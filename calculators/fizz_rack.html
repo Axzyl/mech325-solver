@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rack and Pinion Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            text-align: center;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .equation-inputs > span {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #666;
+            margin: 0 5px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../documents/fizz_rack.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Rack and Pinion Calculator</h1>
+
+            <div class="section">
+                <h2>Given Information</h2>
+                <div class="input-row">
+                    <label>P<sub>D</sub> - Diametral Pitch (teeth/in):</label>
+                    <input type="number" id="PD" step="any" oninput="markAsUser('PD'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>N<sub>P</sub> - Number of Teeth on Pinion:</label>
+                    <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>n<sub>P</sub> - Pinion Speed (rpm):</label>
+                    <input type="number" id="nP" step="any" oninput="markAsUser('nP'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>s<sub>rack</sub> - Rack Travel Distance (ft):</label>
+                    <input type="number" id="srack" step="any" oninput="markAsUser('srack'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 1: Pitch Diameter</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$D_p = \frac{N_P}{P_D}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>p</sub> (in) =</label>
+                            <input type="number" id="Dp" step="any" oninput="markAsUser('Dp'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>P</sub></label>
+                            <input type="number" id="NP_eq1" step="1" oninput="syncInput('NP', 'NP_eq1')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>P<sub>D</sub></label>
+                            <input type="number" id="PD_eq1" step="any" oninput="syncInput('PD', 'PD_eq1')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 2: Distance from Pitch to Back (B)</h2>
+                <div class="note">Look up B from Table 8-10 in PDF based on P<sub>D</sub></div>
+                <div class="input-row">
+                    <label>B - Pitch to Back (in):</label>
+                    <input type="number" id="B" step="any" oninput="markAsUser('B'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 3: Distance from Back to Pinion Centerline</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$B\text{-}C = B + \frac{D_p}{2}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>B-C (in) =</label>
+                            <input type="number" id="BC" step="any" oninput="markAsUser('BC'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>B</label>
+                            <input type="number" id="B_eq3" step="any" oninput="syncInput('B', 'B_eq3')">
+                        </div>
+                        <span>+</span>
+                        <div class="var-input">
+                            <label>D<sub>p</sub></label>
+                            <input type="number" id="Dp_eq3" step="any" oninput="syncInput('Dp', 'Dp_eq3')">
+                        </div>
+                        <span>/ 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 4: Velocity of Rack</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$V_{rack} = \frac{\pi}{6} \times \frac{D_P \times n_P}{2}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>V<sub>rack</sub> (ft/min) =</label>
+                            <input type="number" id="Vrack" step="any" oninput="markAsUser('Vrack'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(π/6) × (</span>
+                        <div class="var-input">
+                            <label>D<sub>p</sub></label>
+                            <input type="number" id="Dp_eq4" step="any" oninput="syncInput('Dp', 'Dp_eq4')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>P</sub></label>
+                            <input type="number" id="nP_eq4" step="any" oninput="syncInput('nP', 'nP_eq4')">
+                        </div>
+                        <span>) / 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 5: Time to Move Distance</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$t = 60 \times \frac{s_{rack}}{V_{rack}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>t (s) =</label>
+                            <input type="number" id="t" step="any" oninput="markAsUser('t'); calculate()">
+                        </div>
+                        <span>= 60 ×</span>
+                        <div class="var-input">
+                            <label>s<sub>rack</sub></label>
+                            <input type="number" id="srack_eq5" step="any" oninput="syncInput('srack', 'srack_eq5')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>V<sub>rack</sub></label>
+                            <input type="number" id="Vrack_eq5" step="any" oninput="syncInput('Vrack', 'Vrack_eq5')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 6: Number of Revolutions</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\theta_P = \frac{6}{\pi} \times \frac{2 \times s_{rack}}{D_P}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>θ<sub>P</sub> (rev) =</label>
+                            <input type="number" id="thetaP" step="any" oninput="markAsUser('thetaP'); calculate()">
+                        </div>
+                        <span>= (6/π) × (2 ×</span>
+                        <div class="var-input">
+                            <label>s<sub>rack</sub></label>
+                            <input type="number" id="srack_eq6" step="any" oninput="syncInput('srack', 'srack_eq6')">
+                        </div>
+                        <span>) /</span>
+                        <div class="var-input">
+                            <label>D<sub>p</sub></label>
+                            <input type="number" id="Dp_eq6" step="any" oninput="syncInput('Dp', 'Dp_eq6')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="resetAll()">Reset All Values</button>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+            markAsUser(mainId);
+            calculate();
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                    if (!userValues.has(id)) {
+                        el.classList.add('computed');
+                    }
+                }
+            }
+        }
+
+        function syncAllFields() {
+            const mainVars = {
+                'PD': ['PD', 'PD_eq1'],
+                'NP': ['NP', 'NP_eq1'],
+                'nP': ['nP', 'nP_eq4'],
+                'srack': ['srack', 'srack_eq5', 'srack_eq6'],
+                'Dp': ['Dp', 'Dp_eq3', 'Dp_eq4', 'Dp_eq6'],
+                'B': ['B', 'B_eq3'],
+                'Vrack': ['Vrack', 'Vrack_eq5']
+            };
+
+            for (let mainVar in mainVars) {
+                const mainEl = document.getElementById(mainVar);
+                if (mainEl && mainEl.value) {
+                    const value = mainEl.value;
+                    mainVars[mainVar].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.value = value;
+                        }
+                    });
+                }
+            }
+        }
+
+        function calculate() {
+            syncAllFields();
+
+            const PD = getValue('PD');
+            const NP = getValue('NP');
+            const nP = getValue('nP');
+            const srack = getValue('srack');
+            const B = getValue('B');
+
+            // Step 1
+            if (NP && PD && !userValues.has('Dp')) {
+                setValue('Dp', NP / PD);
+            }
+
+            const Dp = getValue('Dp');
+
+            // Step 3
+            if (B !== null && Dp && !userValues.has('BC')) {
+                setValue('BC', B + Dp / 2);
+            }
+
+            // Step 4
+            if (Dp && nP && !userValues.has('Vrack')) {
+                setValue('Vrack', (Math.PI / 6) * (Dp * nP / 2));
+            }
+
+            const Vrack = getValue('Vrack');
+
+            // Step 5
+            if (srack !== null && Vrack && Vrack > 0 && !userValues.has('t')) {
+                setValue('t', 60 * (srack / Vrack));
+            }
+
+            // Step 6
+            if (srack !== null && Dp && Dp > 0 && !userValues.has('thetaP')) {
+                setValue('thetaP', (6 / Math.PI) * (2 * srack / Dp));
+            }
+
+            saveSession();
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('rack_fizz_session', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('rack_fizz_session');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+                for (let key in state) {
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                        if (!userValues.has(key)) {
+                            el.classList.add('computed');
+                        }
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('rack_fizz_session');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            MathJax.typesetPromise();
+        });
+    </script>
+</body>
+</html>

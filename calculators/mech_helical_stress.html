@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helical Gear Stress Calculator</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #pdf-panel {
+            flex: 1;
+            background: #fff;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-panel iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        #calculator-panel {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+
+        .helical-info {
+            background: #f3e5f5;
+            padding: 10px;
+            border-left: 4px solid #9b59b6;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #8e44ad;
+        }
+
+        .equation-block {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .equation-latex {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-input {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .var-input label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .var-input input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .var-input .unit {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        .summary-section {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 6px;
+            border: 2px solid #3498db;
+            margin-top: 30px;
+        }
+
+        .summary-section h2 {
+            color: #3498db;
+            border-bottom: none;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PDF Panel -->
+    <div id="pdf-panel">
+        <iframe src="../documents/helical_stress.pdf" type="application/pdf"></iframe>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div id="calculator-panel">
+        <h1>⚙️ Helical Gear Stress Calculator</h1>
+        <p class="subtitle">Complete bending and contact stress analysis for helical gears</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        </div>
+
+        <div class="helical-info">
+            <strong>📋 Helical Gear Note:</strong> Helical gears have unique parameters (ψ, P<sub>nd</sub>, φ<sub>n</sub>) and use different J and I lookup tables/figures than spur gears.
+        </div>
+
+        <!-- HELICAL-SPECIFIC PARAMETERS -->
+        <div class="section">
+            <h2>Helical Gear Parameters (Steps 4-11)</h2>
+
+            <h3>Step 4: Normal Diametral Pitch (Given)</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>P<sub>nd</sub> =</label>
+                <input type="number" id="Pnd" step="1" value="12" oninput="markAsUser('Pnd'); calculate()">
+                <span class="unit">teeth/in (typically 12)</span>
+            </div>
+
+            <div class="var-input">
+                <label>N<sub>P</sub> =</label>
+                <input type="number" id="NP_helical" step="1" value="24" oninput="markAsUser('NP_helical'); calculate()">
+                <span class="unit">teeth (pinion, typically 24)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 5: Transverse Diametral Pitch</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$P_d = P_{nd} \cos(\psi)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_helical" step="0.0001" oninput="markAsUser('Pd_helical'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>P<sub>nd</sub> =</label>
+                        <input type="number" id="Pnd_eq5" step="1" oninput="syncInput('Pnd', 'Pnd_eq5'); calculate()">
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>ψ =</label>
+                        <input type="number" id="psi" step="0.1" oninput="markAsUser('psi'); calculate()">
+                        <span class="unit">°</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 6: Axial Pitch</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$p_x = \frac{\pi}{P_d \tan(\psi)}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>p<sub>x</sub> =</label>
+                        <input type="number" id="px" step="0.0001" oninput="markAsUser('px'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= π / (</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq6" step="0.0001" oninput="syncInput('Pd_helical', 'Pd_eq6'); calculate()">
+                    </div>
+                    <span>× tan(</span>
+                    <div class="var-input">
+                        <label>ψ =</label>
+                        <input type="number" id="psi_eq6" step="0.1" oninput="syncInput('psi', 'psi_eq6'); calculate()">
+                    </div>
+                    <span>))</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 7: Gear Ratio and Teeth</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$VR = \frac{n_P}{n_G} = \frac{N_G}{N_P}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>n<sub>P</sub> =</label>
+                        <input type="number" id="nP_helical" step="0.1" oninput="markAsUser('nP_helical'); calculate()">
+                        <span class="unit">rpm</span>
+                    </div>
+                    <div class="var-input">
+                        <label>n<sub>G</sub> =</label>
+                        <input type="number" id="nG_helical" step="0.1" oninput="markAsUser('nG_helical'); calculate()">
+                        <span class="unit">rpm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>VR =</label>
+                <input type="number" id="VR_helical" step="0.0001" oninput="markAsUser('VR_helical'); calculate()">
+            </div>
+
+            <div class="var-input">
+                <label>N<sub>G</sub> =</label>
+                <input type="number" id="NG_helical" step="1" oninput="markAsUser('NG_helical'); calculate()">
+                <span class="unit">teeth (gear, rounded)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 8: Pressure Angle Conversion</h3>
+            <div class="helical-info">
+                💡 Provide EITHER φ<sub>n</sub> OR φ<sub>t</sub>. The other will be calculated.
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$\phi_t = \arctan\left(\frac{\tan(\phi_n)}{\cos(\psi)}\right)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>φ<sub>n</sub> =</label>
+                        <input type="number" id="phi_n" step="0.1" oninput="markAsUser('phi_n'); calculate()">
+                        <span class="unit">° (normal)</span>
+                    </div>
+                    <div class="var-input">
+                        <label>φ<sub>t</sub> =</label>
+                        <input type="number" id="phi_t" step="0.1" oninput="markAsUser('phi_t'); calculate()">
+                        <span class="unit">° (transverse)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 9: Pitch Diameters</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_P = \frac{N_P}{P_d} \quad , \quad D_G = \frac{N_G}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>P</sub> =</label>
+                        <input type="number" id="DP_helical" step="0.0001" oninput="markAsUser('DP_helical'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <div class="var-input">
+                        <label>D<sub>G</sub> =</label>
+                        <input type="number" id="DG_helical" step="0.0001" oninput="markAsUser('DG_helical'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 10: Nominal Face Width</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$F_{nom} = 2p_x$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>F<sub>nom</sub> =</label>
+                        <input type="number" id="Fnom_helical" step="0.0001" oninput="markAsUser('Fnom_helical'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= 2 ×</span>
+                    <div class="var-input">
+                        <label>p<sub>x</sub> =</label>
+                        <input type="number" id="px_eq10" step="0.0001" oninput="syncInput('px', 'px_eq10'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="var-input">
+                <label>F (selected) =</label>
+                <input type="number" id="F_helical" step="0.0001" oninput="markAsUser('F_helical'); calculate()">
+                <span class="unit">in</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 11: Center Distance and Loads</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$C = \frac{N_P + N_G}{2P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>C =</label>
+                        <input type="number" id="C_helical" step="0.0001" oninput="markAsUser('C_helical'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$v_t = \frac{\pi D_P n_P}{12}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>v<sub>t</sub> =</label>
+                        <input type="number" id="vt_helical" step="0.0001" oninput="markAsUser('vt_helical'); calculate()">
+                        <span class="unit">ft/min</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$W_t = \frac{33000 P}{v_t}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>W<sub>t</sub> =</label>
+                        <input type="number" id="Wt_helical" step="0.0001" oninput="markAsUser('Wt_helical'); calculate()">
+                        <span class="unit">lbs</span>
+                    </div>
+                    <span>= (33000 ×</span>
+                    <div class="var-input">
+                        <label>P =</label>
+                        <input type="number" id="P_helical" step="0.01" oninput="markAsUser('P_helical'); calculate()">
+                        <span class="unit">HP</span>
+                    </div>
+                    <span>) / v<sub>t</sub></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BENDING STRESS ANALYSIS -->
+        <div class="section">
+            <h2>Bending Stress Analysis</h2>
+
+            <h3>Steps 1-2: Overload Factor (Same as Spur)</h3>
+            <div class="info-box">Look up K<sub>o</sub> from Table 9-1</div>
+
+            <div class="var-input">
+                <label>K<sub>o</sub> =</label>
+                <input type="number" id="Ko" step="0.01" oninput="markAsUser('Ko'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 3: Design Power</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$P_{des} = P \times K_o$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>P<sub>des</sub> =</label>
+                        <input type="number" id="Pdes" step="0.0001" oninput="markAsUser('Pdes'); calculate()">
+                        <span class="unit">HP</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Quality Number and Dynamic Factor (Same as Spur)</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>A<sub>v</sub> =</label>
+                <input type="number" id="Av" step="1" oninput="markAsUser('Av'); calculate()">
+                <span class="unit">(from Table 9-5)</span>
+            </div>
+
+            <div class="var-input">
+                <label>K<sub>v</sub> =</label>
+                <input type="number" id="Kv" step="0.0001" oninput="markAsUser('Kv'); calculate()">
+                <span class="unit">(from graph)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 13: Geometry Factor J (HELICAL-SPECIFIC)</h3>
+            <div class="helical-info">
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use Figures 10-5, 10-6, or 10-7 based on φ<sub>n</sub>:<br>
+                • φ<sub>n</sub> = 15°: Figure 10-5<br>
+                • φ<sub>n</sub> = 20°: Figure 10-6<br>
+                • φ<sub>n</sub> = 22.5°: Figure 10-7
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>J<sub>P</sub> =</label>
+                <input type="number" id="JP_helical" step="0.0001" oninput="markAsUser('JP_helical'); calculate()">
+                <span class="unit">(pinion)</span>
+            </div>
+
+            <div class="var-input">
+                <label>J<sub>G</sub> =</label>
+                <input type="number" id="JG_helical" step="0.0001" oninput="markAsUser('JG_helical'); calculate()">
+                <span class="unit">(gear)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Size Factor, Load Distribution, Rim Thickness (Same as Spur)</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>K<sub>s</sub> =</label>
+                <input type="number" id="Ks" step="0.01" oninput="markAsUser('Ks'); calculate()">
+                <span class="unit">(size factor)</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>K<sub>m</sub> =</label>
+                <input type="number" id="Km" step="0.0001" oninput="markAsUser('Km'); calculate()">
+                <span class="unit">(load distribution)</span>
+            </div>
+
+            <div class="var-input">
+                <label>K<sub>B</sub> =</label>
+                <input type="number" id="KB" step="0.0001" value="1" oninput="markAsUser('KB'); calculate()">
+                <span class="unit">(rim thickness)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Bending Stress Calculation</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_{t,P} = \frac{W_t P_d}{F J_P} K_o K_s K_m K_B K_v$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>t,P</sub> =</label>
+                        <input type="number" id="st_P" step="0.0001" oninput="markAsUser('st_P'); calculate()">
+                        <span class="unit">psi (pinion)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="var-input">
+                <label>s<sub>t,G</sub> =</label>
+                <input type="number" id="st_G" step="0.0001" oninput="markAsUser('st_G'); calculate()">
+                <span class="unit">psi (gear)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Stress Cycle Factors (Same as Spur)</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>K<sub>R</sub> =</label>
+                <input type="number" id="KR" step="0.01" value="1" oninput="markAsUser('KR'); calculate()">
+                <span class="unit">(reliability)</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>SF (assumed) =</label>
+                <input type="number" id="SF_assumed" step="0.01" value="1" oninput="markAsUser('SF_assumed'); calculate()">
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>Lifetime =</label>
+                <input type="number" id="lifetime" step="1" oninput="markAsUser('lifetime'); calculate()">
+                <span class="unit">hours</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>Y<sub>NP</sub> =</label>
+                <input type="number" id="YNP" step="0.0001" oninput="markAsUser('YNP'); calculate()">
+            </div>
+
+            <div class="var-input">
+                <label>Y<sub>NG</sub> =</label>
+                <input type="number" id="YNG" step="0.0001" oninput="markAsUser('YNG'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Material Selection for Bending</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>s<sub>at,P</sub> (required) =</label>
+                <input type="number" id="sat_P_required_ksi" step="0.0001" oninput="markAsUser('sat_P_required_ksi'); calculate()">
+                <span class="unit">ksi</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>HB<sub>P</sub> (required) =</label>
+                <input type="number" id="HB_P_required" step="1" oninput="markAsUser('HB_P_required'); calculate()">
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>s<sub>at,P</sub> (actual) =</label>
+                <input type="number" id="sat_P_actual_ksi" step="0.0001" oninput="markAsUser('sat_P_actual_ksi'); calculate()">
+                <span class="unit">ksi</span>
+            </div>
+
+            <div class="var-input">
+                <label>SF<sub>bending</sub> =</label>
+                <input type="number" id="SF_bending" step="0.0001" oninput="markAsUser('SF_bending'); calculate()">
+            </div>
+        </div>
+
+        <!-- CONTACT STRESS ANALYSIS -->
+        <div class="section">
+            <h2>Contact Stress Analysis</h2>
+
+            <h3>Elastic Coefficient (Same as Spur)</h3>
+            <div class="var-input">
+                <label>C<sub>p</sub> =</label>
+                <input type="number" id="Cp" step="1" value="2300" oninput="markAsUser('Cp'); calculate()">
+                <span class="unit">psi<sup>1/2</sup> (2300 for steel)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Step 14: Pitting Geometry Factor I (HELICAL-SPECIFIC)</h3>
+            <div class="helical-info">
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use Tables 10-1 or 10-2 based on φ<sub>n</sub>:<br>
+                • φ<sub>n</sub> = 20°: Table 10-1<br>
+                • φ<sub>n</sub> = 25°: Table 10-2<br>
+                Look up using ψ, VR, and N<sub>P</sub>
+            </div>
+
+            <div class="var-input">
+                <label>I =</label>
+                <input type="number" id="I_helical" step="0.0001" oninput="markAsUser('I_helical'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Contact Stress Calculation</h3>
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_c = C_p \sqrt{\frac{W_t K_o K_s K_m K_B K_v}{F D_P I}}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>c</sub> =</label>
+                        <input type="number" id="sc" step="0.0001" oninput="markAsUser('sc'); calculate()">
+                        <span class="unit">psi</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3>Contact Stress Factors (Same as Spur)</h3>
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>Z<sub>NP</sub> =</label>
+                <input type="number" id="ZNP" step="0.0001" oninput="markAsUser('ZNP'); calculate()">
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>Z<sub>NG</sub> =</label>
+                <input type="number" id="ZNG" step="0.0001" oninput="markAsUser('ZNG'); calculate()">
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>s<sub>ac</sub> (actual) =</label>
+                <input type="number" id="sac_actual_ksi" step="0.0001" oninput="markAsUser('sac_actual_ksi'); calculate()">
+                <span class="unit">ksi</span>
+            </div>
+
+            <div class="var-input">
+                <label>SF<sub>contact</sub> =</label>
+                <input type="number" id="SF_contact" step="0.0001" oninput="markAsUser('SF_contact'); calculate()">
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-section">
+            <h2>📊 Design Summary</h2>
+
+            <div style="margin-bottom: 15px;">
+                <strong>Helical Gear Specifications:</strong>
+                <div class="summary-item">Helix Angle: ψ = <span id="summary_psi">-</span>°</div>
+                <div class="summary-item">Normal Diametral Pitch: P<sub>nd</sub> = <span id="summary_Pnd">-</span> teeth/in</div>
+                <div class="summary-item">Transverse Diametral Pitch: P<sub>d</sub> = <span id="summary_Pd">-</span> teeth/in</div>
+                <div class="summary-item">Pinion: N<sub>P</sub> = <span id="summary_NP">-</span> teeth, D<sub>P</sub> = <span id="summary_DP">-</span> in</div>
+                <div class="summary-item">Gear: N<sub>G</sub> = <span id="summary_NG">-</span> teeth, D<sub>G</sub> = <span id="summary_DG">-</span> in</div>
+                <div class="summary-item">Face Width: F = <span id="summary_F">-</span> in</div>
+            </div>
+
+            <div>
+                <strong>Stress Results:</strong>
+                <div class="summary-item">Bending Stress (Pinion): s<sub>t,P</sub> = <span id="summary_st_P">-</span> psi</div>
+                <div class="summary-item">Contact Stress: s<sub>c</sub> = <span id="summary_sc">-</span> psi</div>
+                <div class="summary-item">Safety Factor (Bending): SF = <span id="summary_SF_bending">-</span></div>
+                <div class="summary-item">Safety Factor (Contact): SF = <span id="summary_SF_contact">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+            markAsUser(mainId);
+            calculate();
+        }
+
+        function markAsUser(fieldId) {
+            userValues.add(fieldId);
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value, decimals = 4) {
+            const el = document.getElementById(id);
+            if (!el || value === null || value === undefined || isNaN(value)) {
+                if (el) el.value = '';
+                return;
+            }
+            el.value = decimals === 0 ? Math.round(value) : value.toFixed(decimals);
+            if (!userValues.has(id)) {
+                el.classList.add('computed');
+            } else {
+                el.classList.remove('computed');
+            }
+        }
+
+        function calculate() {
+            // Helical-specific calculations
+            const Pnd = getValue('Pnd');
+            const psi = getValue('psi');
+            const NP_helical = getValue('NP_helical');
+
+            // Step 5: Pd = Pnd * cos(psi)
+            if (Pnd && psi && !userValues.has('Pd_helical')) {
+                const psi_rad = psi * Math.PI / 180;
+                const Pd_helical = Pnd * Math.cos(psi_rad);
+                setValue('Pd_helical', Pd_helical);
+            }
+
+            const Pd_helical = getValue('Pd_helical');
+
+            // Step 6: px = π / (Pd * tan(psi))
+            if (Pd_helical && psi && !userValues.has('px')) {
+                const psi_rad = psi * Math.PI / 180;
+                const px = Math.PI / (Pd_helical * Math.tan(psi_rad));
+                setValue('px', px);
+            }
+
+            // Step 7: Velocity ratio and NG
+            const nP_helical = getValue('nP_helical');
+            const nG_helical = getValue('nG_helical');
+            if (nP_helical && nG_helical && !userValues.has('VR_helical')) {
+                const VR_helical = nP_helical / nG_helical;
+                setValue('VR_helical', VR_helical);
+            }
+
+            const VR_helical = getValue('VR_helical');
+            if (NP_helical && VR_helical && !userValues.has('NG_helical')) {
+                const NG_helical = Math.round(NP_helical * VR_helical);
+                setValue('NG_helical', NG_helical, 0);
+            }
+
+            // Step 8: Pressure angle conversion
+            const phi_n = getValue('phi_n');
+            const phi_t = getValue('phi_t');
+            if (phi_n && psi && !userValues.has('phi_t')) {
+                const psi_rad = psi * Math.PI / 180;
+                const phi_n_rad = phi_n * Math.PI / 180;
+                const phi_t_rad = Math.atan(Math.tan(phi_n_rad) / Math.cos(psi_rad));
+                const phi_t_deg = phi_t_rad * 180 / Math.PI;
+                setValue('phi_t', phi_t_deg);
+            } else if (phi_t && psi && !userValues.has('phi_n')) {
+                const psi_rad = psi * Math.PI / 180;
+                const phi_t_rad = phi_t * Math.PI / 180;
+                const phi_n_rad = Math.atan(Math.tan(phi_t_rad) * Math.cos(psi_rad));
+                const phi_n_deg = phi_n_rad * 180 / Math.PI;
+                setValue('phi_n', phi_n_deg);
+            }
+
+            // Step 9: Pitch diameters
+            const NG_helical = getValue('NG_helical');
+            if (NP_helical && Pd_helical && !userValues.has('DP_helical')) {
+                const DP_helical = NP_helical / Pd_helical;
+                setValue('DP_helical', DP_helical);
+            }
+            if (NG_helical && Pd_helical && !userValues.has('DG_helical')) {
+                const DG_helical = NG_helical / Pd_helical;
+                setValue('DG_helical', DG_helical);
+            }
+
+            // Step 10: Nominal face width
+            const px = getValue('px');
+            if (px && !userValues.has('Fnom_helical')) {
+                const Fnom_helical = 2 * px;
+                setValue('Fnom_helical', Fnom_helical);
+            }
+
+            // Step 11: C, vt, Wt
+            if (NP_helical && NG_helical && Pd_helical && !userValues.has('C_helical')) {
+                const C_helical = (NP_helical + NG_helical) / (2 * Pd_helical);
+                setValue('C_helical', C_helical);
+            }
+
+            const DP_helical = getValue('DP_helical');
+            if (DP_helical && nP_helical && !userValues.has('vt_helical')) {
+                const vt_helical = (Math.PI / 12) * DP_helical * nP_helical;
+                setValue('vt_helical', vt_helical);
+            }
+
+            const P_helical = getValue('P_helical');
+            const vt_helical = getValue('vt_helical');
+            if (P_helical && vt_helical && !userValues.has('Wt_helical')) {
+                const Wt_helical = (33000 * P_helical) / vt_helical;
+                setValue('Wt_helical', Wt_helical);
+            }
+
+            // Step 3: Design power
+            const Ko = getValue('Ko');
+            if (P_helical && Ko && !userValues.has('Pdes')) {
+                const Pdes = P_helical * Ko;
+                setValue('Pdes', Pdes);
+            }
+
+            // Bending stress calculation
+            const Wt_helical = getValue('Wt_helical');
+            const F_helical = getValue('F_helical');
+            const JP_helical = getValue('JP_helical');
+            const Ks = getValue('Ks');
+            const Km = getValue('Km');
+            const KB = getValue('KB');
+            const Kv = getValue('Kv');
+
+            if (Wt_helical && Pd_helical && F_helical && JP_helical && Ko && Ks && Km && KB && Kv && !userValues.has('st_P')) {
+                const st_P = (Wt_helical * Pd_helical / (F_helical * JP_helical)) * Ko * Ks * Km * KB * Kv;
+                setValue('st_P', st_P);
+            }
+
+            const st_P = getValue('st_P');
+            const JG_helical = getValue('JG_helical');
+            if (st_P && JP_helical && JG_helical && !userValues.has('st_G')) {
+                const st_G = st_P * (JP_helical / JG_helical);
+                setValue('st_G', st_G);
+            }
+
+            // Required allowable bending stress
+            const KR = getValue('KR');
+            const SF_assumed = getValue('SF_assumed');
+            const YNP = getValue('YNP');
+            if (st_P && KR && SF_assumed && YNP && !userValues.has('sat_P_required_ksi')) {
+                const sat_P_required = st_P * KR * SF_assumed / YNP;
+                const sat_P_required_ksi = sat_P_required / 1000;
+                setValue('sat_P_required_ksi', sat_P_required_ksi);
+            }
+
+            // Actual safety factor (bending)
+            const sat_P_actual_ksi = getValue('sat_P_actual_ksi');
+            if (sat_P_actual_ksi && YNP && st_P && KR && !userValues.has('SF_bending')) {
+                const sat_P_actual = sat_P_actual_ksi * 1000;
+                const SF_bending = (sat_P_actual * YNP) / (st_P * KR);
+                setValue('SF_bending', SF_bending);
+            }
+
+            // Contact stress
+            const Cp = getValue('Cp');
+            const I_helical = getValue('I_helical');
+
+            if (Cp && Wt_helical && Ko && Ks && Km && KB && Kv && F_helical && DP_helical && I_helical && !userValues.has('sc')) {
+                const numerator = Wt_helical * Ko * Ks * Km * KB * Kv;
+                const denominator = F_helical * DP_helical * I_helical;
+                const sc = Cp * Math.sqrt(numerator / denominator);
+                setValue('sc', sc);
+            }
+
+            // Actual safety factor (contact)
+            const sc = getValue('sc');
+            const ZNP = getValue('ZNP');
+            const sac_actual_ksi = getValue('sac_actual_ksi');
+            if (sac_actual_ksi && ZNP && sc && KR && !userValues.has('SF_contact')) {
+                const sac_actual = sac_actual_ksi * 1000;
+                const SF_contact = (sac_actual * ZNP) / (sc * KR);
+                setValue('SF_contact', SF_contact);
+            }
+
+            syncAllFields();
+            updateSummary();
+        }
+
+        function syncAllFields() {
+            const mainVars = {
+                'Pnd': ['Pnd', 'Pnd_eq5'],
+                'psi': ['psi', 'psi_eq6'],
+                'Pd_helical': ['Pd_helical', 'Pd_eq6'],
+                'px': ['px', 'px_eq10']
+            };
+
+            for (let mainId in mainVars) {
+                const mainValue = getValue(mainId);
+                if (mainValue !== null) {
+                    mainVars[mainId].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.id !== mainId) {
+                            const currentVal = getValue(id);
+                            if (currentVal !== mainValue) {
+                                el.value = el.step === '1' ? Math.round(mainValue) : mainValue.toFixed(4);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function updateSummary() {
+            document.getElementById('summary_psi').textContent = getValue('psi') ? getValue('psi').toFixed(2) : '-';
+            document.getElementById('summary_Pnd').textContent = getValue('Pnd') || '-';
+            document.getElementById('summary_Pd').textContent = getValue('Pd_helical') ? getValue('Pd_helical').toFixed(4) : '-';
+            document.getElementById('summary_NP').textContent = getValue('NP_helical') || '-';
+            document.getElementById('summary_NG').textContent = getValue('NG_helical') || '-';
+            document.getElementById('summary_DP').textContent = getValue('DP_helical') ? getValue('DP_helical').toFixed(4) : '-';
+            document.getElementById('summary_DG').textContent = getValue('DG_helical') ? getValue('DG_helical').toFixed(4) : '-';
+            document.getElementById('summary_F').textContent = getValue('F_helical') ? getValue('F_helical').toFixed(4) : '-';
+            document.getElementById('summary_st_P').textContent = getValue('st_P') ? getValue('st_P').toFixed(2) : '-';
+            document.getElementById('summary_sc').textContent = getValue('sc') ? getValue('sc').toFixed(2) : '-';
+            document.getElementById('summary_SF_bending').textContent = getValue('SF_bending') ? getValue('SF_bending').toFixed(4) : '-';
+            document.getElementById('summary_SF_contact').textContent = getValue('SF_contact') ? getValue('SF_contact').toFixed(4) : '-';
+        }
+
+        function saveSession() {
+            const state = {
+                userValues: Array.from(userValues),
+                values: {}
+            };
+
+            document.querySelectorAll('input').forEach(el => {
+                if (el.id && el.value) {
+                    state.values[el.id] = el.value;
+                }
+            });
+
+            localStorage.setItem('helical_stress_state', JSON.stringify(state));
+            alert('✅ Session saved successfully!');
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('helical_stress_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) {
+                    state.userValues.forEach(v => userValues.add(v));
+                }
+                for (let id in state.values) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = state.values[id];
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                localStorage.removeItem('helical_stress_state');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                    if (input.id === 'Pnd') {
+                        input.value = '12';
+                    } else if (input.id === 'NP_helical') {
+                        input.value = '24';
+                    } else if (input.id === 'KB' || input.id === 'KR' || input.id === 'SF_assumed') {
+                        input.value = '1';
+                    } else if (input.id === 'Cp') {
+                        input.value = '2300';
+                    } else {
+                        input.value = '';
+                    }
+                    input.classList.remove('computed');
+                });
+                calculate();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

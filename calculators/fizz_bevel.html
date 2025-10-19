@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevel Gear Design Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .section-divider {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            text-align: center;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .equation-inputs > span {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #666;
+            margin: 0 5px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .piecewise-indicator {
+            background: #e1f5fe;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            border: 1px solid #01579b;
+        }
+        button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../documents/fizz_bevel.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Bevel Gear Design Calculator</h1>
+
+            <!-- BEVEL-SPECIFIC STEPS 1-26 -->
+            <div class="section">
+                <h2>Given Information (Bevel)</h2>
+                <div class="input-row">
+                    <label>P - Power (hp):</label>
+                    <input type="number" id="P" step="any" oninput="markAsUser('P'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>K<sub>O</sub> - Shock Factor:</label>
+                    <input type="number" id="KO" step="any" oninput="markAsUser('KO'); calculate()">
+                </div>
+                <div class="note">Look up K<sub>O</sub> from Table 8-1 in PDF</div>
+                <div class="input-row">
+                    <label>n<sub>P</sub> - Pinion Speed (rpm):</label>
+                    <input type="number" id="nP" step="any" oninput="markAsUser('nP'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>N<sub>P</sub> - Number of Teeth on Pinion:</label>
+                    <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>N<sub>G</sub> - Number of Teeth on Gear:</label>
+                    <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>P<sub>d</sub> - Diametral Pitch:</label>
+                    <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
+                </div>
+                <div class="note">Choose standard P<sub>d</sub> from Table 8-2 in PDF</div>
+                <div class="input-row">
+                    <label>F - Face Width (in):</label>
+                    <input type="number" id="F" step="any" oninput="markAsUser('F'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 1-4: Gear Geometry</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$D_P = \frac{N_P}{P_d}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>P</sub> (in) =</label>
+                            <input type="number" id="DP" step="any" oninput="markAsUser('DP'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>P</sub></label>
+                            <input type="number" id="NP_eq1" step="1" oninput="syncInput('NP', 'NP_eq1')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub></label>
+                            <input type="number" id="Pd_eq1" step="any" oninput="syncInput('Pd', 'Pd_eq1')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$D_G = \frac{N_G}{P_d}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>G</sub> (in) =</label>
+                            <input type="number" id="DG" step="any" oninput="markAsUser('DG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>G</sub></label>
+                            <input type="number" id="NG_eq2" step="1" oninput="syncInput('NG', 'NG_eq2')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub></label>
+                            <input type="number" id="Pd_eq2" step="any" oninput="syncInput('Pd', 'Pd_eq2')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$m = \frac{N_G}{N_P}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>m (ratio) =</label>
+                            <input type="number" id="m" step="any" oninput="markAsUser('m'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>G</sub></label>
+                            <input type="number" id="NG_eq3" step="1" oninput="syncInput('NG', 'NG_eq3')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>N<sub>P</sub></label>
+                            <input type="number" id="NP_eq3" step="1" oninput="syncInput('NP', 'NP_eq3')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\gamma = \arctan\left(\frac{1}{m}\right)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>γ (deg) =</label>
+                            <input type="number" id="gamma" step="any" oninput="markAsUser('gamma'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\Gamma = 90° - \gamma$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>Γ (deg) =</label>
+                            <input type="number" id="Gamma" step="any" oninput="markAsUser('Gamma'); calculate()">
+                        </div>
+                        <span>= 90° -</span>
+                        <div class="var-input">
+                            <label>γ</label>
+                            <input type="number" id="gamma_eq5" step="any" oninput="syncInput('gamma', 'gamma_eq5')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 5-6: Cone Distance</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$A_o = \frac{D_P}{2\sin(\gamma)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>A<sub>o</sub> (in) =</label>
+                            <input type="number" id="Ao" step="any" oninput="markAsUser('Ao'); calculate()">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Choose F ≤ A<sub>o</sub>/3 for best results</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 7: Velocity</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$V_t = \frac{\pi D_P n_P}{12}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>V<sub>t</sub> (ft/min) =</label>
+                            <input type="number" id="Vt" step="any" oninput="markAsUser('Vt'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>P</sub></label>
+                            <input type="number" id="DP_eq7" step="any" oninput="syncInput('DP', 'DP_eq7')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>P</sub></label>
+                            <input type="number" id="nP_eq7" step="any" oninput="syncInput('nP', 'nP_eq7')">
+                        </div>
+                        <span>) / 12</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 8-9: Quality and Dynamic Factor</h2>
+                <div class="input-row">
+                    <label>Q<sub>v</sub> - Quality Number:</label>
+                    <input type="number" id="Qv" step="1" oninput="markAsUser('Qv'); calculate()">
+                </div>
+                <div class="note">Choose Q<sub>v</sub> from Table 8-3 based on velocity</div>
+                <div class="input-row">
+                    <label>K<sub>v</sub> - Dynamic Factor:</label>
+                    <input type="number" id="Kv" step="any" oninput="markAsUser('Kv'); calculate()">
+                </div>
+                <div class="note">Calculate from K<sub>v</sub> = [(A + √V<sub>t</sub>)/A]<sup>B</sup> using Table 8-4</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 10-11: Geometry Factors</h2>
+                <div class="input-row">
+                    <label>J<sub>P</sub> - Bending Factor (Pinion):</label>
+                    <input type="number" id="JP" step="any" oninput="markAsUser('JP'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>J<sub>G</sub> - Bending Factor (Gear):</label>
+                    <input type="number" id="JG" step="any" oninput="markAsUser('JG'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>I - Contact Geometry Factor:</label>
+                    <input type="number" id="I" step="any" oninput="markAsUser('I'); calculate()">
+                </div>
+                <div class="note">Look up from bevel gear charts based on N<sub>P</sub>, N<sub>G</sub>, pitch angles</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 12-14: Size Factor (Piecewise)</h2>
+                <div class="piecewise-indicator" id="Ks-indicator">
+                    Formula used: (calculating...)
+                </div>
+                <div class="input-row">
+                    <label>K<sub>s</sub> - Size Factor:</label>
+                    <input type="number" id="Ks" step="any" oninput="markAsUser('Ks'); calculate()">
+                </div>
+                <div class="note">
+                    If P<sub>d</sub> ≥ 5: K<sub>s</sub> = 0.4867 + 0.2132/P<sub>d</sub><br>
+                    If P<sub>d</sub> < 5: K<sub>s</sub> = 0.5 - 0.007P<sub>d</sub>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 15-17: Load Distribution</h2>
+                <div class="input-row">
+                    <label>K<sub>mb</sub> - Base Load Distribution:</label>
+                    <input type="number" id="Kmb" step="any" oninput="markAsUser('Kmb'); calculate()">
+                </div>
+                <div class="note">Look up from Figure 8-16 based on F</div>
+                <div class="input-row">
+                    <label>C<sub>s</sub> - Mounting Factor:</label>
+                    <input type="number" id="Cs" step="any" value="1.0" oninput="markAsUser('Cs'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C<sub>xc</sub> - Crowning Factor:</label>
+                    <input type="number" id="Cxc" step="any" value="1.0" oninput="markAsUser('Cxc'); calculate()">
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$K_m = K_{mb} + C_s(K_{mb} - 1)C_{xc}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>K<sub>m</sub> =</label>
+                            <input type="number" id="Km" step="any" oninput="markAsUser('Km'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 18: Rim Thickness Factor</h2>
+                <div class="input-row">
+                    <label>K<sub>B</sub> - Rim Thickness Factor:</label>
+                    <input type="number" id="KB" step="any" value="1.0" oninput="markAsUser('KB'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 19-20: Life Factors</h2>
+                <div class="input-row">
+                    <label>N<sub>c</sub> - Design Life Cycles:</label>
+                    <input type="number" id="Nc" step="any" oninput="markAsUser('Nc'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>K<sub>L</sub> - Life Factor (Bending):</label>
+                    <input type="number" id="KL" step="any" oninput="markAsUser('KL'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C<sub>L</sub> - Life Factor (Contact):</label>
+                    <input type="number" id="CL" step="any" oninput="markAsUser('CL'); calculate()">
+                </div>
+                <div class="note">Look up from bevel life factor charts based on N<sub>c</sub></div>
+            </div>
+
+            <div class="section">
+                <h2>Step 21: Transmitted Load</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_t = \frac{33000 \times P \times K_O}{V_t}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> (lb) =</label>
+                            <input type="number" id="Wt" step="any" oninput="markAsUser('Wt'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 22-23: Bending Stress</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{tP} = \frac{W_t P_d}{F J_P} K_O K_m K_s K_B K_v$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>tP</sub> (psi) =</label>
+                            <input type="number" id="stP" step="any" oninput="markAsUser('stP'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{tG} = \frac{W_t P_d}{F J_G} K_O K_m K_s K_B K_v$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>tG</sub> (psi) =</label>
+                            <input type="number" id="stG" step="any" oninput="markAsUser('stG'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 24-25: Contact Stress</h2>
+                <div class="input-row">
+                    <label>C<sub>p</sub> - Elastic Coefficient:</label>
+                    <input type="number" id="Cp" step="any" oninput="markAsUser('Cp'); calculate()">
+                </div>
+                <div class="note">Typically 2300 for steel (Table 8-8)</div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_c = C_p \sqrt{\frac{W_t K_O K_m K_s K_v}{F D_P I}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>c</sub> (psi) =</label>
+                            <input type="number" id="sc" step="any" oninput="markAsUser('sc'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 26: Allowable Stresses</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{acP} = \frac{\sigma_{tP}}{K_L}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>acP</sub> (psi) =</label>
+                            <input type="number" id="sacP" step="any" oninput="markAsUser('sacP'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>tP</sub></label>
+                            <input type="number" id="stP_eq26" step="any" oninput="syncInput('stP', 'stP_eq26')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>K<sub>L</sub></label>
+                            <input type="number" id="KL_eq26" step="any" oninput="syncInput('KL', 'KL_eq26')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{acG} = \frac{\sigma_{tG}}{K_L}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>acG</sub> (psi) =</label>
+                            <input type="number" id="sacG" step="any" oninput="markAsUser('sacG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>tG</sub></label>
+                            <input type="number" id="stG_eq26" step="any" oninput="syncInput('stG', 'stG_eq26')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>K<sub>L</sub></label>
+                            <input type="number" id="KL_eq26b" step="any" oninput="syncInput('KL', 'KL_eq26b')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{ac} = \frac{\sigma_c}{C_L}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>ac</sub> (psi) =</label>
+                            <input type="number" id="sac" step="any" oninput="markAsUser('sac'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>c</sub></label>
+                            <input type="number" id="sc_eq26" step="any" oninput="syncInput('sc', 'sc_eq26')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>C<sub>L</sub></label>
+                            <input type="number" id="CL_eq26" step="any" oninput="syncInput('CL', 'CL_eq26')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRANSITION TO SPUR GUIDE -->
+            <div class="section-divider">
+                ⬇ Continue with Spur Guide Steps 35-40 ⬇
+            </div>
+
+            <div class="section">
+                <h2>Spur Step 37: Reliability Factor</h2>
+                <div class="input-row">
+                    <label>K<sub>R</sub> - Reliability Factor:</label>
+                    <input type="number" id="KR" step="any" value="1.0" oninput="markAsUser('KR'); calculate()">
+                </div>
+                <div class="note">Typically 1.0 for 99% reliability</div>
+            </div>
+
+            <div class="section">
+                <h2>Spur Step 38: Design Allowable Strengths</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$S_{acP} = \sigma_{acP} \times K_R$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>S<sub>acP</sub> (psi) =</label>
+                            <input type="number" id="SacP" step="any" oninput="markAsUser('SacP'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>acP</sub></label>
+                            <input type="number" id="sacP_eq38" step="any" oninput="syncInput('sacP', 'sacP_eq38')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>K<sub>R</sub></label>
+                            <input type="number" id="KR_eq38" step="any" oninput="syncInput('KR', 'KR_eq38')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$S_{acG} = \sigma_{acG} \times K_R$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>S<sub>acG</sub> (psi) =</label>
+                            <input type="number" id="SacG" step="any" oninput="markAsUser('SacG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>acG</sub></label>
+                            <input type="number" id="sacG_eq38" step="any" oninput="syncInput('sacG', 'sacG_eq38')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>K<sub>R</sub></label>
+                            <input type="number" id="KR_eq38b" step="any" oninput="syncInput('KR', 'KR_eq38b')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$S_{ac} = \sigma_{ac} \times K_R$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>S<sub>ac</sub> (psi) =</label>
+                            <input type="number" id="Sac" step="any" oninput="markAsUser('Sac'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>ac</sub></label>
+                            <input type="number" id="sac_eq38" step="any" oninput="syncInput('sac', 'sac_eq38')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>K<sub>R</sub></label>
+                            <input type="number" id="KR_eq38c" step="any" oninput="syncInput('KR', 'KR_eq38c')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Spur Step 39-40: Required Hardness</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$HB_{P,bending} = \frac{S_{acP}/1000 - 12.8}{0.0773}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>HB<sub>P,b</sub> =</label>
+                            <input type="number" id="HB_b_P" step="any" oninput="markAsUser('HB_b_P'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$HB_{G,bending} = \frac{S_{acG}/1000 - 12.8}{0.0773}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>HB<sub>G,b</sub> =</label>
+                            <input type="number" id="HB_b_G" step="any" oninput="markAsUser('HB_b_G'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$HB_{contact} = \frac{S_{ac}/1000 - 29.10}{0.322}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>HB<sub>c</sub> =</label>
+                            <input type="number" id="HB_c" step="any" oninput="markAsUser('HB_c'); calculate()">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Select material from Table 8-6 that meets or exceeds these values</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button onclick="resetAll()">Reset All Values</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+            markAsUser(mainId);
+            calculate();
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                    if (!userValues.has(id)) {
+                        el.classList.add('computed');
+                    }
+                }
+            }
+        }
+
+        function syncAllFields() {
+            const mainVars = {
+                'NP': ['NP', 'NP_eq1', 'NP_eq3'],
+                'NG': ['NG', 'NG_eq2', 'NG_eq3'],
+                'Pd': ['Pd', 'Pd_eq1', 'Pd_eq2'],
+                'DP': ['DP', 'DP_eq7'],
+                'nP': ['nP', 'nP_eq7'],
+                'gamma': ['gamma', 'gamma_eq5'],
+                'stP': ['stP', 'stP_eq26'],
+                'stG': ['stG', 'stG_eq26'],
+                'sc': ['sc', 'sc_eq26'],
+                'KL': ['KL', 'KL_eq26', 'KL_eq26b'],
+                'CL': ['CL', 'CL_eq26'],
+                'sacP': ['sacP', 'sacP_eq38'],
+                'sacG': ['sacG', 'sacG_eq38'],
+                'sac': ['sac', 'sac_eq38'],
+                'KR': ['KR', 'KR_eq38', 'KR_eq38b', 'KR_eq38c']
+            };
+
+            for (let mainVar in mainVars) {
+                const mainEl = document.getElementById(mainVar);
+                if (mainEl && mainEl.value) {
+                    const value = mainEl.value;
+                    mainVars[mainVar].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.value = value;
+                        }
+                    });
+                }
+            }
+        }
+
+        function calculate() {
+            syncAllFields();
+
+            const P = getValue('P');
+            const KO = getValue('KO');
+            const nP = getValue('nP');
+            const NP = getValue('NP');
+            const NG = getValue('NG');
+            const Pd = getValue('Pd');
+            const F = getValue('F');
+            const Kv = getValue('Kv');
+            const JP = getValue('JP');
+            const JG = getValue('JG');
+            const I = getValue('I');
+            const Kmb = getValue('Kmb');
+            const Cs = getValue('Cs');
+            const Cxc = getValue('Cxc');
+            const KB = getValue('KB');
+            const KL = getValue('KL');
+            const CL = getValue('CL');
+            const Cp = getValue('Cp');
+            const KR = getValue('KR');
+
+            // Step 1-4: Geometry
+            if (NP && Pd && !userValues.has('DP')) {
+                setValue('DP', NP / Pd);
+            }
+            if (NG && Pd && !userValues.has('DG')) {
+                setValue('DG', NG / Pd);
+            }
+
+            const DP = getValue('DP');
+            const DG = getValue('DG');
+
+            if (NG && NP && !userValues.has('m')) {
+                setValue('m', NG / NP);
+            }
+
+            const m = getValue('m');
+
+            if (m && !userValues.has('gamma')) {
+                const gamma_rad = Math.atan(1 / m);
+                setValue('gamma', gamma_rad * 180 / Math.PI);
+            }
+
+            const gamma = getValue('gamma');
+
+            if (gamma !== null && !userValues.has('Gamma')) {
+                setValue('Gamma', 90 - gamma);
+            }
+
+            // Step 5: Cone distance
+            if (DP && gamma !== null && !userValues.has('Ao')) {
+                const gamma_rad = gamma * Math.PI / 180;
+                setValue('Ao', DP / (2 * Math.sin(gamma_rad)));
+            }
+
+            // Step 7: Velocity
+            if (DP && nP && !userValues.has('Vt')) {
+                setValue('Vt', Math.PI * DP * nP / 12);
+            }
+
+            const Vt = getValue('Vt');
+
+            // Step 12-14: Size factor (piecewise)
+            if (Pd && !userValues.has('Ks')) {
+                let Ks;
+                let Ks_formula;
+                if (Pd >= 5) {
+                    Ks = 0.4867 + 0.2132 / Pd;
+                    Ks_formula = `K_s = 0.4867 + 0.2132/P_d (P_d = ${Pd.toFixed(2)} ≥ 5)`;
+                } else {
+                    Ks = 0.5 - 0.007 * Pd;
+                    Ks_formula = `K_s = 0.5 - 0.007·P_d (P_d = ${Pd.toFixed(2)} < 5)`;
+                }
+                setValue('Ks', Ks);
+                document.getElementById('Ks-indicator').textContent = Ks_formula;
+            }
+
+            const Ks = getValue('Ks');
+
+            // Step 15-17: Load distribution
+            if (Kmb && Cs && Cxc && !userValues.has('Km')) {
+                const Km = Kmb + Cs * (Kmb - 1) * Cxc;
+                setValue('Km', Km);
+            }
+
+            const Km = getValue('Km');
+
+            // Step 21: Transmitted load
+            if (P && KO && Vt && !userValues.has('Wt')) {
+                setValue('Wt', 33000 * P * KO / Vt);
+            }
+
+            const Wt = getValue('Wt');
+
+            // Step 22-23: Bending stress
+            if (Wt && Pd && F && JP && KO && Km && Ks && KB && Kv && !userValues.has('stP')) {
+                setValue('stP', (Wt * Pd / (F * JP)) * KO * Km * Ks * KB * Kv);
+            }
+
+            if (Wt && Pd && F && JG && KO && Km && Ks && KB && Kv && !userValues.has('stG')) {
+                setValue('stG', (Wt * Pd / (F * JG)) * KO * Km * Ks * KB * Kv);
+            }
+
+            const stP = getValue('stP');
+            const stG = getValue('stG');
+
+            // Step 24-25: Contact stress
+            if (Wt && KO && Km && Ks && Kv && F && DP && I && Cp && !userValues.has('sc')) {
+                setValue('sc', Cp * Math.sqrt((Wt * KO * Km * Ks * Kv) / (F * DP * I)));
+            }
+
+            const sc = getValue('sc');
+
+            // Step 26: Allowable stresses
+            if (stP && KL && !userValues.has('sacP')) {
+                setValue('sacP', stP / KL);
+            }
+            if (stG && KL && !userValues.has('sacG')) {
+                setValue('sacG', stG / KL);
+            }
+            if (sc && CL && !userValues.has('sac')) {
+                setValue('sac', sc / CL);
+            }
+
+            const sacP = getValue('sacP');
+            const sacG = getValue('sacG');
+            const sac = getValue('sac');
+
+            // Step 38: Design allowable strengths
+            if (sacP && KR && !userValues.has('SacP')) {
+                setValue('SacP', sacP * KR);
+            }
+            if (sacG && KR && !userValues.has('SacG')) {
+                setValue('SacG', sacG * KR);
+            }
+            if (sac && KR && !userValues.has('Sac')) {
+                setValue('Sac', sac * KR);
+            }
+
+            const SacP = getValue('SacP');
+            const SacG = getValue('SacG');
+            const Sac = getValue('Sac');
+
+            // Required hardness
+            if (SacP && !userValues.has('HB_b_P')) {
+                setValue('HB_b_P', (SacP / 1000 - 12.8) / 0.0773);
+            }
+            if (SacG && !userValues.has('HB_b_G')) {
+                setValue('HB_b_G', (SacG / 1000 - 12.8) / 0.0773);
+            }
+            if (Sac && !userValues.has('HB_c')) {
+                setValue('HB_c', (Sac / 1000 - 29.10) / 0.322);
+            }
+
+            saveSession();
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('bevel_session', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('bevel_session');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+                for (let key in state) {
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                        if (!userValues.has(key)) {
+                            el.classList.add('computed');
+                        }
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('bevel_session');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                document.getElementById('Ks-indicator').textContent = 'Formula used: (calculating...)';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            MathJax.typesetPromise();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevel Gear Stress Calculator</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #pdf-panel {
+            flex: 1;
+            background: #fff;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-panel iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        #calculator-panel {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+
+        .bevel-info {
+            background: #f3e5f5;
+            padding: 10px;
+            border-left: 4px solid #9b59b6;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #8e44ad;
+        }
+
+        .equation-block {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .equation-latex {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-input {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .var-input label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .var-input input,
+        .var-input select {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .var-input select {
+            width: 180px;
+        }
+
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .var-input .unit {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin-top: 10px;
+        }
+
+        .warning {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #dc3545;
+            margin-top: 10px;
+        }
+
+        .summary-section {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 6px;
+            border: 2px solid #3498db;
+            margin-top: 30px;
+        }
+
+        .summary-section h2 {
+            color: #3498db;
+            border-bottom: none;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PDF Panel -->
+    <div id="pdf-panel">
+        <iframe src="../documents/bevel_stress.pdf" type="application/pdf"></iframe>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div id="calculator-panel">
+        <h1>⚙️ Bevel Gear Stress Calculator</h1>
+        <p class="subtitle">Complete bending and contact stress analysis for bevel gears</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        </div>
+
+        <div class="bevel-info">
+            <strong>📋 Bevel Gear Note:</strong> Bevel gears use different factors (K<sub>mb</sub>, K<sub>s</sub>, C<sub>s</sub>, C<sub>xc</sub>) and stress cycle factors (K<sub>L</sub>, C<sub>L</sub>) compared to spur gears.
+        </div>
+
+        <!-- BENDING STRESS ANALYSIS -->
+        <div class="section">
+            <h2>Bending Stress Analysis</h2>
+
+            <!-- Step 1-2: Overload Factor -->
+            <h3>Step 1-2: Overload Factor</h3>
+            <div class="info-box">Look up K<sub>o</sub> from Table 9-1 based on shock from power source and driven machine</div>
+
+            <div class="var-input">
+                <label>K<sub>o</sub> =</label>
+                <input type="number" id="Ko" step="0.01" oninput="markAsUser('Ko'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 2: Basic Parameters -->
+            <h3>Step 2: Basic Gear Parameters</h3>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>N<sub>P</sub> =</label>
+                <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                <span class="unit">teeth (pinion)</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>N<sub>G</sub> =</label>
+                <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                <span class="unit">teeth (gear)</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>P<sub>d</sub> =</label>
+                <input type="number" id="Pd" step="0.1" oninput="markAsUser('Pd'); calculate()">
+                <span class="unit">teeth/in</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>F =</label>
+                <input type="number" id="F" step="0.0001" oninput="markAsUser('F'); calculate()">
+                <span class="unit">in (face width)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 3: Transmitted Load and Velocity -->
+            <h3>Step 3: Transmitted Load and Pitch Line Velocity</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$v_t = \frac{\pi D n}{12}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>v<sub>t</sub> =</label>
+                        <input type="number" id="vt" step="0.0001" oninput="markAsUser('vt'); calculate()">
+                        <span class="unit">ft/min</span>
+                    </div>
+                    <span>= (π ×</span>
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="D" step="0.0001" oninput="syncInput('D', 'D'); markAsUser('D'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>n =</label>
+                        <input type="number" id="n" step="0.1" oninput="syncInput('n', 'n'); markAsUser('n'); calculate()">
+                        <span class="unit">rpm</span>
+                    </div>
+                    <span>) / 12</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$W_t = \frac{33000 P}{v_t}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>W<sub>t</sub> =</label>
+                        <input type="number" id="Wt" step="0.0001" oninput="markAsUser('Wt'); calculate()">
+                        <span class="unit">lbs</span>
+                    </div>
+                    <span>= (33000 ×</span>
+                    <div class="var-input">
+                        <label>P =</label>
+                        <input type="number" id="P" step="0.01" oninput="syncInput('P', 'P'); markAsUser('P'); calculate()">
+                        <span class="unit">HP</span>
+                    </div>
+                    <span>) /</span>
+                    <div class="var-input">
+                        <label>v<sub>t</sub> =</label>
+                        <input type="number" id="vt_eq2" step="0.0001" oninput="syncInput('vt', 'vt_eq2'); calculate()">
+                        <span class="unit">ft/min</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 4: Size Factor (BEVEL-SPECIFIC) -->
+            <h3>Step 4: Size Factor K<sub>s</sub> (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> K<sub>s</sub> = 0.5 if P<sub>d</sub> ≥ 16, otherwise K<sub>s</sub> = 0.4867 + 0.2133/P<sub>d</sub>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$K_s = \begin{cases}
+                    0.5 & P_d \geq 16 \\
+                    0.4867 + \frac{0.2133}{P_d} & P_d < 16
+                    \end{cases}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>K<sub>s</sub> =</label>
+                        <input type="number" id="Ks" step="0.0001" oninput="markAsUser('Ks'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 5-6: Load Distribution Factor (BEVEL-SPECIFIC) -->
+            <h3>Steps 5-6: Load Distribution Factor (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> K<sub>mb</sub> depends on mounting:<br>
+                • Both gears straddle mounted: 1.0<br>
+                • One gear straddle mounted: 1.1<br>
+                • Neither gear straddle mounted: 1.25
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>K<sub>mb</sub> =</label>
+                <select id="Kmb" onchange="markAsUser('Kmb'); calculate()">
+                    <option value="1">1.0 (Both straddle)</option>
+                    <option value="1.1">1.1 (One straddle)</option>
+                    <option value="1.25">1.25 (Neither straddle)</option>
+                </select>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$K_m = K_{mb} + 0.0036 F^2$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>K<sub>m</sub> =</label>
+                        <input type="number" id="Km" step="0.0001" oninput="markAsUser('Km'); calculate()">
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>K<sub>mb</sub> =</label>
+                        <input type="number" id="Kmb_eq" step="0.01" oninput="syncInput('Kmb', 'Kmb_eq'); calculate()" disabled>
+                    </div>
+                    <span>+ 0.0036 ×</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq1" step="0.0001" oninput="syncInput('F', 'F_eq1'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>²</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Steps 7-8: Quality Number and Dynamic Factor -->
+            <h3>Steps 7-8: Quality Number and Dynamic Factor</h3>
+            <div class="info-box">
+                Look up A<sub>v</sub> from Table 9-5 based on application or pitch line speed
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>A<sub>v</sub> =</label>
+                <input type="number" id="Av" step="1" oninput="markAsUser('Av'); calculate()">
+            </div>
+
+            <div class="info-box">
+                Look up K<sub>v</sub> from dynamic factor graph using A<sub>v</sub> and v<sub>t</sub>
+            </div>
+
+            <div class="var-input">
+                <label>K<sub>v</sub> =</label>
+                <input type="number" id="Kv" step="0.0001" oninput="markAsUser('Kv'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 9: Geometry Factor J -->
+            <h3>Step 9: Geometry Factor J</h3>
+            <div class="info-box">
+                Look up J from bevel gear geometry factor graph (Figure in PDF) using number of teeth in mate
+            </div>
+
+            <div class="var-input">
+                <label>J =</label>
+                <input type="number" id="J" step="0.0001" oninput="markAsUser('J'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 10: Bending Stress -->
+            <h3>Step 10: Bending Stress</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_t = \frac{W_t P_d K_o K_s K_m K_v}{F J}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>t</sub> =</label>
+                        <input type="number" id="st" step="0.0001" oninput="markAsUser('st'); calculate()">
+                        <span class="unit">psi</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>W<sub>t</sub> =</label>
+                        <input type="number" id="Wt_eq10" step="0.0001" oninput="syncInput('Wt', 'Wt_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq10" step="0.1" oninput="syncInput('Pd', 'Pd_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>o</sub> =</label>
+                        <input type="number" id="Ko_eq10" step="0.01" oninput="syncInput('Ko', 'Ko_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>s</sub> =</label>
+                        <input type="number" id="Ks_eq10" step="0.0001" oninput="syncInput('Ks', 'Ks_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>m</sub> =</label>
+                        <input type="number" id="Km_eq10" step="0.0001" oninput="syncInput('Km', 'Km_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>v</sub> =</label>
+                        <input type="number" id="Kv_eq10" step="0.0001" oninput="syncInput('Kv', 'Kv_eq10'); calculate()">
+                    </div>
+                    <span>) / (</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq10" step="0.0001" oninput="syncInput('F', 'F_eq10'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>J =</label>
+                        <input type="number" id="J_eq10" step="0.0001" oninput="syncInput('J', 'J_eq10'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Steps 11-12: Safety Factor and Reliability -->
+            <h3>Steps 11-12: Safety Factor and Reliability</h3>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>SF =</label>
+                <input type="number" id="SF_assumed" step="0.01" value="1" oninput="markAsUser('SF_assumed'); calculate()">
+                <span class="unit">(assumed)</span>
+            </div>
+
+            <div class="var-input">
+                <label>K<sub>R</sub> =</label>
+                <input type="number" id="KR" step="0.01" value="1" oninput="markAsUser('KR'); calculate()">
+                <span class="unit">(typically 1 for 99% reliability)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 13: Load Cycles -->
+            <h3>Step 13: Load Cycles</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$N_L = 60 \times \text{lifetime} \times n$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>N<sub>L</sub> =</label>
+                        <input type="number" id="NL" step="1" oninput="markAsUser('NL'); calculate()">
+                        <span class="unit">cycles</span>
+                    </div>
+                    <span>= 60 ×</span>
+                    <div class="var-input">
+                        <label>lifetime =</label>
+                        <input type="number" id="lifetime" step="1" oninput="markAsUser('lifetime'); calculate()">
+                        <span class="unit">hours</span>
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>n =</label>
+                        <input type="number" id="n_eq13" step="0.1" oninput="syncInput('n', 'n_eq13'); calculate()">
+                        <span class="unit">rpm</span>
+                    </div>
+                </div>
+            </div>
+            <p class="hint">Look up lifetime from Table 9-12 based on application</p>
+
+            <div class="divider"></div>
+
+            <!-- Step 14: Stress Cycle Factor KL (BEVEL-SPECIFIC) -->
+            <h3>Step 14: Stress Cycle Factor K<sub>L</sub> (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific K<sub>L</sub> graph (not Y<sub>N</sub>) with N<sub>L</sub>
+            </div>
+
+            <div class="var-input">
+                <label>K<sub>L</sub> =</label>
+                <input type="number" id="KL" step="0.0001" oninput="markAsUser('KL'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 15: Allowable Bending Stress -->
+            <h3>Step 15: Required Allowable Bending Stress</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_{at} = \frac{s_t \times SF \times K_R}{K_L}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>at</sub> =</label>
+                        <input type="number" id="sat_required" step="0.0001" oninput="markAsUser('sat_required'); calculate()">
+                        <span class="unit">psi</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>s<sub>t</sub> =</label>
+                        <input type="number" id="st_eq15" step="0.0001" oninput="syncInput('st', 'st_eq15'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>SF =</label>
+                        <input type="number" id="SF_eq15" step="0.01" oninput="syncInput('SF_assumed', 'SF_eq15'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>R</sub> =</label>
+                        <input type="number" id="KR_eq15" step="0.01" oninput="syncInput('KR', 'KR_eq15'); calculate()">
+                    </div>
+                    <span>) /</span>
+                    <div class="var-input">
+                        <label>K<sub>L</sub> =</label>
+                        <input type="number" id="KL_eq15" step="0.0001" oninput="syncInput('KL', 'KL_eq15'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="var-input">
+                <label>s<sub>at</sub> =</label>
+                <input type="number" id="sat_required_ksi" step="0.0001" oninput="markAsUser('sat_required_ksi'); calculate()">
+                <span class="unit">ksi (for material selection)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 16: Material Selection -->
+            <h3>Step 16: Material Selection (Bending)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> Use bevel-specific material graphs (different from spur!)
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>HB (required) =</label>
+                <input type="number" id="HB_required" step="1" oninput="markAsUser('HB_required'); calculate()">
+                <span class="unit">from bevel material graph</span>
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>Material =</label>
+                <input type="text" id="material" placeholder="e.g., AISI 4340 OQT 400" style="width: 250px;" oninput="markAsUser('material'); calculate()">
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>HB (actual) =</label>
+                <input type="number" id="HB_actual" step="1" oninput="markAsUser('HB_actual'); calculate()">
+            </div>
+
+            <div class="var-input">
+                <label>s<sub>at</sub> (actual) =</label>
+                <input type="number" id="sat_actual_ksi" step="0.0001" oninput="markAsUser('sat_actual_ksi'); calculate()">
+                <span class="unit">ksi (from bevel formula)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Actual Safety Factor (Bending) -->
+            <h3>Actual Safety Factor (Bending)</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$SF_{bending} = \frac{s_{at} \times K_L}{s_t \times K_R}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>SF<sub>bending</sub> =</label>
+                        <input type="number" id="SF_bending" step="0.0001" oninput="markAsUser('SF_bending'); calculate()">
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>s<sub>at</sub> =</label>
+                        <input type="number" id="sat_actual_ksi_eq16" step="0.0001" oninput="syncInput('sat_actual_ksi', 'sat_actual_ksi_eq16'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                    <span>× 1000 ×</span>
+                    <div class="var-input">
+                        <label>K<sub>L</sub> =</label>
+                        <input type="number" id="KL_eq16" step="0.0001" oninput="syncInput('KL', 'KL_eq16'); calculate()">
+                    </div>
+                    <span>) / (</span>
+                    <div class="var-input">
+                        <label>s<sub>t</sub> =</label>
+                        <input type="number" id="st_eq16" step="0.0001" oninput="syncInput('st', 'st_eq16'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>R</sub> =</label>
+                        <input type="number" id="KR_eq16" step="0.01" oninput="syncInput('KR', 'KR_eq16'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div id="SF_bending_status"></div>
+        </div>
+
+        <!-- CONTACT STRESS ANALYSIS -->
+        <div class="section">
+            <h2>Contact Stress Analysis</h2>
+
+            <!-- Step 17: Elastic Coefficient -->
+            <h3>Step 17: Elastic Coefficient</h3>
+            <div class="info-box">
+                C<sub>p</sub> = 2300 psi<sup>1/2</sup> for steel gears (look up Table 9-7 for other materials)
+            </div>
+
+            <div class="var-input">
+                <label>C<sub>p</sub> =</label>
+                <input type="number" id="Cp" step="1" value="2300" oninput="markAsUser('Cp'); calculate()">
+                <span class="unit">psi<sup>1/2</sup></span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 18: Pitting Resistance Size Factor (BEVEL-SPECIFIC) -->
+            <h3>Step 18: Pitting Resistance Size Factor (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> C<sub>s</sub> = 0.125F + 0.4375
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$C_s = 0.125 F + 0.4375$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>C<sub>s</sub> =</label>
+                        <input type="number" id="Cs" step="0.0001" oninput="markAsUser('Cs'); calculate()">
+                    </div>
+                    <span>= 0.125 ×</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq18" step="0.0001" oninput="syncInput('F', 'F_eq18'); calculate()">
+                    </div>
+                    <span>+ 0.4375</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 19: Crown Factor (BEVEL-SPECIFIC) -->
+            <h3>Step 19: Crown Factor (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> C<sub>xc</sub> = 1.5 for properly crowned teeth (typical), 2.0 for non-crowned
+            </div>
+
+            <div class="var-input">
+                <label>C<sub>xc</sub> =</label>
+                <select id="Cxc" onchange="markAsUser('Cxc'); calculate()">
+                    <option value="1.5" selected>1.5 (Properly crowned)</option>
+                    <option value="2">2.0 (Non-crowned)</option>
+                </select>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 20: Pitting Geometry Factor I -->
+            <h3>Step 20: Pitting Geometry Factor I</h3>
+            <div class="info-box">
+                Look up I from bevel gear pitting geometry factor graph (Figure in PDF)
+            </div>
+
+            <div class="var-input">
+                <label>I =</label>
+                <input type="number" id="I" step="0.0001" oninput="markAsUser('I'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 21: Contact Stress (BEVEL-SPECIFIC FORMULA) -->
+            <h3>Step 21: Contact Stress (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> Formula includes C<sub>s</sub> and C<sub>xc</sub> factors
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>D<sub>p</sub> =</label>
+                <input type="number" id="Dp" step="0.0001" oninput="markAsUser('Dp'); calculate()">
+                <span class="unit">in (pinion pitch diameter)</span>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_c = C_p \sqrt{\frac{W_t K_o K_m K_v C_s C_{xc}}{F D_p I}}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>c</sub> =</label>
+                        <input type="number" id="sc" step="0.0001" oninput="markAsUser('sc'); calculate()">
+                        <span class="unit">psi</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>C<sub>p</sub> =</label>
+                        <input type="number" id="Cp_eq21" step="1" oninput="syncInput('Cp', 'Cp_eq21'); calculate()">
+                    </div>
+                    <span>× √[(</span>
+                    <div class="var-input">
+                        <label>W<sub>t</sub> =</label>
+                        <input type="number" id="Wt_eq21" step="0.0001" oninput="syncInput('Wt', 'Wt_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>o</sub> =</label>
+                        <input type="number" id="Ko_eq21" step="0.01" oninput="syncInput('Ko', 'Ko_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>m</sub> =</label>
+                        <input type="number" id="Km_eq21" step="0.0001" oninput="syncInput('Km', 'Km_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>K<sub>v</sub> =</label>
+                        <input type="number" id="Kv_eq21" step="0.0001" oninput="syncInput('Kv', 'Kv_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>C<sub>s</sub> =</label>
+                        <input type="number" id="Cs_eq21" step="0.0001" oninput="syncInput('Cs', 'Cs_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>C<sub>xc</sub> =</label>
+                        <input type="number" id="Cxc_eq21" step="0.1" oninput="syncInput('Cxc', 'Cxc_eq21'); calculate()" disabled>
+                    </div>
+                    <span>) / (</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq21" step="0.0001" oninput="syncInput('F', 'F_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>D<sub>p</sub> =</label>
+                        <input type="number" id="Dp_eq21" step="0.0001" oninput="syncInput('Dp', 'Dp_eq21'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>I =</label>
+                        <input type="number" id="I_eq21" step="0.0001" oninput="syncInput('I', 'I_eq21'); calculate()">
+                    </div>
+                    <span>)]</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 22: Reliability Factor for Contact -->
+            <h3>Step 22: Reliability Factor (Contact)</h3>
+
+            <div class="var-input">
+                <label>C<sub>R</sub> =</label>
+                <input type="number" id="CR" step="0.01" value="1" oninput="markAsUser('CR'); calculate()">
+                <span class="unit">(typically 1 for 99% reliability)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 23: Stress Cycle Factor CL (BEVEL-SPECIFIC) -->
+            <h3>Step 23: Stress Cycle Factor C<sub>L</sub> (BEVEL-SPECIFIC)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific C<sub>L</sub> graph (not Z<sub>N</sub>) with N<sub>L</sub>
+            </div>
+
+            <div class="var-input">
+                <label>C<sub>L</sub> =</label>
+                <input type="number" id="CL" step="0.0001" oninput="markAsUser('CL'); calculate()">
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 24: Allowable Contact Stress -->
+            <h3>Step 24: Required Allowable Contact Stress</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$s_{ac} = \frac{s_c \times SF \times C_R}{C_L}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>s<sub>ac</sub> =</label>
+                        <input type="number" id="sac_required" step="0.0001" oninput="markAsUser('sac_required'); calculate()">
+                        <span class="unit">psi</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>s<sub>c</sub> =</label>
+                        <input type="number" id="sc_eq24" step="0.0001" oninput="syncInput('sc', 'sc_eq24'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>SF =</label>
+                        <input type="number" id="SF_eq24" step="0.01" oninput="syncInput('SF_assumed', 'SF_eq24'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>C<sub>R</sub> =</label>
+                        <input type="number" id="CR_eq24" step="0.01" oninput="syncInput('CR', 'CR_eq24'); calculate()">
+                    </div>
+                    <span>) /</span>
+                    <div class="var-input">
+                        <label>C<sub>L</sub> =</label>
+                        <input type="number" id="CL_eq24" step="0.0001" oninput="syncInput('CL', 'CL_eq24'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="var-input">
+                <label>s<sub>ac</sub> =</label>
+                <input type="number" id="sac_required_ksi" step="0.0001" oninput="markAsUser('sac_required_ksi'); calculate()">
+                <span class="unit">ksi (for material selection)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 25: Material Selection (Contact) -->
+            <h3>Step 25: Material Selection (Contact)</h3>
+            <div class="bevel-info">
+                <strong>⚠️ BEVEL-SPECIFIC:</strong> Use bevel-specific contact stress material graphs
+            </div>
+
+            <div class="var-input" style="margin-bottom: 10px;">
+                <label>HB (required, contact) =</label>
+                <input type="number" id="HB_contact_required" step="1" oninput="markAsUser('HB_contact_required'); calculate()">
+            </div>
+
+            <div class="var-input">
+                <label>s<sub>ac</sub> (actual) =</label>
+                <input type="number" id="sac_actual_ksi" step="0.0001" oninput="markAsUser('sac_actual_ksi'); calculate()">
+                <span class="unit">ksi (from bevel formula)</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Actual Safety Factor (Contact) -->
+            <h3>Actual Safety Factor (Contact)</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$SF_{contact} = \frac{s_{ac} \times C_L}{s_c \times C_R}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>SF<sub>contact</sub> =</label>
+                        <input type="number" id="SF_contact" step="0.0001" oninput="markAsUser('SF_contact'); calculate()">
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>s<sub>ac</sub> =</label>
+                        <input type="number" id="sac_actual_ksi_eq25" step="0.0001" oninput="syncInput('sac_actual_ksi', 'sac_actual_ksi_eq25'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                    <span>× 1000 ×</span>
+                    <div class="var-input">
+                        <label>C<sub>L</sub> =</label>
+                        <input type="number" id="CL_eq25" step="0.0001" oninput="syncInput('CL', 'CL_eq25'); calculate()">
+                    </div>
+                    <span>) / (</span>
+                    <div class="var-input">
+                        <label>s<sub>c</sub> =</label>
+                        <input type="number" id="sc_eq25" step="0.0001" oninput="syncInput('sc', 'sc_eq25'); calculate()">
+                    </div>
+                    <span>×</span>
+                    <div class="var-input">
+                        <label>C<sub>R</sub> =</label>
+                        <input type="number" id="CR_eq25" step="0.01" oninput="syncInput('CR', 'CR_eq25'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div id="SF_contact_status"></div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-section">
+            <h2>📊 Design Summary</h2>
+
+            <div style="margin-bottom: 15px;">
+                <strong>Gear Specifications:</strong>
+                <div class="summary-item">Pinion: N<sub>P</sub> = <span id="summary_NP">-</span> teeth, D<sub>p</sub> = <span id="summary_Dp">-</span> in</div>
+                <div class="summary-item">Gear: N<sub>G</sub> = <span id="summary_NG">-</span> teeth</div>
+                <div class="summary-item">Diametral Pitch: P<sub>d</sub> = <span id="summary_Pd">-</span> teeth/in</div>
+                <div class="summary-item">Face Width: F = <span id="summary_F">-</span> in</div>
+            </div>
+
+            <div>
+                <strong>Stress Results:</strong>
+                <div class="summary-item">Bending Stress: s<sub>t</sub> = <span id="summary_st">-</span> psi</div>
+                <div class="summary-item">Contact Stress: s<sub>c</sub> = <span id="summary_sc">-</span> psi</div>
+                <div class="summary-item">Safety Factor (Bending): SF = <span id="summary_SF_bending">-</span></div>
+                <div class="summary-item">Safety Factor (Contact): SF = <span id="summary_SF_contact">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User-modified values tracking
+        const userValues = new Set();
+
+        // Sync input values across multiple instances
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+
+            markAsUser(mainId);
+            calculate();
+        }
+
+        // Mark field as user-modified
+        function markAsUser(fieldId) {
+            userValues.add(fieldId);
+        }
+
+        // Get value with fallback
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = el.type === 'select-one' ? parseFloat(el.value) : parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        // Set value with precision
+        function setValue(id, value, decimals = 4) {
+            const el = document.getElementById(id);
+            if (!el || value === null || value === undefined || isNaN(value)) {
+                if (el && el.type !== 'select-one') el.value = '';
+                return;
+            }
+            if (el.type !== 'select-one') {
+                el.value = decimals === 0 ? Math.round(value) : value.toFixed(decimals);
+                // Add computed class for visual feedback
+                if (!userValues.has(id)) {
+                    el.classList.add('computed');
+                } else {
+                    el.classList.remove('computed');
+                }
+            }
+        }
+
+        // Main calculation function
+        function calculate() {
+            // Sync select values to equation fields
+            const Kmb = getValue('Kmb');
+            if (Kmb) setValue('Kmb_eq', Kmb, 2);
+
+            const Cxc = getValue('Cxc');
+            if (Cxc) setValue('Cxc_eq21', Cxc, 1);
+
+            // Step 3: Pitch line velocity
+            const D = getValue('D');
+            const n = getValue('n');
+            if (D && n && !userValues.has('vt')) {
+                const vt = (Math.PI * D * n) / 12;
+                setValue('vt', vt);
+                setValue('vt_eq2', vt);
+            }
+
+            // Step 3: Transmitted load
+            const P = getValue('P');
+            const vt = getValue('vt');
+            if (P && vt && !userValues.has('Wt')) {
+                const Wt = (33000 * P) / vt;
+                setValue('Wt', Wt);
+            }
+
+            // Step 4: Size factor (bevel-specific)
+            const Pd = getValue('Pd');
+            if (Pd && !userValues.has('Ks')) {
+                const Ks = Pd >= 16 ? 0.5 : (0.4867 + 0.2133 / Pd);
+                setValue('Ks', Ks);
+            }
+
+            // Step 5-6: Load distribution factor (bevel-specific)
+            const F = getValue('F');
+            if (Kmb && F && !userValues.has('Km')) {
+                const Km = Kmb + 0.0036 * F * F;
+                setValue('Km', Km);
+            }
+
+            // Step 10: Bending stress
+            const Wt = getValue('Wt');
+            const Ko = getValue('Ko');
+            const Ks = getValue('Ks');
+            const Km = getValue('Km');
+            const Kv = getValue('Kv');
+            const J = getValue('J');
+
+            if (Wt && Pd && Ko && Ks && Km && Kv && F && J && !userValues.has('st')) {
+                const st = (Wt * Pd * Ko * Ks * Km * Kv) / (F * J);
+                setValue('st', st);
+            }
+
+            // Step 13: Load cycles
+            const lifetime = getValue('lifetime');
+            if (lifetime && n && !userValues.has('NL')) {
+                const NL = 60 * lifetime * n;
+                setValue('NL', NL, 0);
+            }
+
+            // Step 15: Allowable bending stress
+            const st = getValue('st');
+            const SF_assumed = getValue('SF_assumed');
+            const KR = getValue('KR');
+            const KL = getValue('KL');
+
+            if (st && SF_assumed && KR && KL && !userValues.has('sat_required')) {
+                const sat_required = (st * SF_assumed * KR) / KL;
+                setValue('sat_required', sat_required);
+                if (!userValues.has('sat_required_ksi')) {
+                    setValue('sat_required_ksi', sat_required / 1000);
+                }
+            }
+
+            // Step 16: Actual safety factor (bending)
+            const sat_actual_ksi = getValue('sat_actual_ksi');
+            if (sat_actual_ksi && KL && st && KR && !userValues.has('SF_bending')) {
+                const sat_actual = sat_actual_ksi * 1000;
+                const SF_bending = (sat_actual * KL) / (st * KR);
+                setValue('SF_bending', SF_bending);
+
+                const status = document.getElementById('SF_bending_status');
+                if (SF_bending >= 1) {
+                    status.innerHTML = `✅ <strong>Design is SAFE</strong> for bending stress (SF = ${SF_bending.toFixed(4)} ≥ 1)`;
+                    status.className = 'success';
+                } else {
+                    status.innerHTML = `❌ <strong>Design is UNSAFE</strong> for bending stress (SF = ${SF_bending.toFixed(4)} < 1). Choose stronger material!`;
+                    status.className = 'warning';
+                }
+            }
+
+            // Step 18: Pitting resistance size factor (bevel-specific)
+            if (F && !userValues.has('Cs')) {
+                const Cs = 0.125 * F + 0.4375;
+                setValue('Cs', Cs);
+            }
+
+            // Step 21: Contact stress (bevel-specific formula)
+            const Cp = getValue('Cp');
+            const Dp = getValue('Dp');
+            const I = getValue('I');
+            const Cs = getValue('Cs');
+
+            if (Cp && Wt && Ko && Km && Kv && Cs && Cxc && F && Dp && I && !userValues.has('sc')) {
+                const numerator = Wt * Ko * Km * Kv * Cs * Cxc;
+                const denominator = F * Dp * I;
+                const sc = Cp * Math.sqrt(numerator / denominator);
+                setValue('sc', sc);
+            }
+
+            // Step 24: Allowable contact stress
+            const sc = getValue('sc');
+            const CR = getValue('CR');
+            const CL = getValue('CL');
+
+            if (sc && SF_assumed && CR && CL && !userValues.has('sac_required')) {
+                const sac_required = (sc * SF_assumed * CR) / CL;
+                setValue('sac_required', sac_required);
+                if (!userValues.has('sac_required_ksi')) {
+                    setValue('sac_required_ksi', sac_required / 1000);
+                }
+            }
+
+            // Step 25: Actual safety factor (contact)
+            const sac_actual_ksi = getValue('sac_actual_ksi');
+            if (sac_actual_ksi && CL && sc && CR && !userValues.has('SF_contact')) {
+                const sac_actual = sac_actual_ksi * 1000;
+                const SF_contact = (sac_actual * CL) / (sc * CR);
+                setValue('SF_contact', SF_contact);
+
+                const status = document.getElementById('SF_contact_status');
+                if (SF_contact >= 1) {
+                    status.innerHTML = `✅ <strong>Design is SAFE</strong> for contact stress (SF = ${SF_contact.toFixed(4)} ≥ 1)`;
+                    status.className = 'success';
+                } else {
+                    status.innerHTML = `❌ <strong>Design is UNSAFE</strong> for contact stress (SF = ${SF_contact.toFixed(4)} < 1). Choose stronger material!`;
+                    status.className = 'warning';
+                }
+            }
+
+            // Sync all duplicate fields
+            syncAllFields();
+            updateSummary();
+        }
+
+        // Sync all duplicate field instances
+        function syncAllFields() {
+            const mainVars = {
+                'D': ['D'],
+                'n': ['n', 'n_eq13'],
+                'P': ['P'],
+                'vt': ['vt', 'vt_eq2'],
+                'Wt': ['Wt', 'Wt_eq10', 'Wt_eq21'],
+                'Pd': ['Pd', 'Pd_eq10'],
+                'F': ['F', 'F_eq1', 'F_eq10', 'F_eq18', 'F_eq21'],
+                'Ko': ['Ko', 'Ko_eq10', 'Ko_eq21'],
+                'Ks': ['Ks', 'Ks_eq10'],
+                'Km': ['Km', 'Km_eq10', 'Km_eq21'],
+                'Kv': ['Kv', 'Kv_eq10', 'Kv_eq21'],
+                'J': ['J', 'J_eq10'],
+                'st': ['st', 'st_eq15', 'st_eq16'],
+                'SF_assumed': ['SF_assumed', 'SF_eq15', 'SF_eq24'],
+                'KR': ['KR', 'KR_eq15', 'KR_eq16'],
+                'KL': ['KL', 'KL_eq15', 'KL_eq16'],
+                'sat_actual_ksi': ['sat_actual_ksi', 'sat_actual_ksi_eq16'],
+                'Cp': ['Cp', 'Cp_eq21'],
+                'Cs': ['Cs', 'Cs_eq21'],
+                'Dp': ['Dp', 'Dp_eq21'],
+                'I': ['I', 'I_eq21'],
+                'sc': ['sc', 'sc_eq24', 'sc_eq25'],
+                'CR': ['CR', 'CR_eq24', 'CR_eq25'],
+                'CL': ['CL', 'CL_eq24', 'CL_eq25'],
+                'sac_actual_ksi': ['sac_actual_ksi', 'sac_actual_ksi_eq25']
+            };
+
+            for (let mainId in mainVars) {
+                const mainValue = getValue(mainId);
+                if (mainValue !== null) {
+                    mainVars[mainId].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.id !== mainId) {
+                            const currentVal = getValue(id);
+                            if (currentVal !== mainValue) {
+                                el.value = el.step === '1' ? Math.round(mainValue) : mainValue.toFixed(4);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // Update summary section
+        function updateSummary() {
+            document.getElementById('summary_NP').textContent = getValue('NP') || '-';
+            document.getElementById('summary_NG').textContent = getValue('NG') || '-';
+            document.getElementById('summary_Dp').textContent = getValue('Dp') ? getValue('Dp').toFixed(4) : '-';
+            document.getElementById('summary_Pd').textContent = getValue('Pd') || '-';
+            document.getElementById('summary_F').textContent = getValue('F') ? getValue('F').toFixed(4) : '-';
+            document.getElementById('summary_st').textContent = getValue('st') ? getValue('st').toFixed(2) : '-';
+            document.getElementById('summary_sc').textContent = getValue('sc') ? getValue('sc').toFixed(2) : '-';
+            document.getElementById('summary_SF_bending').textContent = getValue('SF_bending') ? getValue('SF_bending').toFixed(4) : '-';
+            document.getElementById('summary_SF_contact').textContent = getValue('SF_contact') ? getValue('SF_contact').toFixed(4) : '-';
+        }
+
+        // Save session to localStorage
+        function saveSession() {
+            const state = {
+                userValues: Array.from(userValues),
+                values: {}
+            };
+
+            document.querySelectorAll('input, select').forEach(el => {
+                if (el.id && el.value) {
+                    state.values[el.id] = el.value;
+                }
+            });
+
+            localStorage.setItem('bevel_stress_state', JSON.stringify(state));
+            alert('✅ Session saved successfully!');
+        }
+
+        // Load session from localStorage
+        function loadSession() {
+            const saved = localStorage.getItem('bevel_stress_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+
+                // Restore user values tracking
+                userValues.clear();
+                if (state.userValues) {
+                    state.userValues.forEach(v => userValues.add(v));
+                }
+
+                // Restore all field values
+                for (let id in state.values) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = state.values[id];
+                    }
+                }
+
+                calculate();
+            }
+        }
+
+        // Reset all values
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                localStorage.removeItem('bevel_stress_state');
+                userValues.clear();
+
+                document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                    if (input.id === 'Cp') {
+                        input.value = '2300';
+                    } else if (input.id === 'KR' || input.id === 'CR' || input.id === 'SF_assumed') {
+                        input.value = '1';
+                    } else {
+                        input.value = '';
+                    }
+                    input.classList.remove('computed');
+                });
+
+                document.getElementById('Kmb').value = '1';
+                document.getElementById('Cxc').value = '1.5';
+
+                calculate();
+            }
+        }
+
+        // Load session on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

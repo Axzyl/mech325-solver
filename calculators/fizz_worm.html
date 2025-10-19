@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worm Gear Design Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            text-align: center;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .equation-inputs > span {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #666;
+            margin: 0 5px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        button {
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../documents/fizz_worm.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Worm Gear Design Calculator</h1>
+
+            <div class="section">
+                <h2>Given Information</h2>
+                <div class="input-row">
+                    <label>P<sub>out</sub> - Output Power (hp):</label>
+                    <input type="number" id="Pout" step="any" oninput="markAsUser('Pout'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>n<sub>w</sub> - Worm Speed (rpm):</label>
+                    <input type="number" id="nw" step="any" oninput="markAsUser('nw'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>n<sub>g</sub> - Gear Speed (rpm):</label>
+                    <input type="number" id="ng" step="any" oninput="markAsUser('ng'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>N<sub>w</sub> - Number of Worm Threads:</label>
+                    <input type="number" id="Nw" step="1" oninput="markAsUser('Nw'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>N<sub>g</sub> - Number of Gear Teeth:</label>
+                    <input type="number" id="Ng" step="1" oninput="markAsUser('Ng'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 1: Velocity Ratio</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$m_G = \frac{n_w}{n_g}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>m<sub>G</sub> =</label>
+                            <input type="number" id="mG" step="any" oninput="markAsUser('mG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>n<sub>w</sub></label>
+                            <input type="number" id="nw_eq1" step="any" oninput="syncInput('nw', 'nw_eq1')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>n<sub>g</sub></label>
+                            <input type="number" id="ng_eq1" step="any" oninput="syncInput('ng', 'ng_eq1')">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Verify: m<sub>G</sub> = N<sub>g</sub> / N<sub>w</sub></div>
+            </div>
+
+            <div class="section">
+                <h2>Step 2-3: Pitch Diameter Selection</h2>
+                <div class="input-row">
+                    <label>d - Worm Pitch Diameter (in):</label>
+                    <input type="number" id="d" step="any" oninput="markAsUser('d'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C - Center Distance (in):</label>
+                    <input type="number" id="C" step="any" oninput="markAsUser('C'); calculate()">
+                </div>
+                <div class="note">Choose based on design constraints</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 4: Lead and Axial Pitch</h2>
+                <div class="input-row">
+                    <label>L - Lead (in):</label>
+                    <input type="number" id="L" step="any" oninput="markAsUser('L'); calculate()">
+                </div>
+                <div class="note">L = N<sub>w</sub> × p<sub>x</sub> (choose from standard values)</div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$p_x = \frac{\pi d}{\tan(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p<sub>x</sub> (in) =</label>
+                            <input type="number" id="px" step="any" oninput="markAsUser('px'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 5: Lead Angle</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\lambda = \arctan\left(\frac{L}{\pi d}\right)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>λ (deg) =</label>
+                            <input type="number" id="lambda" step="any" oninput="markAsUser('lambda'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 6: Gear Pitch Diameter</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$D = 2C - d$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D (in) =</label>
+                            <input type="number" id="D" step="any" oninput="markAsUser('D'); calculate()">
+                        </div>
+                        <span>= 2 ×</span>
+                        <div class="var-input">
+                            <label>C</label>
+                            <input type="number" id="C_eq6" step="any" oninput="syncInput('C', 'C_eq6')">
+                        </div>
+                        <span>-</span>
+                        <div class="var-input">
+                            <label>d</label>
+                            <input type="number" id="d_eq6" step="any" oninput="syncInput('d', 'd_eq6')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 7: Worm Velocity</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$V_w = \frac{\pi d n_w}{12}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>V<sub>w</sub> (ft/min) =</label>
+                            <input type="number" id="Vw" step="any" oninput="markAsUser('Vw'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(π ×</span>
+                        <div class="var-input">
+                            <label>d</label>
+                            <input type="number" id="d_eq7" step="any" oninput="syncInput('d', 'd_eq7')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>w</sub></label>
+                            <input type="number" id="nw_eq7" step="any" oninput="syncInput('nw', 'nw_eq7')">
+                        </div>
+                        <span>) / 12</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 8: Friction Coefficient</h2>
+                <div class="input-row">
+                    <label>μ - Coefficient of Friction:</label>
+                    <input type="number" id="mu" step="any" oninput="markAsUser('mu'); calculate()">
+                </div>
+                <div class="note">Look up from friction charts based on V<sub>w</sub> and material pair</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 9: Efficiency</h2>
+                <div class="input-row">
+                    <label>φ<sub>n</sub> - Normal Pressure Angle (deg):</label>
+                    <input type="number" id="phi_n" step="any" value="20" oninput="markAsUser('phi_n'); calculate()">
+                </div>
+                <div class="note">Typically 20° for worm gears</div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\eta = \frac{\cos(\phi_n) - \mu\tan(\lambda)}{\cos(\phi_n) + \mu\cot(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>η =</label>
+                            <input type="number" id="eta" step="any" oninput="markAsUser('eta'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 10: Input Power</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_{in} = \frac{P_{out}}{\eta}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>in</sub> (hp) =</label>
+                            <input type="number" id="Pin" step="any" oninput="markAsUser('Pin'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>P<sub>out</sub></label>
+                            <input type="number" id="Pout_eq10" step="any" oninput="syncInput('Pout', 'Pout_eq10')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>η</label>
+                            <input type="number" id="eta_eq10" step="any" oninput="syncInput('eta', 'eta_eq10')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 11: Tangential Force on Gear</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$V_g = \frac{\pi D n_g}{12}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>V<sub>g</sub> (ft/min) =</label>
+                            <input type="number" id="Vg" step="any" oninput="markAsUser('Vg'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_t = \frac{33000 \times P_{out}}{V_g}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> (lb) =</label>
+                            <input type="number" id="Wt" step="any" oninput="markAsUser('Wt'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 12: Forces on Worm</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{tw} = \frac{W_t(\cos(\phi_n)\tan(\lambda) + \mu)}{\cos(\phi_n) - \mu\tan(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>tw</sub> (lb) =</label>
+                            <input type="number" id="Wtw" step="any" oninput="markAsUser('Wtw'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{rw} = W_t \tan(\phi_n)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>rw</sub> (lb) =</label>
+                            <input type="number" id="Wrw" step="any" oninput="markAsUser('Wrw'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 13: Face Width</h2>
+                <div class="input-row">
+                    <label>F - Face Width (in):</label>
+                    <input type="number" id="F" step="any" oninput="markAsUser('F'); calculate()">
+                </div>
+                <div class="note">Choose based on design constraints (typically 0.67d or less)</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 14-15: Stress on Gear Teeth</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_d = \frac{N_g}{D}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>g</sub></label>
+                            <input type="number" id="Ng_eq14" step="1" oninput="syncInput('Ng', 'Ng_eq14')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>D</label>
+                            <input type="number" id="D_eq14" step="any" oninput="syncInput('D', 'D_eq14')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <label>y - Lewis Form Factor:</label>
+                    <input type="number" id="y" step="any" oninput="markAsUser('y'); calculate()">
+                </div>
+                <div class="note">Look up from Lewis factor table based on N<sub>g</sub></div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_t = \frac{W_t P_d}{F y}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>t</sub> (psi) =</label>
+                            <input type="number" id="st" step="any" oninput="markAsUser('st'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 16: Strength Factors</h2>
+                <div class="input-row">
+                    <label>C<sub>s</sub> - Service Factor:</label>
+                    <input type="number" id="Cs" step="any" value="1.0" oninput="markAsUser('Cs'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C<sub>m</sub> - Materials Factor:</label>
+                    <input type="number" id="Cm" step="any" oninput="markAsUser('Cm'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C<sub>v</sub> - Velocity Factor:</label>
+                    <input type="number" id="Cv" step="any" oninput="markAsUser('Cv'); calculate()">
+                </div>
+                <div class="note">Look up C<sub>m</sub> and C<sub>v</sub> from tables based on material and velocity</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 17-18: Allowable Stress</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{all} = 1000 \times C_s \times C_m \times C_v$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>all</sub> (psi) =</label>
+                            <input type="number" id="sall" step="any" oninput="markAsUser('sall'); calculate()">
+                        </div>
+                        <span>= 1000 ×</span>
+                        <div class="var-input">
+                            <label>C<sub>s</sub></label>
+                            <input type="number" id="Cs_eq17" step="any" oninput="syncInput('Cs', 'Cs_eq17')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>C<sub>m</sub></label>
+                            <input type="number" id="Cm_eq17" step="any" oninput="syncInput('Cm', 'Cm_eq17')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>C<sub>v</sub></label>
+                            <input type="number" id="Cv_eq17" step="any" oninput="syncInput('Cv', 'Cv_eq17')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\text{Factor of Safety} = \frac{\sigma_{all}}{\sigma_t}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>FS =</label>
+                            <input type="number" id="FS" step="any" oninput="markAsUser('FS'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>σ<sub>all</sub></label>
+                            <input type="number" id="sall_eq18" step="any" oninput="syncInput('sall', 'sall_eq18')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>σ<sub>t</sub></label>
+                            <input type="number" id="st_eq18" step="any" oninput="syncInput('st', 'st_eq18')">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Factor of safety should typically be > 1.5 for reliable operation</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 19: Wear Load Rating</h2>
+                <div class="input-row">
+                    <label>K - Wear Factor:</label>
+                    <input type="number" id="K" step="any" oninput="markAsUser('K'); calculate()">
+                </div>
+                <div class="note">Look up K from wear factor table based on material combination</div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{wear} = D \times F \times K$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>wear</sub> (lb) =</label>
+                            <input type="number" id="Wwear" step="any" oninput="markAsUser('Wwear'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>D</label>
+                            <input type="number" id="D_eq19" step="any" oninput="syncInput('D', 'D_eq19')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>F</label>
+                            <input type="number" id="F_eq19" step="any" oninput="syncInput('F', 'F_eq19')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>K</label>
+                            <input type="number" id="K_eq19" step="any" oninput="syncInput('K', 'K_eq19')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 20: Thermal Rating</h2>
+                <div class="input-row">
+                    <label>h - Heat Transfer Coefficient (BTU/min·ft²·°F):</label>
+                    <input type="number" id="h" step="any" oninput="markAsUser('h'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>A - Surface Area (ft²):</label>
+                    <input type="number" id="A" step="any" oninput="markAsUser('A'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>t<sub>g</sub> - Max Gear Temperature (°F):</label>
+                    <input type="number" id="tg" step="any" value="180" oninput="markAsUser('tg'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>t<sub>a</sub> - Ambient Temperature (°F):</label>
+                    <input type="number" id="ta" step="any" value="70" oninput="markAsUser('ta'); calculate()">
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_{thermal} = \frac{h \times A \times (t_g - t_a)}{33000}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>thermal</sub> (hp) =</label>
+                            <input type="number" id="Pthermal" step="any" oninput="markAsUser('Pthermal'); calculate()">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Ensure P<sub>thermal</sub> > P<sub>in</sub>(1 - η) for adequate cooling</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 21: Heat Dissipation Check</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_{loss} = P_{in} \times (1 - \eta)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>loss</sub> (hp) =</label>
+                            <input type="number" id="Ploss" step="any" oninput="markAsUser('Ploss'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>P<sub>in</sub></label>
+                            <input type="number" id="Pin_eq21" step="any" oninput="syncInput('Pin', 'Pin_eq21')">
+                        </div>
+                        <span>× (1 -</span>
+                        <div class="var-input">
+                            <label>η</label>
+                            <input type="number" id="eta_eq21" step="any" oninput="syncInput('eta', 'eta_eq21')">
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\text{Thermal Margin} = \frac{P_{thermal}}{P_{loss}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>TM =</label>
+                            <input type="number" id="TM" step="any" oninput="markAsUser('TM'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>P<sub>thermal</sub></label>
+                            <input type="number" id="Pthermal_eq21" step="any" oninput="syncInput('Pthermal', 'Pthermal_eq21')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>P<sub>loss</sub></label>
+                            <input type="number" id="Ploss_eq21" step="any" oninput="syncInput('Ploss', 'Ploss_eq21')">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Thermal margin should be > 1.0; add cooling if insufficient</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button onclick="resetAll()">Reset All Values</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+            markAsUser(mainId);
+            calculate();
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                    if (!userValues.has(id)) {
+                        el.classList.add('computed');
+                    }
+                }
+            }
+        }
+
+        function syncAllFields() {
+            const mainVars = {
+                'nw': ['nw', 'nw_eq1', 'nw_eq7'],
+                'ng': ['ng', 'ng_eq1'],
+                'Pout': ['Pout', 'Pout_eq10'],
+                'C': ['C', 'C_eq6'],
+                'd': ['d', 'd_eq6', 'd_eq7'],
+                'D': ['D', 'D_eq14', 'D_eq19'],
+                'eta': ['eta', 'eta_eq10', 'eta_eq21'],
+                'Pin': ['Pin', 'Pin_eq21'],
+                'Ng': ['Ng', 'Ng_eq14'],
+                'F': ['F', 'F_eq19'],
+                'K': ['K', 'K_eq19'],
+                'Cs': ['Cs', 'Cs_eq17'],
+                'Cm': ['Cm', 'Cm_eq17'],
+                'Cv': ['Cv', 'Cv_eq17'],
+                'sall': ['sall', 'sall_eq18'],
+                'st': ['st', 'st_eq18'],
+                'Pthermal': ['Pthermal', 'Pthermal_eq21'],
+                'Ploss': ['Ploss', 'Ploss_eq21']
+            };
+
+            for (let mainVar in mainVars) {
+                const mainEl = document.getElementById(mainVar);
+                if (mainEl && mainEl.value) {
+                    const value = mainEl.value;
+                    mainVars[mainVar].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.value = value;
+                        }
+                    });
+                }
+            }
+        }
+
+        function calculate() {
+            syncAllFields();
+
+            const Pout = getValue('Pout');
+            const nw = getValue('nw');
+            const ng = getValue('ng');
+            const Nw = getValue('Nw');
+            const Ng = getValue('Ng');
+            const d = getValue('d');
+            const C = getValue('C');
+            const L = getValue('L');
+            const mu = getValue('mu');
+            const phi_n = getValue('phi_n');
+            const F = getValue('F');
+            const y = getValue('y');
+            const Cs = getValue('Cs');
+            const Cm = getValue('Cm');
+            const Cv = getValue('Cv');
+            const K = getValue('K');
+            const h = getValue('h');
+            const A = getValue('A');
+            const tg = getValue('tg');
+            const ta = getValue('ta');
+
+            // Step 1: Velocity ratio
+            if (nw && ng && !userValues.has('mG')) {
+                setValue('mG', nw / ng);
+            }
+
+            // Step 5: Lead angle
+            if (d && L && !userValues.has('lambda')) {
+                const lambdaRad = Math.atan(L / (Math.PI * d));
+                const lambda = lambdaRad * 180 / Math.PI;
+                setValue('lambda', lambda);
+
+                // Step 4: Axial pitch
+                if (lambdaRad !== 0 && !userValues.has('px')) {
+                    setValue('px', (Math.PI * d) / Math.tan(lambdaRad));
+                }
+            }
+
+            const lambda = getValue('lambda');
+            const lambdaRad = lambda ? lambda * Math.PI / 180 : null;
+
+            // Step 6: Gear pitch diameter
+            if (C && d && !userValues.has('D')) {
+                setValue('D', 2 * C - d);
+            }
+
+            const D = getValue('D');
+
+            // Step 7: Worm velocity
+            if (d && nw && !userValues.has('Vw')) {
+                setValue('Vw', Math.PI * d * nw / 12);
+            }
+
+            // Step 11: Gear velocity
+            if (D && ng && !userValues.has('Vg')) {
+                const Vg = Math.PI * D * ng / 12;
+                setValue('Vg', Vg);
+
+                if (Pout && Vg > 0 && !userValues.has('Wt')) {
+                    setValue('Wt', 33000 * Pout / Vg);
+                }
+            }
+
+            const Wt = getValue('Wt');
+
+            // Step 12: Forces on worm
+            if (Wt && phi_n !== null && lambdaRad && mu !== null) {
+                const phi_nRad = phi_n * Math.PI / 180;
+                const cos_phi = Math.cos(phi_nRad);
+                const sin_phi = Math.sin(phi_nRad);
+                const tan_lambda = Math.tan(lambdaRad);
+
+                if (!userValues.has('Wtw')) {
+                    const denominator = cos_phi - mu * tan_lambda;
+                    if (Math.abs(denominator) > 0.0001) {
+                        setValue('Wtw', Wt * (cos_phi * tan_lambda + mu) / denominator);
+                    }
+                }
+
+                if (!userValues.has('Wrw')) {
+                    setValue('Wrw', Wt * sin_phi / cos_phi);
+                }
+            }
+
+            // Step 14: Diametral pitch
+            if (Ng && D && D > 0 && !userValues.has('Pd')) {
+                setValue('Pd', Ng / D);
+            }
+
+            const Pd = getValue('Pd');
+
+            // Step 15: Stress
+            if (Wt && Pd && F && y && !userValues.has('st')) {
+                setValue('st', (Wt * Pd) / (F * y));
+            }
+
+            const st = getValue('st');
+
+            // Step 17-18: Allowable stress
+            if (Cs && Cm && Cv && !userValues.has('sall')) {
+                setValue('sall', 1000 * Cs * Cm * Cv);
+            }
+
+            const sall = getValue('sall');
+
+            if (sall && st && st > 0 && !userValues.has('FS')) {
+                setValue('FS', sall / st);
+            }
+
+            // Step 19: Wear load
+            if (D && F && K && !userValues.has('Wwear')) {
+                setValue('Wwear', D * F * K);
+            }
+
+            // Step 9: Efficiency
+            if (phi_n !== null && mu !== null && lambdaRad) {
+                const phi_nRad = phi_n * Math.PI / 180;
+                const cos_phi = Math.cos(phi_nRad);
+                const tan_lambda = Math.tan(lambdaRad);
+                const cot_lambda = 1 / tan_lambda;
+
+                if (!userValues.has('eta')) {
+                    setValue('eta', (cos_phi - mu * tan_lambda) / (cos_phi + mu * cot_lambda));
+                }
+            }
+
+            const eta = getValue('eta');
+
+            // Step 10: Input power
+            if (Pout && eta && eta > 0 && !userValues.has('Pin')) {
+                setValue('Pin', Pout / eta);
+            }
+
+            const Pin = getValue('Pin');
+
+            // Step 21: Heat dissipation
+            if (Pin && eta !== null && !userValues.has('Ploss')) {
+                setValue('Ploss', Pin * (1 - eta));
+            }
+
+            const Ploss = getValue('Ploss');
+
+            // Step 20: Thermal rating
+            if (h && A && tg !== null && ta !== null && !userValues.has('Pthermal')) {
+                setValue('Pthermal', (h * A * (tg - ta)) / 33000);
+            }
+
+            const Pthermal = getValue('Pthermal');
+
+            if (Pthermal && Ploss && Ploss > 0 && !userValues.has('TM')) {
+                setValue('TM', Pthermal / Ploss);
+            }
+
+            saveSession();
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('worm_fizz_session', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('worm_fizz_session');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+                for (let key in state) {
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                        if (!userValues.has(key)) {
+                            el.classList.add('computed');
+                        }
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('worm_fizz_session');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            MathJax.typesetPromise();
+        });
+    </script>
+</body>
+</html>
