@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bevel Gear Spec Calculator</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #pdf-panel {
+            flex: 1;
+            background: #fff;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-panel iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        #calculator-panel {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .pitch-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin-top: 10px;
+            color: #856404;
+            display: none;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .equation-block {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .equation-latex {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-input {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .var-input label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .var-input input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .var-input .unit {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin-top: 20px;
+        }
+
+        .given-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PDF Panel -->
+    <div id="pdf-panel">
+        <iframe src="../../documents/gears/bevel_design_spec.pdf" type="application/pdf"></iframe>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div id="calculator-panel">
+        <h1>⚙️ Bevel Gear Spec Calculator</h1>
+        <p class="subtitle">Based on Mott's design specification for bevel gears</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        </div>
+
+        <!-- Given Information -->
+        <div class="section">
+            <h2>Given Information</h2>
+            <p style="margin-bottom: 10px;">Enter your known values below (you can edit any calculated value to override it):</p>
+
+            <div class="given-inputs">
+                <div class="var-input">
+                    <label>P<sub>d</sub> =</label>
+                    <input type="number" id="Pd" step="0.0001" oninput="markAsUser('Pd'); calculate()">
+                    <span class="unit">teeth/in</span>
+                </div>
+
+                <div class="var-input">
+                    <label>φ =</label>
+                    <input type="number" id="phi" step="0.01" oninput="markAsUser('phi'); calculate()">
+                    <span class="unit">deg</span>
+                </div>
+
+                <div class="var-input">
+                    <label>N<sub>P</sub> =</label>
+                    <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                    <span class="unit">(teeth - pinion)</span>
+                </div>
+
+                <div class="var-input">
+                    <label>N<sub>G</sub> =</label>
+                    <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                    <span class="unit">(teeth - gear)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Calculations -->
+        <div class="section">
+            <h2>Calculations</h2>
+            <p class="hint">Green background = calculated value. You can override any value by editing it.</p>
+
+            <!-- Step 1: Gear Ratio and Pitch Diameters -->
+            <h3>Step 1: Calculate Gear Ratio and Pitch Diameters</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$m_G = \frac{N_G}{N_P}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>m<sub>G</sub> =</label>
+                        <input type="number" id="mG" step="0.0001" oninput="markAsUser('mG'); calculate()">
+                        <span class="unit">(ratio)</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="NG_eq1" step="1" oninput="syncInput('NG', 'NG_eq1'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="NP_eq1" step="1" oninput="syncInput('NP', 'NP_eq1'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D = \frac{N_G}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="D" step="0.0001" oninput="markAsUser('D'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="NG_eq2" step="1" oninput="syncInput('NG', 'NG_eq2'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq1" step="0.0001" oninput="syncInput('Pd', 'Pd_eq1'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$d = \frac{N_P}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>d =</label>
+                        <input type="number" id="d" step="0.0001" oninput="markAsUser('d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="NP_eq2" step="1" oninput="syncInput('NP', 'NP_eq2'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq2" step="0.0001" oninput="syncInput('Pd', 'Pd_eq2'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 2: Pitch Cone Angles -->
+            <h3>Step 2: Calculate Pitch Cone Angles</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$\gamma = \tan^{-1}\left(\frac{N_P}{N_G}\right)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>γ =</label>
+                        <input type="number" id="gamma" step="0.0001" oninput="markAsUser('gamma'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>= atan(</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="NP_eq3" step="1" oninput="syncInput('NP', 'NP_eq3'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="NG_eq3" step="1" oninput="syncInput('NG', 'NG_eq3'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$\Gamma = \tan^{-1}\left(\frac{N_G}{N_P}\right)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="Gamma" step="0.0001" oninput="markAsUser('Gamma'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>= atan(</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="NG_eq4" step="1" oninput="syncInput('NG', 'NG_eq4'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="NP_eq4" step="1" oninput="syncInput('NP', 'NP_eq4'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 3: Cone Distance -->
+            <h3>Step 3: Calculate Cone Distance</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$A_O = \frac{0.5 D}{\sin(\Gamma)}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO" step="0.0001" oninput="markAsUser('AO'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= (0.5 ×</span>
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="D_eq3" step="0.0001" oninput="syncInput('D', 'D_eq3'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>) / sin(</span>
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="Gamma_eq3" step="0.0001" oninput="syncInput('Gamma', 'Gamma_eq3'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 4: Face Width (SPECIAL - RANGE) -->
+            <h3>Step 4: Determine Face Width Range</h3>
+
+            <div class="info-box">
+                ⚠️ <strong>Face width (F) is a recommended range, not a single value.</strong><br>
+                F should satisfy: <strong>F<sub>nom</sub> ≤ F ≤ F<sub>max</sub></strong>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$F_{nom} = \frac{A_O}{3}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>F<sub>nom</sub> =</label>
+                        <input type="number" id="Fnom" step="0.0001" oninput="markAsUser('Fnom'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq4a" step="0.0001" oninput="syncInput('AO', 'AO_eq4a'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/ 3</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$F_{max} = \frac{10}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>F<sub>max</sub> =</label>
+                        <input type="number" id="Fmax" step="0.0001" oninput="markAsUser('Fmax'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= 10 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq4" step="0.0001" oninput="syncInput('Pd', 'Pd_eq4'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$F_{nom} \leq F \leq F_{max}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F" step="0.0001" oninput="markAsUser('F'); validateFaceWidth(); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span class="hint">(Choose F within recommended range)</span>
+                </div>
+            </div>
+
+            <div class="warning-box" id="F-warning"></div>
+
+            <div class="divider"></div>
+
+            <!-- Step 5: Mean Cone Distance -->
+            <h3>Step 5: Calculate Mean Cone Distance</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$A_m = A_O - \frac{F}{2}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>A<sub>m</sub> =</label>
+                        <input type="number" id="Am" step="0.0001" oninput="markAsUser('Am'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq5" step="0.0001" oninput="syncInput('AO', 'AO_eq5'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>- (</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq5" step="0.0001" oninput="syncInput('F', 'F_eq5'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/ 2)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 6: Mean Circular Pitch -->
+            <h3>Step 6: Calculate Mean Circular Pitch</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$p_m = \frac{\pi A_m}{0.5 N_G}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>p<sub>m</sub> =</label>
+                        <input type="number" id="pm" step="0.0001" oninput="markAsUser('pm'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= (π ×</span>
+                    <div class="var-input">
+                        <label>A<sub>m</sub> =</label>
+                        <input type="number" id="Am_eq6" step="0.0001" oninput="syncInput('Am', 'Am_eq6'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>) / (0.5 ×</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="NG_eq6" step="1" oninput="syncInput('NG', 'NG_eq6'); calculate()">
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 7: Whole Depth and Clearance -->
+            <h3>Step 7: Calculate Whole Depth and Clearance</h3>
+            <div id="pitch-type-indicator"></div>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="h-equation-latex">
+                    $$h = \frac{2.188}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>h =</label>
+                        <input type="number" id="h" step="0.0001" oninput="markAsUser('h'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="h-formula-text">= 2.188 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq7" step="0.0001" oninput="syncInput('Pd', 'Pd_eq7'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="c-equation-latex">
+                    $$c = \frac{0.188}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>c =</label>
+                        <input type="number" id="c" step="0.0001" oninput="markAsUser('c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="c-formula-text">= 0.188 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq7b" step="0.0001" oninput="syncInput('Pd', 'Pd_eq7b'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 8: Mean Addendum and Dedendum -->
+            <h3>Step 8: Calculate Mean Addendum and Dedendum</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="hm-equation-latex">
+                    $$h_m = h \cos(\Gamma) - \frac{c}{2}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>h<sub>m</sub> =</label>
+                        <input type="number" id="hm" step="0.0001" oninput="markAsUser('hm'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>h =</label>
+                        <input type="number" id="h_eq8" step="0.0001" oninput="syncInput('h', 'h_eq8'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="Gamma_eq8" step="0.0001" oninput="syncInput('Gamma', 'Gamma_eq8'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span id="hm-formula-text">) - (</span>
+                    <div class="var-input">
+                        <label>c =</label>
+                        <input type="number" id="c_eq8" step="0.0001" oninput="syncInput('c', 'c_eq8'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="hm-formula-text2">/ 2)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="c1-equation-latex">
+                    $$c_1 = \frac{c}{2}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>c<sub>1</sub> =</label>
+                        <input type="number" id="c1" step="0.0001" oninput="markAsUser('c1'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="c1-formula-text">=</span>
+                    <div class="var-input">
+                        <label>c =</label>
+                        <input type="number" id="c_eq8b" step="0.0001" oninput="syncInput('c', 'c_eq8b'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="c1-formula-text2">/ 2</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a_m = \frac{h_m}{2}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am" step="0.0001" oninput="markAsUser('am'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>h<sub>m</sub> =</label>
+                        <input type="number" id="hm_eq8c" step="0.0001" oninput="syncInput('hm', 'hm_eq8c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/ 2</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$b_m = h_m - a_m$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>b<sub>m</sub> =</label>
+                        <input type="number" id="bm" step="0.0001" oninput="markAsUser('bm'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>h<sub>m</sub> =</label>
+                        <input type="number" id="hm_eq8d" step="0.0001" oninput="syncInput('hm', 'hm_eq8d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>-</span>
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am_eq8d" step="0.0001" oninput="syncInput('am', 'am_eq8d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 9: Addendum and Dedendum Angles -->
+            <h3>Step 9: Calculate Addendum and Dedendum Angles</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a_G = \frac{a_m}{A_O}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a<sub>G</sub> =</label>
+                        <input type="number" id="aG" step="0.0001" oninput="markAsUser('aG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am_eq9a" step="0.0001" oninput="syncInput('am', 'am_eq9a'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq9a" step="0.0001" oninput="syncInput('AO', 'AO_eq9a'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a_P = \frac{a_m}{A_O}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a<sub>P</sub> =</label>
+                        <input type="number" id="aP" step="0.0001" oninput="markAsUser('aP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am_eq9b" step="0.0001" oninput="syncInput('am', 'am_eq9b'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq9b" step="0.0001" oninput="syncInput('AO', 'AO_eq9b'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$b_G = \frac{b_m}{A_O}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>b<sub>G</sub> =</label>
+                        <input type="number" id="bG" step="0.0001" oninput="markAsUser('bG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>b<sub>m</sub> =</label>
+                        <input type="number" id="bm_eq9c" step="0.0001" oninput="syncInput('bm', 'bm_eq9c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq9c" step="0.0001" oninput="syncInput('AO', 'AO_eq9c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$b_P = \frac{b_m}{A_O}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>b<sub>P</sub> =</label>
+                        <input type="number" id="bP" step="0.0001" oninput="markAsUser('bP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>b<sub>m</sub> =</label>
+                        <input type="number" id="bm_eq9d" step="0.0001" oninput="syncInput('bm', 'bm_eq9d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>A<sub>O</sub> =</label>
+                        <input type="number" id="AO_eq9d" step="0.0001" oninput="syncInput('AO', 'AO_eq9d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 10: Face Angles and Outside Diameters -->
+            <h3>Step 10: Calculate Face Angles and Outside Diameters</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$\delta_G = \Gamma + a_G$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>δ<sub>G</sub> =</label>
+                        <input type="number" id="deltaG" step="0.0001" oninput="markAsUser('deltaG'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="Gamma_eq10a" step="0.0001" oninput="syncInput('Gamma', 'Gamma_eq10a'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>+</span>
+                    <div class="var-input">
+                        <label>a<sub>G</sub> =</label>
+                        <input type="number" id="aG_eq10a" step="0.0001" oninput="syncInput('aG', 'aG_eq10a'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$\delta_P = \gamma + a_P$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>δ<sub>P</sub> =</label>
+                        <input type="number" id="deltaP" step="0.0001" oninput="markAsUser('deltaP'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>γ =</label>
+                        <input type="number" id="gamma_eq10b" step="0.0001" oninput="syncInput('gamma', 'gamma_eq10b'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>+</span>
+                    <div class="var-input">
+                        <label>a<sub>P</sub> =</label>
+                        <input type="number" id="aP_eq10b" step="0.0001" oninput="syncInput('aP', 'aP_eq10b'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a_{OG} = a_m + \frac{F}{2} \sin(\delta_G)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a<sub>OG</sub> =</label>
+                        <input type="number" id="aOG" step="0.0001" oninput="markAsUser('aOG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am_eq10c" step="0.0001" oninput="syncInput('am', 'am_eq10c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>+ (</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq10c" step="0.0001" oninput="syncInput('F', 'F_eq10c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/ 2) × sin(</span>
+                    <div class="var-input">
+                        <label>δ<sub>G</sub> =</label>
+                        <input type="number" id="deltaG_eq10c" step="0.0001" oninput="syncInput('deltaG', 'deltaG_eq10c'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a_{OP} = a_m + \frac{F}{2} \sin(\delta_P)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a<sub>OP</sub> =</label>
+                        <input type="number" id="aOP" step="0.0001" oninput="markAsUser('aOP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>a<sub>m</sub> =</label>
+                        <input type="number" id="am_eq10d" step="0.0001" oninput="syncInput('am', 'am_eq10d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>+ (</span>
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="F_eq10d" step="0.0001" oninput="syncInput('F', 'F_eq10d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>/ 2) × sin(</span>
+                    <div class="var-input">
+                        <label>δ<sub>P</sub> =</label>
+                        <input type="number" id="deltaP_eq10d" step="0.0001" oninput="syncInput('deltaP', 'deltaP_eq10d'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_O = D + 2 a_{OG} \cos(\Gamma)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>O</sub> =</label>
+                        <input type="number" id="DO" step="0.0001" oninput="markAsUser('DO'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="D_eq10e" step="0.0001" oninput="syncInput('D', 'D_eq10e'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>+ 2 ×</span>
+                    <div class="var-input">
+                        <label>a<sub>OG</sub> =</label>
+                        <input type="number" id="aOG_eq10e" step="0.0001" oninput="syncInput('aOG', 'aOG_eq10e'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="Gamma_eq10e" step="0.0001" oninput="syncInput('Gamma', 'Gamma_eq10e'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$d_O = d + 2 a_{OP} \cos(\gamma)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>d<sub>O</sub> =</label>
+                        <input type="number" id="dO" step="0.0001" oninput="markAsUser('dO'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>d =</label>
+                        <input type="number" id="d_eq10f" step="0.0001" oninput="syncInput('d', 'd_eq10f'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>+ 2 ×</span>
+                    <div class="var-input">
+                        <label>a<sub>OP</sub> =</label>
+                        <input type="number" id="aOP_eq10f" step="0.0001" oninput="syncInput('aOP', 'aOP_eq10f'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>γ =</label>
+                        <input type="number" id="gamma_eq10f" step="0.0001" oninput="syncInput('gamma', 'gamma_eq10f'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="success">✅ You're done!</div>
+        </div>
+    </div>
+
+    <script>
+        // Track which values are user-entered vs computed
+        let userValues = new Set(['Pd', 'phi', 'NP', 'NG', 'F']);
+
+        // Mark a field as user-entered
+        function markAsUser(fieldId) {
+            userValues.add(fieldId);
+        }
+
+        // Sync duplicate fields (for the same variable shown in multiple equations)
+        function syncInput(mainId, sourceId) {
+            const value = document.getElementById(sourceId).value;
+            document.getElementById(mainId).value = value;
+            markAsUser(mainId);
+        }
+
+        // Get value with fallback
+        function getValue(id) {
+            const val = parseFloat(document.getElementById(id).value);
+            return isNaN(val) ? null : val;
+        }
+
+        // Set value and mark as computed
+        function setValue(id, value) {
+            if (value !== null && !userValues.has(id)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = value.toFixed(4);
+                    element.classList.add('computed');
+                }
+            }
+        }
+
+        // Sync all duplicate fields
+        function syncAllFields() {
+            const mainVars = ['Pd', 'phi', 'NP', 'NG', 'D', 'd', 'gamma', 'Gamma', 'AO',
+                              'F', 'Am', 'pm', 'h', 'c', 'hm', 'c1', 'am', 'bm', 'aG', 'aP', 'bG', 'bP',
+                              'deltaG', 'deltaP', 'aOG', 'aOP', 'mG', 'Fnom', 'Fmax', 'DO', 'dO'];
+
+            mainVars.forEach(varId => {
+                const mainValue = getValue(varId);
+                const mainElement = document.getElementById(varId);
+                const isComputed = mainElement && mainElement.classList.contains('computed');
+
+                if (mainValue !== null) {
+                    document.querySelectorAll(`input[id^="${varId}_eq"]`).forEach(input => {
+                        if (getValue(input.id) !== mainValue) {
+                            input.value = mainValue.toFixed(4);
+                        }
+                        // Apply computed class to synced fields if main is computed
+                        if (isComputed && !userValues.has(input.id)) {
+                            input.classList.add('computed');
+                        }
+                    });
+                }
+            });
+        }
+
+        function validateFaceWidth() {
+            const F = getValue('F');
+            const Fnom = getValue('Fnom');
+            const Fmax = getValue('Fmax');
+
+            const warning = document.getElementById('F-warning');
+
+            if (F && Fnom && Fmax) {
+                if (F < Fnom) {
+                    warning.textContent = `⚠️ Warning: F (${F.toFixed(4)}) is below recommended minimum Fnom (${Fnom.toFixed(4)})`;
+                    warning.style.display = 'block';
+                } else if (F > Fmax) {
+                    warning.textContent = `⚠️ Warning: F (${F.toFixed(4)}) exceeds recommended maximum Fmax (${Fmax.toFixed(4)})`;
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        function calculate() {
+            // Get primary input values
+            const Pd = getValue('Pd');
+            const phi = getValue('phi');
+            const NP = getValue('NP');
+            const NG = getValue('NG');
+
+            // Determine pitch type and update formulas
+            let isCoarse = Pd < 20;
+            const pitchIndicator = document.getElementById('pitch-type-indicator');
+            const hLatex = document.getElementById('h-equation-latex');
+            const cLatex = document.getElementById('c-equation-latex');
+            const hmLatex = document.getElementById('hm-equation-latex');
+            const c1Latex = document.getElementById('c1-equation-latex');
+
+            if (Pd && Pd > 0) {
+                if (isCoarse) {
+                    pitchIndicator.innerHTML = '<div class="pitch-info">Coarse Pitch (P<sub>d</sub> < 20 teeth/in)</div>';
+                    hLatex.innerHTML = '$$h = \\frac{2.188}{P_d}$$';
+                    cLatex.innerHTML = '$$c = \\frac{0.188}{P_d}$$';
+                    hmLatex.innerHTML = '$$h_m = h \\cos(\\Gamma) - \\frac{c}{2}$$';
+                    c1Latex.innerHTML = '$$c_1 = \\frac{c}{2}$$';
+                    document.getElementById('h-formula-text').textContent = '= 2.188 /';
+                    document.getElementById('c-formula-text').textContent = '= 0.188 /';
+                    document.getElementById('hm-formula-text').textContent = ') - (';
+                    document.getElementById('hm-formula-text2').textContent = '/ 2)';
+                    document.getElementById('c1-formula-text').textContent = '=';
+                    document.getElementById('c1-formula-text2').textContent = '/ 2';
+                } else {
+                    pitchIndicator.innerHTML = '<div class="pitch-info">Fine Pitch (P<sub>d</sub> ≥ 20 teeth/in)</div>';
+                    hLatex.innerHTML = '$$h = \\frac{2}{P_d} + 0.002$$';
+                    cLatex.innerHTML = '$$c = 0.002$$';
+                    hmLatex.innerHTML = '$$h_m = h \\cos(\\Gamma) - c$$';
+                    c1Latex.innerHTML = '$$c_1 = c$$';
+                    document.getElementById('h-formula-text').textContent = '= (2 / Pd) + 0.002';
+                    document.getElementById('c-formula-text').textContent = '= 0.002';
+                    document.getElementById('hm-formula-text').textContent = ') -';
+                    document.getElementById('hm-formula-text2').textContent = '';
+                    document.getElementById('c1-formula-text').textContent = '=';
+                    document.getElementById('c1-formula-text2').textContent = '';
+                }
+                MathJax.typesetPromise([hLatex, cLatex, hmLatex, c1Latex]);
+            } else {
+                pitchIndicator.innerHTML = '';
+            }
+
+            // Step 1: Gear Ratio and Pitch Diameters
+            if (NG && NP && NG > 0 && NP > 0) {
+                setValue('mG', NG / NP);
+            }
+            if (Pd && Pd > 0 && NG && NG > 0) {
+                setValue('D', NG / Pd);
+            }
+            if (Pd && Pd > 0 && NP && NP > 0) {
+                setValue('d', NP / Pd);
+            }
+
+            // Step 2: Pitch Cone Angles (convert to degrees)
+            if (NP && NG && NP > 0 && NG > 0) {
+                const gammaRad = Math.atan(NP / NG);
+                setValue('gamma', gammaRad * 180 / Math.PI);
+
+                const GammaRad = Math.atan(NG / NP);
+                setValue('Gamma', GammaRad * 180 / Math.PI);
+            }
+
+            // Step 3: Cone Distance
+            const D = getValue('D');
+            const Gamma = getValue('Gamma');
+            if (D !== null && Gamma !== null) {
+                const GammaRad = Gamma * Math.PI / 180;
+                setValue('AO', (0.5 * D) / Math.sin(GammaRad));
+            }
+
+            // Step 4: Face Width Range
+            const AO = getValue('AO');
+            if (AO !== null) {
+                setValue('Fnom', AO / 3);
+            }
+            if (Pd && Pd > 0) {
+                setValue('Fmax', 10 / Pd);
+            }
+            validateFaceWidth();
+
+            // Step 5: Mean Cone Distance
+            const F = getValue('F');
+            if (AO !== null && F !== null) {
+                setValue('Am', AO - F / 2);
+            }
+
+            // Step 6: Mean Circular Pitch
+            const Am = getValue('Am');
+            if (Am !== null && NG && NG > 0) {
+                setValue('pm', (Math.PI * Am) / (0.5 * NG));
+            }
+
+            // Step 7: Whole Depth and Clearance
+            if (Pd && Pd > 0) {
+                if (isCoarse) {
+                    setValue('h', 2.188 / Pd);
+                    setValue('c', 0.188 / Pd);
+                } else {
+                    setValue('h', 2 / Pd + 0.002);
+                    setValue('c', 0.002);
+                }
+            }
+
+            // Step 8: Mean Addendum and Dedendum
+            const h = getValue('h');
+            const c = getValue('c');
+            if (h !== null && Gamma !== null && c !== null) {
+                const GammaRad = Gamma * Math.PI / 180;
+                if (isCoarse) {
+                    setValue('hm', h * Math.cos(GammaRad) - c / 2);
+                    setValue('c1', c / 2);
+                } else {
+                    setValue('hm', h * Math.cos(GammaRad) - c);
+                    setValue('c1', c);
+                }
+            }
+
+            const hm = getValue('hm');
+            if (hm !== null) {
+                setValue('am', hm / 2);
+            }
+
+            const am = getValue('am');
+            if (hm !== null && am !== null) {
+                setValue('bm', hm - am);
+            }
+
+            // Step 9: Addendum and Dedendum Angles
+            const bm = getValue('bm');
+            if (am !== null && AO !== null) {
+                setValue('aG', am / AO);
+                setValue('aP', am / AO);
+            }
+            if (bm !== null && AO !== null) {
+                setValue('bG', bm / AO);
+                setValue('bP', bm / AO);
+            }
+
+            // Step 10: Face Angles and Outside Diameters
+            const gamma = getValue('gamma');
+            const aG = getValue('aG');
+            const aP = getValue('aP');
+
+            if (Gamma !== null && aG !== null) {
+                setValue('deltaG', Gamma + aG);
+            }
+            if (gamma !== null && aP !== null) {
+                setValue('deltaP', gamma + aP);
+            }
+
+            const deltaG = getValue('deltaG');
+            const deltaP = getValue('deltaP');
+
+            if (am !== null && F !== null && deltaG !== null) {
+                const deltaGRad = deltaG * Math.PI / 180;
+                setValue('aOG', am + (F / 2) * Math.sin(deltaGRad));
+            }
+            if (am !== null && F !== null && deltaP !== null) {
+                const deltaPRad = deltaP * Math.PI / 180;
+                setValue('aOP', am + (F / 2) * Math.sin(deltaPRad));
+            }
+
+            const aOG = getValue('aOG');
+            const aOP = getValue('aOP');
+            const d = getValue('d');
+
+            if (D !== null && aOG !== null && Gamma !== null) {
+                const GammaRad = Gamma * Math.PI / 180;
+                setValue('DO', D + 2 * aOG * Math.cos(GammaRad));
+            }
+            if (d !== null && aOP !== null && gamma !== null) {
+                const gammaRad = gamma * Math.PI / 180;
+                setValue('dO', d + 2 * aOP * Math.cos(gammaRad));
+            }
+
+            // Sync duplicate fields
+            syncAllFields();
+        }
+
+        function saveSession() {
+            const data = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) {
+                    data[input.id] = input.value;
+                }
+            });
+            data._userValues = Array.from(userValues);
+            localStorage.setItem('bevelGearSession', JSON.stringify(data));
+            alert('Session saved!');
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('bevelGearSession');
+            if (saved) {
+                const data = JSON.parse(saved);
+                for (let key in data) {
+                    if (key === '_userValues') {
+                        userValues = new Set(data[key]);
+                    } else {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = data[key];
+                        }
+                    }
+                }
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                document.querySelectorAll('input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                userValues = new Set(['Pd', 'phi', 'NP', 'NG', 'F']);
+                localStorage.removeItem('bevelGearSession');
+                calculate();
+            }
+        }
+
+        // Load on startup
+        window.addEventListener('load', function() {
+            loadSession();
+            calculate();
+        });
+    </script>
+</body>
+</html>

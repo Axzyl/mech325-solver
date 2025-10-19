@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worm Gear Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            text-align: center;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .equation-inputs > span {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #666;
+            margin: 0 5px;
+        }
+        select {
+            padding: 10px;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+        }
+        select:focus {
+            outline: none;
+            border-color: #2980b9;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0;
+        }
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .summary-section {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .summary-section h2 {
+            color: white;
+            border-left-color: white;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .summary-item {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .summary-item strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .piecewise-indicator {
+            background: #e1f5fe;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            border: 1px solid #01579b;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/gears/worm.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Worm Gear Calculator</h1>
+
+            <!-- Given Information -->
+            <div class="section">
+                <h2>Given Information</h2>
+                <div class="info-box">
+                    💡 <strong>Input Types:</strong><br>
+                    • White boxes = User inputs or editable values<br>
+                    • Green boxes = Auto-calculated (but still editable)
+                </div>
+
+                <div class="input-row">
+                    <label>\(N_G\) - Number of Teeth on Gear:</label>
+                    <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(N_W\) - Number of Worm Threads:</label>
+                    <input type="number" id="NW" step="1" oninput="markAsUser('NW'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(D_G\) - Pitch Diameter of Gear (in):</label>
+                    <input type="number" id="DG" step="any" oninput="markAsUser('DG'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(D_W\) - Pitch Diameter of Worm (in):</label>
+                    <input type="number" id="DW" step="any" oninput="markAsUser('DW'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(P_d\) - Diametral Pitch (teeth/in):</label>
+                    <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(\phi_n\) - Normal Pressure Angle (deg):</label>
+                    <input type="number" id="phi_n" step="any" oninput="markAsUser('phi_n'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(n_W\) - Speed of Worm (rpm):</label>
+                    <input type="number" id="nW" step="any" oninput="markAsUser('nW'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(n_G\) - Speed of Gear (rpm):</label>
+                    <input type="number" id="nG" step="any" oninput="markAsUser('nG'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(P_o\) - Output Power (hp):</label>
+                    <input type="number" id="Po" step="any" oninput="markAsUser('Po'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>\(F\) - Face Width of Wormgear (in):</label>
+                    <input type="number" id="F" step="any" oninput="markAsUser('F'); calculate()">
+                </div>
+
+                <div class="input-row">
+                    <label>Bronze Type:</label>
+                    <select id="bronze_type" onchange="calculate()">
+                        <option value="">Select...</option>
+                        <option value="sand">Sand-cast</option>
+                        <option value="static">Static-chill-cast or Forged</option>
+                        <option value="centrifugal">Centrifugally cast</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- General Equations -->
+            <div class="section">
+                <h2>General Equations</h2>
+                <div class="info-box">
+                    📐 Reference equations from Section 9.3.4.1. These are automatically calculated when enough inputs are provided.
+                </div>
+
+                <!-- Pitch Equations -->
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$p = \frac{\pi D_G}{N_G}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p =</label>
+                            <input type="number" id="p_gen" step="0.0001" oninput="markAsUser('p_gen'); calculate()">
+                            <span class="unit">in (circular pitch)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$P_d = \frac{N_G}{D_G} = \frac{\pi}{p}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen" step="0.0001" oninput="markAsUser('Pd_gen'); calculate()">
+                            <span class="unit">teeth/in (diametral pitch)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geometry Equations -->
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$C = \frac{D_W + D_G}{2}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>C =</label>
+                            <input type="number" id="C_gen" step="0.0001" oninput="markAsUser('C_gen'); calculate()">
+                            <span class="unit">in (center distance)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$a = \frac{1}{P_d}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>a =</label>
+                            <input type="number" id="a_gen" step="0.0001" oninput="markAsUser('a_gen'); calculate()">
+                            <span class="unit">in (addendum)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$h_t = \frac{2.157}{P_d}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>h<sub>t</sub> =</label>
+                            <input type="number" id="ht_gen" step="0.0001" oninput="markAsUser('ht_gen'); calculate()">
+                            <span class="unit">in (whole depth)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$b = h_t - a$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>b =</label>
+                            <input type="number" id="b_gen" step="0.0001" oninput="markAsUser('b_gen'); calculate()">
+                            <span class="unit">in (dedendum)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$D_{rW} = D_W - 2b$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>rW</sub> =</label>
+                            <input type="number" id="DrW_gen" step="0.0001" oninput="markAsUser('DrW_gen'); calculate()">
+                            <span class="unit">in (worm root diameter)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$D_{oW} = D_W + 2a$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>oW</sub> =</label>
+                            <input type="number" id="DoW_gen" step="0.0001" oninput="markAsUser('DoW_gen'); calculate()">
+                            <span class="unit">in (worm outside diameter)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$D_{rG} = D_G - 2b$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>rG</sub> =</label>
+                            <input type="number" id="DrG_gen" step="0.0001" oninput="markAsUser('DrG_gen'); calculate()">
+                            <span class="unit">in (gear root diameter)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$D_t = D_G + 2a$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D<sub>t</sub> =</label>
+                            <input type="number" id="Dt_gen" step="0.0001" oninput="markAsUser('Dt_gen'); calculate()">
+                            <span class="unit">in (gear throat diameter)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Speed Equations -->
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$v_W = \frac{\pi D_W n_W}{12}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>v<sub>W</sub> =</label>
+                            <input type="number" id="vW_gen" step="0.0001" oninput="markAsUser('vW_gen'); calculate()">
+                            <span class="unit">ft/min (worm pitch line speed)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$v_G = \frac{\pi D_G n_G}{12}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>v<sub>G</sub> =</label>
+                            <input type="number" id="vG_gen" step="0.0001" oninput="markAsUser('vG_gen'); calculate()">
+                            <span class="unit">ft/min (gear pitch line speed)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$VR = \frac{n_W}{n_G}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>VR =</label>
+                            <input type="number" id="VR_gen" step="0.0001" oninput="markAsUser('VR_gen'); calculate()">
+                            <span class="unit">(velocity ratio)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Lead and Lead Angle -->
+            <div class="section">
+                <h2>Step 1: Calculate Lead and Lead Angle</h2>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$p = \frac{\pi}{P_d}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p =</label>
+                            <input type="number" id="p" step="any" oninput="markAsUser('p'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>π /</label>
+                            <input type="number" id="Pd_eq1" step="any" oninput="syncInput('Pd', 'Pd_eq1')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_x = p$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>x</sub> =</label>
+                            <input type="number" id="Px" step="any" oninput="markAsUser('Px'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>p</label>
+                            <input type="number" id="p_eq2" step="any" oninput="syncInput('p', 'p_eq2')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$L = N_W \cdot P_x$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>L =</label>
+                            <input type="number" id="L" step="any" oninput="markAsUser('L'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>W</sub></label>
+                            <input type="number" id="NW_eq3" step="1" oninput="syncInput('NW', 'NW_eq3')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>P<sub>x</sub></label>
+                            <input type="number" id="Px_eq3" step="any" oninput="syncInput('Px', 'Px_eq3')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\lambda = \arctan\left(\frac{L}{\pi D_W}\right)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>λ (deg) =</label>
+                            <input type="number" id="lambda" step="any" oninput="markAsUser('lambda'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>atan(</span>
+                        <div class="var-input">
+                            <label>L</label>
+                            <input type="number" id="L_eq4" step="any" oninput="syncInput('L', 'L_eq4')">
+                        </div>
+                        <span>/</span>
+                        <span>(π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub></label>
+                            <input type="number" id="DW_eq4" step="any" oninput="syncInput('DW', 'DW_eq4')">
+                        </div>
+                        <span>))</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Center Distance -->
+            <div class="section">
+                <h2>Step 2: Calculate Center Distance</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$CD = \frac{D_G + D_W}{2}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>CD =</label>
+                            <input type="number" id="CD" step="any" oninput="markAsUser('CD'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub></label>
+                            <input type="number" id="DG_eq2" step="any" oninput="syncInput('DG', 'DG_eq2')">
+                        </div>
+                        <span>+</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub></label>
+                            <input type="number" id="DW_eq2" step="any" oninput="syncInput('DW', 'DW_eq2')">
+                        </div>
+                        <span>) / 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Pitch Line Speed of Gear -->
+            <div class="section">
+                <h2>Step 3: Calculate Pitch Line Speed of Gear</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\nu_{tG} = \frac{\pi D_G n_G}{12}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>ν<sub>tG</sub> (ft/min) =</label>
+                            <input type="number" id="vtG" step="any" oninput="markAsUser('vtG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub></label>
+                            <input type="number" id="DG_eq3" step="any" oninput="syncInput('DG', 'DG_eq3')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>G</sub></label>
+                            <input type="number" id="nG_eq3" step="any" oninput="syncInput('nG', 'nG_eq3')">
+                        </div>
+                        <span>) / 12</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Sliding Speed -->
+            <div class="section">
+                <h2>Step 4: Calculate Sliding Speed</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\nu_s = \frac{\nu_{tG}}{\sin(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>ν<sub>s</sub> (ft/min) =</label>
+                            <input type="number" id="vs" step="any" oninput="markAsUser('vs'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>ν<sub>tG</sub></label>
+                            <input type="number" id="vtG_eq4" step="any" oninput="syncInput('vtG', 'vtG_eq4')">
+                        </div>
+                        <span>/ sin(</span>
+                        <div class="var-input">
+                            <label>λ</label>
+                            <input type="number" id="lambda_eq4" step="any" oninput="syncInput('lambda', 'lambda_eq4')">
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Coefficient of Friction -->
+            <div class="section">
+                <h2>Step 5: Calculate Coefficient of Friction</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$\mu = \begin{cases}
+                        0.15 & \nu_s = 0 \\
+                        0.124 e^{-0.074 \nu_s^{0.645}} & 0 < \nu_s < 10 \\
+                        0.103 e^{-0.11 \nu_s^{0.45}} + 0.012 & \nu_s \geq 10
+                        \end{cases}$$
+                    </div>
+                </div>
+
+                <div class="piecewise-indicator" id="mu-indicator">
+                    Formula used: (calculating...)
+                </div>
+
+                <div class="equation-inputs" style="justify-content: center;">
+                    <div class="var-input">
+                        <label>μ =</label>
+                        <input type="number" id="mu" step="any" oninput="markAsUser('mu'); calculate()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Forces on Gear -->
+            <div class="section">
+                <h2>Step 6: Calculate Forces on Gear</h2>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$T_o = \frac{63000 P_o}{n_G}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>T<sub>o</sub> (lb-in) =</label>
+                            <input type="number" id="To" step="any" oninput="markAsUser('To'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(63000 ×</span>
+                        <div class="var-input">
+                            <label>P<sub>o</sub></label>
+                            <input type="number" id="Po_eq6" step="any" oninput="syncInput('Po', 'Po_eq6')">
+                        </div>
+                        <span>) /</span>
+                        <div class="var-input">
+                            <label>n<sub>G</sub></label>
+                            <input type="number" id="nG_eq6" step="any" oninput="syncInput('nG', 'nG_eq6')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{tG} = \frac{2 T_o}{D_G}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>tG</sub> (lb) =</label>
+                            <input type="number" id="WtG" step="any" oninput="markAsUser('WtG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(2 ×</span>
+                        <div class="var-input">
+                            <label>T<sub>o</sub></label>
+                            <input type="number" id="To_eq6b" step="any" oninput="syncInput('To', 'To_eq6b')">
+                        </div>
+                        <span>) /</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub></label>
+                            <input type="number" id="DG_eq6b" step="any" oninput="syncInput('DG', 'DG_eq6b')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{xG} = W_{tG} \frac{\cos(\phi_n)\sin(\lambda) + \mu\cos(\lambda)}{\cos(\phi_n)\cos(\lambda) - \mu\sin(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>xG</sub> (lb) =</label>
+                            <input type="number" id="WxG" step="any" oninput="markAsUser('WxG'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{rG} = \frac{W_{tG} \sin(\phi_n)}{\cos(\phi_n)\cos(\lambda) - \mu\sin(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>rG</sub> (lb) =</label>
+                            <input type="number" id="WrG" step="any" oninput="markAsUser('WrG'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Friction Force -->
+            <div class="section">
+                <h2>Step 7: Calculate Friction Force</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_f = \frac{\mu W_{tG}}{\cos(\lambda)\cos(\phi_n) - \mu\sin(\lambda)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>f</sub> (lb) =</label>
+                            <input type="number" id="Wf" step="any" oninput="markAsUser('Wf'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: Power Loss -->
+            <div class="section">
+                <h2>Step 8: Calculate Power Loss Due to Friction</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_L = \frac{\nu_s W_f}{33000}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>L</sub> (hp) =</label>
+                            <input type="number" id="PL" step="any" oninput="markAsUser('PL'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(</span>
+                        <div class="var-input">
+                            <label>ν<sub>s</sub></label>
+                            <input type="number" id="vs_eq8" step="any" oninput="syncInput('vs', 'vs_eq8')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>W<sub>f</sub></label>
+                            <input type="number" id="Wf_eq8" step="any" oninput="syncInput('Wf', 'Wf_eq8')">
+                        </div>
+                        <span>) / 33000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 9: Input Power -->
+            <div class="section">
+                <h2>Step 9: Calculate Input Power</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$P_i = P_o + P_L$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>i</sub> (hp) =</label>
+                            <input type="number" id="Pi" step="any" oninput="markAsUser('Pi'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>P<sub>o</sub></label>
+                            <input type="number" id="Po_eq9" step="any" oninput="syncInput('Po', 'Po_eq9')">
+                        </div>
+                        <span>+</span>
+                        <div class="var-input">
+                            <label>P<sub>L</sub></label>
+                            <input type="number" id="PL_eq9" step="any" oninput="syncInput('PL', 'PL_eq9')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 10: Efficiency -->
+            <div class="section">
+                <h2>Step 10: Calculate Efficiency</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\eta = \frac{P_o}{P_i} \times 100$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>η (%) =</label>
+                            <input type="number" id="eta" step="any" oninput="markAsUser('eta'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>(</span>
+                        <div class="var-input">
+                            <label>P<sub>o</sub></label>
+                            <input type="number" id="Po_eq10" step="any" oninput="syncInput('Po', 'Po_eq10')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>P<sub>i</sub></label>
+                            <input type="number" id="Pi_eq10" step="any" oninput="syncInput('Pi', 'Pi_eq10')">
+                        </div>
+                        <span>) × 100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 11: Lewis Form Factor -->
+            <div class="section">
+                <h2>Step 11: Find Lewis Form Factor</h2>
+                <div class="info-box">
+                    📋 <strong>Table 10-5: Approximate Lewis Form Factor for Wormgear Teeth</strong>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>\(\phi_n\)</th>
+                            <th>\(y\)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>14.5°</td><td>0.100</td></tr>
+                        <tr><td>20°</td><td>0.125</td></tr>
+                        <tr><td>25°</td><td>0.150</td></tr>
+                        <tr><td>30°</td><td>0.175</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="input-row">
+                    <label>\(y\) - Lewis Form Factor:</label>
+                    <input type="number" id="y" step="any" oninput="markAsUser('y'); calculate()">
+                </div>
+            </div>
+
+            <!-- Step 12: Normal Circular Pitch -->
+            <div class="section">
+                <h2>Step 12: Calculate Normal Circular Pitch</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$p_n = p \cos(\lambda)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p<sub>n</sub> (in) =</label>
+                            <input type="number" id="pn" step="any" oninput="markAsUser('pn'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>p</label>
+                            <input type="number" id="p_eq12" step="any" oninput="syncInput('p', 'p_eq12')">
+                        </div>
+                        <span>× cos(</span>
+                        <div class="var-input">
+                            <label>λ</label>
+                            <input type="number" id="lambda_eq12" step="any" oninput="syncInput('lambda', 'lambda_eq12')">
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 13: Dynamic Factor -->
+            <div class="section">
+                <h2>Step 13: Calculate Dynamic Factor</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$K_v = \frac{1200}{1200 + \nu_{tG}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>K<sub>v</sub> =</label>
+                            <input type="number" id="Kv" step="any" oninput="markAsUser('Kv'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <span>1200 / (1200 +</span>
+                        <div class="var-input">
+                            <label>ν<sub>tG</sub></label>
+                            <input type="number" id="vtG_eq13" step="any" oninput="syncInput('vtG', 'vtG_eq13')">
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 14: Dynamic Load -->
+            <div class="section">
+                <h2>Step 14: Calculate Dynamic Load</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_d = \frac{W_{tG}}{K_v}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>d</sub> (lb) =</label>
+                            <input type="number" id="Wd" step="any" oninput="markAsUser('Wd'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>W<sub>tG</sub></label>
+                            <input type="number" id="WtG_eq14" step="any" oninput="syncInput('WtG', 'WtG_eq14')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>K<sub>v</sub></label>
+                            <input type="number" id="Kv_eq14" step="any" oninput="syncInput('Kv', 'Kv_eq14')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 15: Stress -->
+            <div class="section">
+                <h2>Step 15: Calculate Stress in Gear Teeth</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma = \frac{W_d}{y F p_n}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ (psi) =</label>
+                            <input type="number" id="sigma" step="any" oninput="markAsUser('sigma'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>W<sub>d</sub></label>
+                            <input type="number" id="Wd_eq15" step="any" oninput="syncInput('Wd', 'Wd_eq15')">
+                        </div>
+                        <span>/ (</span>
+                        <div class="var-input">
+                            <label>y</label>
+                            <input type="number" id="y_eq15" step="any" oninput="syncInput('y', 'y_eq15')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>F</label>
+                            <input type="number" id="F_eq15" step="any" oninput="syncInput('F', 'F_eq15')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>p<sub>n</sub></label>
+                            <input type="number" id="pn_eq15" step="any" oninput="syncInput('pn', 'pn_eq15')">
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 16: Materials Factor -->
+            <div class="section">
+                <h2>Step 16: Calculate Materials Factor</h2>
+                <div class="info-box">
+                    Based on bronze type selected above and gear diameter \(D_G\)
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$\text{Sand-cast: } C_s = \begin{cases}
+                        1189.636 - 476.545 \log_{10}(D_G) & D_G > 2.5 \\
+                        1000 & D_G \leq 2.5
+                        \end{cases}$$
+                    </div>
+                    <div class="equation-latex">
+                        $$\text{Static-chill/Forged: } C_s = \begin{cases}
+                        1411.651 - 455.825 \log_{10}(D_G) & D_G < 8 \\
+                        1000 & D_G \geq 8
+                        \end{cases}$$
+                    </div>
+                    <div class="equation-latex">
+                        $$\text{Centrifugally cast: } C_s = \begin{cases}
+                        1251.291 - 179.75 \log_{10}(D_G) & D_G < 25 \\
+                        1000 & D_G \geq 25
+                        \end{cases}$$
+                    </div>
+                </div>
+
+                <div class="piecewise-indicator" id="Cs-indicator">
+                    Formula used: (calculating...)
+                </div>
+
+                <div class="input-row">
+                    <label>\(C_s\) - Materials Factor (psi):</label>
+                    <input type="number" id="Cs" step="any" oninput="markAsUser('Cs'); calculate()">
+                </div>
+            </div>
+
+            <!-- Step 17: Ratio Correction Factor -->
+            <div class="section">
+                <h2>Step 17: Calculate Ratio Correction Factor</h2>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$m_G = \frac{N_G}{N_W}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>m<sub>G</sub> =</label>
+                            <input type="number" id="mG" step="any" oninput="markAsUser('mG'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>G</sub></label>
+                            <input type="number" id="NG_eq17" step="1" oninput="syncInput('NG', 'NG_eq17')">
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>N<sub>W</sub></label>
+                            <input type="number" id="NW_eq17" step="1" oninput="syncInput('NW', 'NW_eq17')">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$C_m = \begin{cases}
+                        0.02\sqrt{-m_G^2 + 40m_G - 76} + 0.46 & 6 < m_G < 20 \\
+                        0.0107\sqrt{m_G^2 + 56m_G + 5146} & 20 \leq m_G < 76 \\
+                        1.1483 - 0.00658 m_G & m_G \geq 76
+                        \end{cases}$$
+                    </div>
+                </div>
+
+                <div class="piecewise-indicator" id="Cm-indicator">
+                    Formula used: (calculating...)
+                </div>
+
+                <div class="input-row">
+                    <label>\(C_m\) - Ratio Correction Factor:</label>
+                    <input type="number" id="Cm" step="any" oninput="markAsUser('Cm'); calculate()">
+                </div>
+            </div>
+
+            <!-- Step 18: Velocity Factor -->
+            <div class="section">
+                <h2>Step 18: Calculate Worm Gear Velocity Factor</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$C_v = \begin{cases}
+                        0.659 e^{-0.0011 \nu_s} & 0 < \nu_s < 700 \\
+                        13.31 \nu_s^{-0.571} & 700 \leq \nu_s < 3000 \\
+                        65.52 \nu_s^{-0.774} & \nu_s \geq 3000
+                        \end{cases}$$
+                    </div>
+                </div>
+
+                <div class="piecewise-indicator" id="Cv-indicator">
+                    Formula used: (calculating...)
+                </div>
+
+                <div class="input-row">
+                    <label>\(C_v\) - Velocity Factor:</label>
+                    <input type="number" id="Cv" step="any" oninput="markAsUser('Cv'); calculate()">
+                </div>
+            </div>
+
+            <!-- Step 19: Effective Face Width -->
+            <div class="section">
+                <h2>Step 19: Calculate Effective Face Width</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$F_e = \begin{cases}
+                        F & F < \frac{D_W}{3} \\
+                        \frac{D_W}{3} & F \geq \frac{D_W}{3}
+                        \end{cases}$$
+                    </div>
+                </div>
+
+                <div class="piecewise-indicator" id="Fe-indicator">
+                    Formula used: (calculating...)
+                </div>
+
+                <div class="input-row">
+                    <label>\(F_e\) - Effective Face Width (in):</label>
+                    <input type="number" id="Fe" step="any" oninput="markAsUser('Fe'); calculate()">
+                </div>
+            </div>
+
+            <!-- Step 20: Rated Tangential Load -->
+            <div class="section">
+                <h2>Step 20: Calculate Rated Tangential Load</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_{tR} = C_s D_G^{0.8} F_e C_m C_v$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>tR</sub> (lb) =</label>
+                            <input type="number" id="WtR" step="any" oninput="markAsUser('WtR'); calculate()">
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>C<sub>s</sub></label>
+                            <input type="number" id="Cs_eq20" step="any" oninput="syncInput('Cs', 'Cs_eq20')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub><sup>0.8</sup></label>
+                            <input type="number" id="DG_eq20" step="any" oninput="syncInput('DG', 'DG_eq20')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>F<sub>e</sub></label>
+                            <input type="number" id="Fe_eq20" step="any" oninput="syncInput('Fe', 'Fe_eq20')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>C<sub>m</sub></label>
+                            <input type="number" id="Cm_eq20" step="any" oninput="syncInput('Cm', 'Cm_eq20')">
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>C<sub>v</sub></label>
+                            <input type="number" id="Cv_eq20" step="any" oninput="syncInput('Cv', 'Cv_eq20')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 21: Pitting Check -->
+            <div class="section">
+                <h2>Step 21: Check Pitting Resistance</h2>
+                <div class="warning-box" id="pitting-check">
+                    ⚠️ Calculating...
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\text{Design is satisfactory if: } W_{tR} > W_{tG}$$</div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-section">
+                <h2>Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <strong>Lead Angle (λ)</strong>
+                        <span id="summary_lambda">-</span>°
+                    </div>
+                    <div class="summary-item">
+                        <strong>Efficiency (η)</strong>
+                        <span id="summary_eta">-</span>%
+                    </div>
+                    <div class="summary-item">
+                        <strong>Input Power (Pi)</strong>
+                        <span id="summary_Pi">-</span> hp
+                    </div>
+                    <div class="summary-item">
+                        <strong>Transmitted Force (WtG)</strong>
+                        <span id="summary_WtG">-</span> lb
+                    </div>
+                    <div class="summary-item">
+                        <strong>Stress (σ)</strong>
+                        <span id="summary_sigma">-</span> psi
+                    </div>
+                    <div class="summary-item">
+                        <strong>Rated Load (WtR)</strong>
+                        <span id="summary_WtR">-</span> lb
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function syncInput(mainId, sourceId) {
+            const sourceEl = document.getElementById(sourceId);
+            const mainEl = document.getElementById(mainId);
+            if (sourceEl && mainEl) {
+                mainEl.value = sourceEl.value;
+            }
+            markAsUser(mainId);
+            calculate();
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                    if (!userValues.has(id)) {
+                        el.classList.add('computed');
+                    }
+                }
+                updateSummary(id, value);
+            }
+        }
+
+        function updateSummary(id, value) {
+            const summaryEl = document.getElementById('summary_' + id);
+            if (summaryEl && value !== null) {
+                summaryEl.textContent = value.toFixed(4);
+            }
+        }
+
+        function degToRad(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function radToDeg(rad) {
+            return rad * 180 / Math.PI;
+        }
+
+        function syncAllFields() {
+            const mainVars = {
+                'Pd': ['Pd', 'Pd_eq1'],
+                'p': ['p', 'p_eq2', 'p_eq12'],
+                'Px': ['Px', 'Px_eq3'],
+                'NW': ['NW', 'NW_eq3', 'NW_eq17'],
+                'L': ['L', 'L_eq4'],
+                'DW': ['DW', 'DW_eq4', 'DW_eq2'],
+                'lambda': ['lambda', 'lambda_eq4', 'lambda_eq12'],
+                'DG': ['DG', 'DG_eq2', 'DG_eq3', 'DG_eq6b', 'DG_eq20'],
+                'nG': ['nG', 'nG_eq3', 'nG_eq6'],
+                'vtG': ['vtG', 'vtG_eq4', 'vtG_eq13'],
+                'Po': ['Po', 'Po_eq6', 'Po_eq9', 'Po_eq10'],
+                'To': ['To', 'To_eq6b'],
+                'WtG': ['WtG', 'WtG_eq14'],
+                'vs': ['vs', 'vs_eq8'],
+                'Wf': ['Wf', 'Wf_eq8'],
+                'PL': ['PL', 'PL_eq9'],
+                'Pi': ['Pi', 'Pi_eq10'],
+                'y': ['y', 'y_eq15'],
+                'F': ['F', 'F_eq15'],
+                'pn': ['pn', 'pn_eq15'],
+                'Kv': ['Kv', 'Kv_eq14'],
+                'Wd': ['Wd', 'Wd_eq15'],
+                'NG': ['NG', 'NG_eq17'],
+                'Cs': ['Cs', 'Cs_eq20'],
+                'Fe': ['Fe', 'Fe_eq20'],
+                'Cm': ['Cm', 'Cm_eq20'],
+                'Cv': ['Cv', 'Cv_eq20']
+            };
+
+            for (let mainVar in mainVars) {
+                const mainEl = document.getElementById(mainVar);
+                if (mainEl && mainEl.value) {
+                    const value = mainEl.value;
+                    mainVars[mainVar].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.value = value;
+                        }
+                    });
+                }
+            }
+        }
+
+        function calculate() {
+            syncAllFields();
+
+            // Get inputs
+            const NG = getValue('NG');
+            const NW = getValue('NW');
+            const DG = getValue('DG');
+            const DW = getValue('DW');
+            const Pd = getValue('Pd');
+            const phi_n = getValue('phi_n');
+            const nW = getValue('nW');
+            const nG = getValue('nG');
+            const Po = getValue('Po');
+            const F = getValue('F');
+            const bronze_type = document.getElementById('bronze_type').value;
+            const y = getValue('y');
+
+            // General Equations - Pitch
+            if (DG && NG && !userValues.has('p_gen')) {
+                const p_gen = (Math.PI * DG) / NG;
+                setValue('p_gen', p_gen);
+            }
+
+            const p_gen = getValue('p_gen');
+
+            if (NG && DG && !userValues.has('Pd_gen')) {
+                const Pd_gen = NG / DG;
+                setValue('Pd_gen', Pd_gen);
+            } else if (p_gen && !userValues.has('Pd_gen')) {
+                const Pd_gen = Math.PI / p_gen;
+                setValue('Pd_gen', Pd_gen);
+            }
+
+            const Pd_gen = getValue('Pd_gen');
+
+            // General Equations - Geometry
+            if (DW && DG && !userValues.has('C_gen')) {
+                const C_gen = (DW + DG) / 2;
+                setValue('C_gen', C_gen);
+            }
+
+            if (Pd_gen && !userValues.has('a_gen')) {
+                const a_gen = 1 / Pd_gen;
+                setValue('a_gen', a_gen);
+            }
+
+            const a_gen = getValue('a_gen');
+
+            if (Pd_gen && !userValues.has('ht_gen')) {
+                const ht_gen = 2.157 / Pd_gen;
+                setValue('ht_gen', ht_gen);
+            }
+
+            const ht_gen = getValue('ht_gen');
+
+            if (ht_gen && a_gen && !userValues.has('b_gen')) {
+                const b_gen = ht_gen - a_gen;
+                setValue('b_gen', b_gen);
+            }
+
+            const b_gen = getValue('b_gen');
+
+            if (DW && b_gen && !userValues.has('DrW_gen')) {
+                const DrW_gen = DW - 2 * b_gen;
+                setValue('DrW_gen', DrW_gen);
+            }
+
+            if (DW && a_gen && !userValues.has('DoW_gen')) {
+                const DoW_gen = DW + 2 * a_gen;
+                setValue('DoW_gen', DoW_gen);
+            }
+
+            if (DG && b_gen && !userValues.has('DrG_gen')) {
+                const DrG_gen = DG - 2 * b_gen;
+                setValue('DrG_gen', DrG_gen);
+            }
+
+            if (DG && a_gen && !userValues.has('Dt_gen')) {
+                const Dt_gen = DG + 2 * a_gen;
+                setValue('Dt_gen', Dt_gen);
+            }
+
+            // General Equations - Speed
+            if (DW && nW && !userValues.has('vW_gen')) {
+                const vW_gen = (Math.PI * DW * nW) / 12;
+                setValue('vW_gen', vW_gen);
+            }
+
+            if (DG && nG && !userValues.has('vG_gen')) {
+                const vG_gen = (Math.PI * DG * nG) / 12;
+                setValue('vG_gen', vG_gen);
+            }
+
+            if (nW && nG && !userValues.has('VR_gen')) {
+                const VR_gen = nW / nG;
+                setValue('VR_gen', VR_gen);
+            }
+
+            // Step 1: Lead and lead angle
+            if (Pd && !userValues.has('p')) {
+                const p = Math.PI / Pd;
+                setValue('p', p);
+            }
+
+            const p = getValue('p');
+
+            if (p && !userValues.has('Px')) {
+                setValue('Px', p);
+            }
+
+            const Px = getValue('Px');
+
+            if (NW && Px && !userValues.has('L')) {
+                const L = NW * Px;
+                setValue('L', L);
+            }
+
+            const L = getValue('L');
+
+            if (L && DW && !userValues.has('lambda')) {
+                const lambda_rad = Math.atan(L / (Math.PI * DW));
+                const lambda_deg = radToDeg(lambda_rad);
+                setValue('lambda', lambda_deg);
+            }
+
+            const lambda = getValue('lambda');
+
+            // Step 2: Center distance
+            if (DG && DW && !userValues.has('CD')) {
+                const CD = (DG + DW) / 2;
+                setValue('CD', CD);
+            }
+
+            // Step 3: Pitch line speed of gear
+            if (DG && nG && !userValues.has('vtG')) {
+                const vtG = Math.PI * DG * nG / 12;
+                setValue('vtG', vtG);
+            }
+
+            const vtG = getValue('vtG');
+
+            // Step 4: Sliding speed
+            if (vtG && lambda && !userValues.has('vs')) {
+                const lambda_rad = degToRad(lambda);
+                const vs = vtG / Math.sin(lambda_rad);
+                setValue('vs', vs);
+            }
+
+            const vs = getValue('vs');
+
+            // Step 5: Coefficient of friction
+            if (vs !== null && !userValues.has('mu')) {
+                let mu;
+                let mu_formula;
+                if (vs === 0) {
+                    mu = 0.15;
+                    mu_formula = "μ = 0.15 (vs = 0)";
+                } else if (vs < 10) {
+                    mu = 0.124 * Math.exp(-0.074 * Math.pow(vs, 0.645));
+                    mu_formula = `μ = 0.124e^(-0.074·vs^0.645) (0 < vs < 10, vs = ${vs.toFixed(2)})`;
+                } else {
+                    mu = 0.103 * Math.exp(-0.11 * Math.pow(vs, 0.45)) + 0.012;
+                    mu_formula = `μ = 0.103e^(-0.11·vs^0.45) + 0.012 (vs ≥ 10, vs = ${vs.toFixed(2)})`;
+                }
+                setValue('mu', mu);
+                document.getElementById('mu-indicator').textContent = mu_formula;
+            }
+
+            const mu = getValue('mu');
+
+            // Step 6: Forces
+            if (Po && nG && !userValues.has('To')) {
+                const To = 63000 * Po / nG;
+                setValue('To', To);
+            }
+
+            const To = getValue('To');
+
+            if (To && DG && !userValues.has('WtG')) {
+                const WtG = 2 * To / DG;
+                setValue('WtG', WtG);
+            }
+
+            const WtG = getValue('WtG');
+
+            if (WtG && phi_n && lambda && mu !== null && !userValues.has('WxG')) {
+                const phi_n_rad = degToRad(phi_n);
+                const lambda_rad = degToRad(lambda);
+                const numerator = Math.cos(phi_n_rad) * Math.sin(lambda_rad) + mu * Math.cos(lambda_rad);
+                const denominator = Math.cos(phi_n_rad) * Math.cos(lambda_rad) - mu * Math.sin(lambda_rad);
+                const WxG = WtG * (numerator / denominator);
+                setValue('WxG', WxG);
+            }
+
+            if (WtG && phi_n && lambda && mu !== null && !userValues.has('WrG')) {
+                const phi_n_rad = degToRad(phi_n);
+                const lambda_rad = degToRad(lambda);
+                const numerator = WtG * Math.sin(phi_n_rad);
+                const denominator = Math.cos(phi_n_rad) * Math.cos(lambda_rad) - mu * Math.sin(lambda_rad);
+                const WrG = numerator / denominator;
+                setValue('WrG', WrG);
+            }
+
+            // Step 7: Friction force
+            if (mu !== null && WtG && lambda && phi_n && !userValues.has('Wf')) {
+                const phi_n_rad = degToRad(phi_n);
+                const lambda_rad = degToRad(lambda);
+                const numerator = mu * WtG;
+                const denominator = Math.cos(lambda_rad) * Math.cos(phi_n_rad) - mu * Math.sin(lambda_rad);
+                const Wf = numerator / denominator;
+                setValue('Wf', Wf);
+            }
+
+            const Wf = getValue('Wf');
+
+            // Step 8: Power loss
+            if (vs !== null && Wf && !userValues.has('PL')) {
+                const PL = vs * Wf / 33000;
+                setValue('PL', PL);
+            }
+
+            const PL = getValue('PL');
+
+            // Step 9: Input power
+            if (Po && PL && !userValues.has('Pi')) {
+                const Pi = Po + PL;
+                setValue('Pi', Pi);
+            }
+
+            const Pi = getValue('Pi');
+
+            // Step 10: Efficiency
+            if (Po && Pi && !userValues.has('eta')) {
+                const eta = (Po / Pi) * 100;
+                setValue('eta', eta);
+            }
+
+            // Step 12: Normal circular pitch
+            if (p && lambda && !userValues.has('pn')) {
+                const lambda_rad = degToRad(lambda);
+                const pn = p * Math.cos(lambda_rad);
+                setValue('pn', pn);
+            }
+
+            const pn = getValue('pn');
+
+            // Step 13: Dynamic factor
+            if (vtG && !userValues.has('Kv')) {
+                const Kv = 1200 / (1200 + vtG);
+                setValue('Kv', Kv);
+            }
+
+            const Kv = getValue('Kv');
+
+            // Step 14: Dynamic load
+            if (WtG && Kv && !userValues.has('Wd')) {
+                const Wd = WtG / Kv;
+                setValue('Wd', Wd);
+            }
+
+            const Wd = getValue('Wd');
+
+            // Step 15: Stress
+            if (Wd && y && F && pn && !userValues.has('sigma')) {
+                const sigma = Wd / (y * F * pn);
+                setValue('sigma', sigma);
+            }
+
+            // Step 16: Materials factor
+            if (DG && bronze_type && !userValues.has('Cs')) {
+                let Cs;
+                let Cs_formula;
+
+                if (bronze_type === 'sand') {
+                    if (DG > 2.5) {
+                        Cs = 1189.636 - 476.545 * Math.log10(DG);
+                        Cs_formula = `Sand-cast: Cs = 1189.636 - 476.545·log₁₀(DG) (DG = ${DG.toFixed(2)} > 2.5)`;
+                    } else {
+                        Cs = 1000;
+                        Cs_formula = `Sand-cast: Cs = 1000 (DG = ${DG.toFixed(2)} ≤ 2.5)`;
+                    }
+                } else if (bronze_type === 'static') {
+                    if (DG < 8) {
+                        Cs = 1411.651 - 455.825 * Math.log10(DG);
+                        Cs_formula = `Static-chill/Forged: Cs = 1411.651 - 455.825·log₁₀(DG) (DG = ${DG.toFixed(2)} < 8)`;
+                    } else {
+                        Cs = 1000;
+                        Cs_formula = `Static-chill/Forged: Cs = 1000 (DG = ${DG.toFixed(2)} ≥ 8)`;
+                    }
+                } else if (bronze_type === 'centrifugal') {
+                    if (DG < 25) {
+                        Cs = 1251.291 - 179.75 * Math.log10(DG);
+                        Cs_formula = `Centrifugally cast: Cs = 1251.291 - 179.75·log₁₀(DG) (DG = ${DG.toFixed(2)} < 25)`;
+                    } else {
+                        Cs = 1000;
+                        Cs_formula = `Centrifugally cast: Cs = 1000 (DG = ${DG.toFixed(2)} ≥ 25)`;
+                    }
+                }
+
+                if (Cs !== undefined) {
+                    setValue('Cs', Cs);
+                    document.getElementById('Cs-indicator').textContent = Cs_formula;
+                }
+            }
+
+            const Cs = getValue('Cs');
+
+            // Step 17: Ratio correction factor
+            if (NG && NW && !userValues.has('mG')) {
+                const mG = NG / NW;
+                setValue('mG', mG);
+            }
+
+            const mG = getValue('mG');
+
+            if (mG && !userValues.has('Cm')) {
+                let Cm;
+                let Cm_formula;
+
+                if (mG > 6 && mG < 20) {
+                    Cm = 0.02 * Math.sqrt(-mG * mG + 40 * mG - 76) + 0.46;
+                    Cm_formula = `Cm = 0.02√(-mG² + 40mG - 76) + 0.46 (6 < mG < 20, mG = ${mG.toFixed(2)})`;
+                } else if (mG >= 20 && mG < 76) {
+                    Cm = 0.0107 * Math.sqrt(mG * mG + 56 * mG + 5146);
+                    Cm_formula = `Cm = 0.0107√(mG² + 56mG + 5146) (20 ≤ mG < 76, mG = ${mG.toFixed(2)})`;
+                } else if (mG >= 76) {
+                    Cm = 1.1483 - 0.00658 * mG;
+                    Cm_formula = `Cm = 1.1483 - 0.00658·mG (mG ≥ 76, mG = ${mG.toFixed(2)})`;
+                }
+
+                if (Cm !== undefined) {
+                    setValue('Cm', Cm);
+                    document.getElementById('Cm-indicator').textContent = Cm_formula;
+                }
+            }
+
+            const Cm = getValue('Cm');
+
+            // Step 18: Velocity factor
+            if (vs !== null && !userValues.has('Cv')) {
+                let Cv;
+                let Cv_formula;
+
+                if (vs > 0 && vs < 700) {
+                    Cv = 0.659 * Math.exp(-0.0011 * vs);
+                    Cv_formula = `Cv = 0.659e^(-0.0011·vs) (0 < vs < 700, vs = ${vs.toFixed(2)})`;
+                } else if (vs >= 700 && vs < 3000) {
+                    Cv = 13.31 * Math.pow(vs, -0.571);
+                    Cv_formula = `Cv = 13.31·vs^(-0.571) (700 ≤ vs < 3000, vs = ${vs.toFixed(2)})`;
+                } else if (vs >= 3000) {
+                    Cv = 65.52 * Math.pow(vs, -0.774);
+                    Cv_formula = `Cv = 65.52·vs^(-0.774) (vs ≥ 3000, vs = ${vs.toFixed(2)})`;
+                }
+
+                if (Cv !== undefined) {
+                    setValue('Cv', Cv);
+                    document.getElementById('Cv-indicator').textContent = Cv_formula;
+                }
+            }
+
+            const Cv = getValue('Cv');
+
+            // Step 19: Effective face width
+            if (F && DW && !userValues.has('Fe')) {
+                let Fe;
+                let Fe_formula;
+                const DW_over_3 = DW / 3;
+
+                if (F < DW_over_3) {
+                    Fe = F;
+                    Fe_formula = `Fe = F (F = ${F.toFixed(4)} < DW/3 = ${DW_over_3.toFixed(4)})`;
+                } else {
+                    Fe = DW_over_3;
+                    Fe_formula = `Fe = DW/3 (F = ${F.toFixed(4)} ≥ DW/3 = ${DW_over_3.toFixed(4)})`;
+                }
+
+                setValue('Fe', Fe);
+                document.getElementById('Fe-indicator').textContent = Fe_formula;
+            }
+
+            const Fe = getValue('Fe');
+
+            // Step 20: Rated tangential load
+            if (Cs && DG && Fe && Cm && Cv && !userValues.has('WtR')) {
+                const WtR = Cs * Math.pow(DG, 0.8) * Fe * Cm * Cv;
+                setValue('WtR', WtR);
+            }
+
+            const WtR = getValue('WtR');
+
+            // Step 21: Pitting check
+            if (WtR && WtG) {
+                const pitting_el = document.getElementById('pitting-check');
+                if (WtR > WtG) {
+                    pitting_el.innerHTML = `✅ <strong>Design is SATISFACTORY</strong> for pitting resistance<br>WtR (${WtR.toFixed(2)} lb) > WtG (${WtG.toFixed(2)} lb)`;
+                    pitting_el.style.background = '#d4edda';
+                    pitting_el.style.borderColor = '#28a745';
+                } else {
+                    pitting_el.innerHTML = `❌ <strong>Design is NOT SATISFACTORY</strong> for pitting resistance<br>WtR (${WtR.toFixed(2)} lb) ≤ WtG (${WtG.toFixed(2)} lb)`;
+                    pitting_el.style.background = '#f8d7da';
+                    pitting_el.style.borderColor = '#dc3545';
+                }
+            }
+
+            saveSession();
+        }
+
+        function saveSession() {
+            const state = {};
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                if (input.value) {
+                    state[input.id] = input.value;
+                }
+            });
+            state.bronze_type = document.getElementById('bronze_type').value;
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('worm_state', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('worm_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) {
+                    state.userValues.forEach(v => userValues.add(v));
+                }
+                for (let key in state) {
+                    const el = document.getElementById(key);
+                    if (el && state[key] !== null && state[key] !== '') {
+                        el.value = state[key];
+                        if (el.tagName === 'INPUT' && el.type === 'number') {
+                            if (userValues.has(key)) {
+                                el.classList.remove('computed');
+                            } else {
+                                el.classList.add('computed');
+                            }
+                            updateSummary(key, parseFloat(state[key]));
+                        }
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                localStorage.removeItem('worm_state');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                document.getElementById('bronze_type').value = '';
+                document.querySelectorAll('.summary-item span').forEach(span => {
+                    span.textContent = '-';
+                });
+                document.getElementById('pitting-check').innerHTML = '⚠️ Calculating...';
+                document.getElementById('pitting-check').style.background = '#fff3cd';
+                document.getElementById('pitting-check').style.borderColor = '#ffc107';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            MathJax.typesetPromise();
+        });
+    </script>
+</body>
+</html>
