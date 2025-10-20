@@ -237,6 +237,80 @@
             font-style: italic;
             margin-top: 5px;
         }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none !important;
+        }
+
+        .tab-content.active {
+            display: block !important;
+        }
+
+        /* Variables Tab */
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .var-category {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -259,6 +333,16 @@
             <strong>📋 Bevel Gear Note:</strong> Bevel gears use different factors (K<sub>mb</sub>, K<sub>s</sub>, C<sub>s</sub>, C<sub>xc</sub>) and stress cycle factors (K<sub>L</sub>, C<sub>L</sub>) compared to spur gears.
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+            <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+            <button class="tab-button" onclick="showTab('variables')">Variables</button>
+        </div>
+
+        <!-- Procedure Tab -->
+        <div id="procedure-tab" class="tab-content active">
+
         <!-- BENDING STRESS ANALYSIS -->
         <div class="section">
             <h2>Bending Stress Analysis</h2>
@@ -269,7 +353,7 @@
 
             <div class="var-input">
                 <label>K<sub>o</sub> =</label>
-                <input type="number" id="Ko" step="0.01" oninput="markAsUser('Ko'); calculate()">
+                <input type="number" id="Ko" step="0.01" oninput="syncAllInstances('Ko'); markAsUser('Ko'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -279,25 +363,25 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>N<sub>P</sub> =</label>
-                <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                <input type="number" id="NP" step="1" oninput="syncAllInstances('NP'); markAsUser('NP'); calculate()">
                 <span class="unit">teeth (pinion)</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>N<sub>G</sub> =</label>
-                <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                <input type="number" id="NG" step="1" oninput="syncAllInstances('NG'); markAsUser('NG'); calculate()">
                 <span class="unit">teeth (gear)</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>P<sub>d</sub> =</label>
-                <input type="number" id="Pd" step="0.1" oninput="markAsUser('Pd'); calculate()">
+                <input type="number" id="Pd" step="0.1" oninput="syncAllInstances('Pd'); markAsUser('Pd'); calculate()">
                 <span class="unit">teeth/in</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>F =</label>
-                <input type="number" id="F" step="0.0001" oninput="markAsUser('F'); calculate()">
+                <input type="number" id="F" step="0.0001" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
                 <span class="unit">in (face width)</span>
             </div>
 
@@ -313,7 +397,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>v<sub>t</sub> =</label>
-                        <input type="number" id="vt" step="0.0001" oninput="markAsUser('vt'); calculate()">
+                        <input type="number" id="vt" step="0.0001" oninput="syncAllInstances('vt'); markAsUser('vt'); calculate()">
                         <span class="unit">ft/min</span>
                     </div>
                     <span>= (π ×</span>
@@ -339,7 +423,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>W<sub>t</sub> =</label>
-                        <input type="number" id="Wt" step="0.0001" oninput="markAsUser('Wt'); calculate()">
+                        <input type="number" id="Wt" step="0.0001" oninput="syncAllInstances('Wt'); markAsUser('Wt'); calculate()">
                         <span class="unit">lbs</span>
                     </div>
                     <span>= (33000 ×</span>
@@ -375,7 +459,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>K<sub>s</sub> =</label>
-                        <input type="number" id="Ks" step="0.0001" oninput="markAsUser('Ks'); calculate()">
+                        <input type="number" id="Ks" step="0.0001" oninput="syncAllInstances('Ks'); markAsUser('Ks'); calculate()">
                     </div>
                 </div>
             </div>
@@ -407,7 +491,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>K<sub>m</sub> =</label>
-                        <input type="number" id="Km" step="0.0001" oninput="markAsUser('Km'); calculate()">
+                        <input type="number" id="Km" step="0.0001" oninput="syncAllInstances('Km'); markAsUser('Km'); calculate()">
                     </div>
                     <span>=</span>
                     <div class="var-input">
@@ -434,7 +518,7 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>A<sub>v</sub> =</label>
-                <input type="number" id="Av" step="1" oninput="markAsUser('Av'); calculate()">
+                <input type="number" id="Av" step="1" oninput="syncAllInstances('Av'); markAsUser('Av'); calculate()">
             </div>
 
             <div class="info-box">
@@ -443,7 +527,7 @@
 
             <div class="var-input">
                 <label>K<sub>v</sub> =</label>
-                <input type="number" id="Kv" step="0.0001" oninput="markAsUser('Kv'); calculate()">
+                <input type="number" id="Kv" step="0.0001" oninput="syncAllInstances('Kv'); markAsUser('Kv'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -456,7 +540,7 @@
 
             <div class="var-input">
                 <label>J =</label>
-                <input type="number" id="J" step="0.0001" oninput="markAsUser('J'); calculate()">
+                <input type="number" id="J" step="0.0001" oninput="syncAllInstances('J'); markAsUser('J'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -471,7 +555,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>s<sub>t</sub> =</label>
-                        <input type="number" id="st" step="0.0001" oninput="markAsUser('st'); calculate()">
+                        <input type="number" id="st" step="0.0001" oninput="syncAllInstances('st'); markAsUser('st'); calculate()">
                         <span class="unit">psi</span>
                     </div>
                     <span>= (</span>
@@ -525,13 +609,13 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>SF =</label>
-                <input type="number" id="SF_assumed" step="0.01" value="1" oninput="markAsUser('SF_assumed'); calculate()">
+                <input type="number" id="SF_assumed" step="0.01" oninput="syncAllInstances('SF_assumed'); markAsUser('SF_assumed'); calculate()">
                 <span class="unit">(assumed)</span>
             </div>
 
             <div class="var-input">
                 <label>K<sub>R</sub> =</label>
-                <input type="number" id="KR" step="0.01" value="1" oninput="markAsUser('KR'); calculate()">
+                <input type="number" id="KR" step="0.01" oninput="syncAllInstances('KR'); markAsUser('KR'); calculate()">
                 <span class="unit">(typically 1 for 99% reliability)</span>
             </div>
 
@@ -547,13 +631,13 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>N<sub>L</sub> =</label>
-                        <input type="number" id="NL" step="1" oninput="markAsUser('NL'); calculate()">
+                        <input type="number" id="NL" step="1" oninput="syncAllInstances('NL'); markAsUser('NL'); calculate()">
                         <span class="unit">cycles</span>
                     </div>
                     <span>= 60 ×</span>
                     <div class="var-input">
                         <label>lifetime =</label>
-                        <input type="number" id="lifetime" step="1" oninput="markAsUser('lifetime'); calculate()">
+                        <input type="number" id="lifetime" step="1" oninput="syncAllInstances('lifetime'); markAsUser('lifetime'); calculate()">
                         <span class="unit">hours</span>
                     </div>
                     <span>×</span>
@@ -576,7 +660,7 @@
 
             <div class="var-input">
                 <label>K<sub>L</sub> =</label>
-                <input type="number" id="KL" step="0.0001" oninput="markAsUser('KL'); calculate()">
+                <input type="number" id="KL" step="0.0001" oninput="syncAllInstances('KL'); markAsUser('KL'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -591,7 +675,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>s<sub>at</sub> =</label>
-                        <input type="number" id="sat_required" step="0.0001" oninput="markAsUser('sat_required'); calculate()">
+                        <input type="number" id="sat_required" step="0.0001" oninput="syncAllInstances('sat_required'); markAsUser('sat_required'); calculate()">
                         <span class="unit">psi</span>
                     </div>
                     <span>= (</span>
@@ -619,7 +703,7 @@
 
             <div class="var-input">
                 <label>s<sub>at</sub> =</label>
-                <input type="number" id="sat_required_ksi" step="0.0001" oninput="markAsUser('sat_required_ksi'); calculate()">
+                <input type="number" id="sat_required_ksi" step="0.0001" oninput="syncAllInstances('sat_required_ksi'); markAsUser('sat_required_ksi'); calculate()">
                 <span class="unit">ksi (for material selection)</span>
             </div>
 
@@ -633,23 +717,23 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>HB (required) =</label>
-                <input type="number" id="HB_required" step="1" oninput="markAsUser('HB_required'); calculate()">
+                <input type="number" id="HB_required" step="1" oninput="syncAllInstances('HB_required'); markAsUser('HB_required'); calculate()">
                 <span class="unit">from bevel material graph</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>Material =</label>
-                <input type="text" id="material" placeholder="e.g., AISI 4340 OQT 400" style="width: 250px;" oninput="markAsUser('material'); calculate()">
+                <input type="text" id="material" placeholder="e.g., AISI 4340 OQT 400" style="width: 250px;" oninput="syncAllInstances('material'); markAsUser('material'); calculate()">
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>HB (actual) =</label>
-                <input type="number" id="HB_actual" step="1" oninput="markAsUser('HB_actual'); calculate()">
+                <input type="number" id="HB_actual" step="1" oninput="syncAllInstances('HB_actual'); markAsUser('HB_actual'); calculate()">
             </div>
 
             <div class="var-input">
                 <label>s<sub>at</sub> (actual) =</label>
-                <input type="number" id="sat_actual_ksi" step="0.0001" oninput="markAsUser('sat_actual_ksi'); calculate()">
+                <input type="number" id="sat_actual_ksi" step="0.0001" oninput="syncAllInstances('sat_actual_ksi'); markAsUser('sat_actual_ksi'); calculate()">
                 <span class="unit">ksi (from bevel formula)</span>
             </div>
 
@@ -665,7 +749,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>SF<sub>bending</sub> =</label>
-                        <input type="number" id="SF_bending" step="0.0001" oninput="markAsUser('SF_bending'); calculate()">
+                        <input type="number" id="SF_bending" step="0.0001" oninput="syncAllInstances('SF_bending'); markAsUser('SF_bending'); calculate()">
                     </div>
                     <span>= (</span>
                     <div class="var-input">
@@ -707,7 +791,7 @@
 
             <div class="var-input">
                 <label>C<sub>p</sub> =</label>
-                <input type="number" id="Cp" step="1" value="2300" oninput="markAsUser('Cp'); calculate()">
+                <input type="number" id="Cp" step="1" oninput="syncAllInstances('Cp'); markAsUser('Cp'); calculate()">
                 <span class="unit">psi<sup>1/2</sup></span>
             </div>
 
@@ -726,7 +810,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>C<sub>s</sub> =</label>
-                        <input type="number" id="Cs" step="0.0001" oninput="markAsUser('Cs'); calculate()">
+                        <input type="number" id="Cs" step="0.0001" oninput="syncAllInstances('Cs'); markAsUser('Cs'); calculate()">
                     </div>
                     <span>= 0.125 ×</span>
                     <div class="var-input">
@@ -763,7 +847,7 @@
 
             <div class="var-input">
                 <label>I =</label>
-                <input type="number" id="I" step="0.0001" oninput="markAsUser('I'); calculate()">
+                <input type="number" id="I" step="0.0001" oninput="syncAllInstances('I'); markAsUser('I'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -776,7 +860,7 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>D<sub>p</sub> =</label>
-                <input type="number" id="Dp" step="0.0001" oninput="markAsUser('Dp'); calculate()">
+                <input type="number" id="Dp" step="0.0001" oninput="syncAllInstances('Dp'); markAsUser('Dp'); calculate()">
                 <span class="unit">in (pinion pitch diameter)</span>
             </div>
 
@@ -787,7 +871,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>s<sub>c</sub> =</label>
-                        <input type="number" id="sc" step="0.0001" oninput="markAsUser('sc'); calculate()">
+                        <input type="number" id="sc" step="0.0001" oninput="syncAllInstances('sc'); markAsUser('sc'); calculate()">
                         <span class="unit">psi</span>
                     </div>
                     <span>=</span>
@@ -851,7 +935,7 @@
 
             <div class="var-input">
                 <label>C<sub>R</sub> =</label>
-                <input type="number" id="CR" step="0.01" value="1" oninput="markAsUser('CR'); calculate()">
+                <input type="number" id="CR" step="0.01" oninput="syncAllInstances('CR'); markAsUser('CR'); calculate()">
                 <span class="unit">(typically 1 for 99% reliability)</span>
             </div>
 
@@ -865,7 +949,7 @@
 
             <div class="var-input">
                 <label>C<sub>L</sub> =</label>
-                <input type="number" id="CL" step="0.0001" oninput="markAsUser('CL'); calculate()">
+                <input type="number" id="CL" step="0.0001" oninput="syncAllInstances('CL'); markAsUser('CL'); calculate()">
             </div>
 
             <div class="divider"></div>
@@ -880,7 +964,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>s<sub>ac</sub> =</label>
-                        <input type="number" id="sac_required" step="0.0001" oninput="markAsUser('sac_required'); calculate()">
+                        <input type="number" id="sac_required" step="0.0001" oninput="syncAllInstances('sac_required'); markAsUser('sac_required'); calculate()">
                         <span class="unit">psi</span>
                     </div>
                     <span>= (</span>
@@ -908,7 +992,7 @@
 
             <div class="var-input">
                 <label>s<sub>ac</sub> =</label>
-                <input type="number" id="sac_required_ksi" step="0.0001" oninput="markAsUser('sac_required_ksi'); calculate()">
+                <input type="number" id="sac_required_ksi" step="0.0001" oninput="syncAllInstances('sac_required_ksi'); markAsUser('sac_required_ksi'); calculate()">
                 <span class="unit">ksi (for material selection)</span>
             </div>
 
@@ -922,12 +1006,12 @@
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>HB (required, contact) =</label>
-                <input type="number" id="HB_contact_required" step="1" oninput="markAsUser('HB_contact_required'); calculate()">
+                <input type="number" id="HB_contact_required" step="1" oninput="syncAllInstances('HB_contact_required'); markAsUser('HB_contact_required'); calculate()">
             </div>
 
             <div class="var-input">
                 <label>s<sub>ac</sub> (actual) =</label>
-                <input type="number" id="sac_actual_ksi" step="0.0001" oninput="markAsUser('sac_actual_ksi'); calculate()">
+                <input type="number" id="sac_actual_ksi" step="0.0001" oninput="syncAllInstances('sac_actual_ksi'); markAsUser('sac_actual_ksi'); calculate()">
                 <span class="unit">ksi (from bevel formula)</span>
             </div>
 
@@ -943,7 +1027,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>SF<sub>contact</sub> =</label>
-                        <input type="number" id="SF_contact" step="0.0001" oninput="markAsUser('SF_contact'); calculate()">
+                        <input type="number" id="SF_contact" step="0.0001" oninput="syncAllInstances('SF_contact'); markAsUser('SF_contact'); calculate()">
                     </div>
                     <span>= (</span>
                     <div class="var-input">
@@ -993,6 +1077,520 @@
                 <div class="summary-item">Safety Factor (Contact): SF = <span id="summary_SF_contact">-</span></div>
             </div>
         </div>
+
+        </div> <!-- End Procedure Tab -->
+
+        <!-- General Equations Tab -->
+        <div id="equations-tab" class="tab-content">
+            <div class="section">
+                <h2>Bevel Gear Stress - General Equations</h2>
+
+                <h3>Velocity and Force</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$v_t = \frac{\pi D n}{12}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>v<sub>t</sub> (ft/min)</label>
+                            <input type="number" id="vt_eq1" step="any" oninput="syncAllInstances('vt_eq1'); markAsUser('vt_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>D (in)</label>
+                            <input type="number" id="D_eq1" step="any" oninput="syncAllInstances('D_eq1'); markAsUser('D_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>n (rpm)</label>
+                            <input type="number" id="n_eq1" step="any" oninput="syncAllInstances('n_eq1'); markAsUser('n_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Pitch Line Velocity</p>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$W_t = \frac{33000 P}{v_t}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> (lbs)</label>
+                            <input type="number" id="Wt_eq1" step="any" oninput="syncAllInstances('Wt_eq1'); markAsUser('Wt_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>P (HP)</label>
+                            <input type="number" id="P_eq1" step="any" oninput="syncAllInstances('P_eq1'); markAsUser('P_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>v<sub>t</sub> (ft/min)</label>
+                            <input type="number" id="vt_eq2" step="any" oninput="syncAllInstances('vt_eq2'); markAsUser('vt_eq2'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Transmitted Load</p>
+                </div>
+
+                <h3>Bevel-Specific Factors</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$K_m = K_{mb} + 0.0036 F^2$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>K<sub>m</sub></label>
+                            <input type="number" id="Km_eq1" step="any" oninput="syncAllInstances('Km_eq1'); markAsUser('Km_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>mb</sub></label>
+                            <input type="number" id="Kmb_eq1" step="any" oninput="syncAllInstances('Kmb_eq1'); markAsUser('Kmb_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>F (in)</label>
+                            <input type="number" id="F_eq1" step="any" oninput="syncAllInstances('F_eq1'); markAsUser('F_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Load Distribution Factor (Bevel)</p>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$C_s = 0.125 F + 0.4375$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>C<sub>s</sub></label>
+                            <input type="number" id="Cs_eq1" step="any" oninput="syncAllInstances('Cs_eq1'); markAsUser('Cs_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>F (in)</label>
+                            <input type="number" id="F_eq2" step="any" oninput="syncAllInstances('F_eq2'); markAsUser('F_eq2'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Pitting Resistance Size Factor (Bevel)</p>
+                </div>
+
+                <h3>Bending Stress</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$s_t = \frac{W_t P_d K_o K_s K_m K_v}{F J}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>s<sub>t</sub> (psi)</label>
+                            <input type="number" id="st_eq1" step="any" oninput="syncAllInstances('st_eq1'); markAsUser('st_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>W<sub>t</sub> (lbs)</label>
+                            <input type="number" id="Wt_eq2" step="any" oninput="syncAllInstances('Wt_eq2'); markAsUser('Wt_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>P<sub>d</sub></label>
+                            <input type="number" id="Pd_eq1" step="any" oninput="syncAllInstances('Pd_eq1'); markAsUser('Pd_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>o</sub></label>
+                            <input type="number" id="Ko_eq1" step="any" oninput="syncAllInstances('Ko_eq1'); markAsUser('Ko_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>s</sub></label>
+                            <input type="number" id="Ks_eq1" step="any" oninput="syncAllInstances('Ks_eq1'); markAsUser('Ks_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>m</sub></label>
+                            <input type="number" id="Km_eq2" step="any" oninput="syncAllInstances('Km_eq2'); markAsUser('Km_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>v</sub></label>
+                            <input type="number" id="Kv_eq1" step="any" oninput="syncAllInstances('Kv_eq1'); markAsUser('Kv_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>F (in)</label>
+                            <input type="number" id="F_eq3" step="any" oninput="syncAllInstances('F_eq3'); markAsUser('F_eq3'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>J</label>
+                            <input type="number" id="J_eq1" step="any" oninput="syncAllInstances('J_eq1'); markAsUser('J_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Bending Stress</p>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$SF_{bending} = \frac{s_{at} K_L}{s_t K_R}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>SF<sub>bending</sub></label>
+                            <input type="number" id="SF_bending_eq1" step="any" oninput="syncAllInstances('SF_bending_eq1'); markAsUser('SF_bending_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>s<sub>at</sub> (psi)</label>
+                            <input type="number" id="sat_eq1" step="any" oninput="syncAllInstances('sat_eq1'); markAsUser('sat_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>L</sub></label>
+                            <input type="number" id="KL_eq1" step="any" oninput="syncAllInstances('KL_eq1'); markAsUser('KL_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>s<sub>t</sub> (psi)</label>
+                            <input type="number" id="st_eq2" step="any" oninput="syncAllInstances('st_eq2'); markAsUser('st_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>R</sub></label>
+                            <input type="number" id="KR_eq1" step="any" oninput="syncAllInstances('KR_eq1'); markAsUser('KR_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Bending Safety Factor</p>
+                </div>
+
+                <h3>Contact Stress</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$s_c = C_p \sqrt{\frac{W_t K_o K_m K_v C_s C_{xc}}{F D_p I}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>s<sub>c</sub> (psi)</label>
+                            <input type="number" id="sc_eq1" step="any" oninput="syncAllInstances('sc_eq1'); markAsUser('sc_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>C<sub>p</sub></label>
+                            <input type="number" id="Cp_eq1" step="any" oninput="syncAllInstances('Cp_eq1'); markAsUser('Cp_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>W<sub>t</sub> (lbs)</label>
+                            <input type="number" id="Wt_eq3" step="any" oninput="syncAllInstances('Wt_eq3'); markAsUser('Wt_eq3'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>o</sub></label>
+                            <input type="number" id="Ko_eq2" step="any" oninput="syncAllInstances('Ko_eq2'); markAsUser('Ko_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>m</sub></label>
+                            <input type="number" id="Km_eq3" step="any" oninput="syncAllInstances('Km_eq3'); markAsUser('Km_eq3'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>K<sub>v</sub></label>
+                            <input type="number" id="Kv_eq2" step="any" oninput="syncAllInstances('Kv_eq2'); markAsUser('Kv_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>C<sub>s</sub></label>
+                            <input type="number" id="Cs_eq2" step="any" oninput="syncAllInstances('Cs_eq2'); markAsUser('Cs_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>C<sub>xc</sub></label>
+                            <input type="number" id="Cxc_eq1" step="any" oninput="syncAllInstances('Cxc_eq1'); markAsUser('Cxc_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>F (in)</label>
+                            <input type="number" id="F_eq4" step="any" oninput="syncAllInstances('F_eq4'); markAsUser('F_eq4'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>D<sub>p</sub> (in)</label>
+                            <input type="number" id="Dp_eq1" step="any" oninput="syncAllInstances('Dp_eq1'); markAsUser('Dp_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>I</label>
+                            <input type="number" id="I_eq1" step="any" oninput="syncAllInstances('I_eq1'); markAsUser('I_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Contact Stress (Bevel-Specific)</p>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$SF_{contact} = \frac{s_{ac} C_L}{s_c C_R}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>SF<sub>contact</sub></label>
+                            <input type="number" id="SF_contact_eq1" step="any" oninput="syncAllInstances('SF_contact_eq1'); markAsUser('SF_contact_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>s<sub>ac</sub> (psi)</label>
+                            <input type="number" id="sac_eq1" step="any" oninput="syncAllInstances('sac_eq1'); markAsUser('sac_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>C<sub>L</sub></label>
+                            <input type="number" id="CL_eq1" step="any" oninput="syncAllInstances('CL_eq1'); markAsUser('CL_eq1'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>s<sub>c</sub> (psi)</label>
+                            <input type="number" id="sc_eq2" step="any" oninput="syncAllInstances('sc_eq2'); markAsUser('sc_eq2'); calculate()">
+                        </div>
+                        <div class="var-input">
+                            <label>C<sub>R</sub></label>
+                            <input type="number" id="CR_eq1" step="any" oninput="syncAllInstances('CR_eq1'); markAsUser('CR_eq1'); calculate()">
+                        </div>
+                    </div>
+                    <p style="margin-top:10px; color:#666; font-size:0.9em;">Contact Safety Factor</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variables Tab -->
+        <div id="variables-tab" class="tab-content">
+            <h2>All Variables</h2>
+            <table class="variables-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Description</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="var-category"><td colspan="4">Basic Parameters</td></tr>
+                    <tr>
+                        <td>P</td>
+                        <td>Power</td>
+                        <td><input type="number" id="var_P" step="0.01" oninput="syncAllInstances('var_P'); markAsUser('var_P'); calculate()"></td>
+                        <td>HP</td>
+                    </tr>
+                    <tr>
+                        <td>n</td>
+                        <td>Speed</td>
+                        <td><input type="number" id="var_n" step="0.1" oninput="syncAllInstances('var_n'); markAsUser('var_n'); calculate()"></td>
+                        <td>rpm</td>
+                    </tr>
+                    <tr>
+                        <td>D</td>
+                        <td>Pitch Diameter</td>
+                        <td><input type="number" id="var_D" step="0.0001" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>D<sub>p</sub></td>
+                        <td>Pinion Pitch Diameter</td>
+                        <td><input type="number" id="var_Dp" step="0.0001" oninput="syncAllInstances('var_Dp'); markAsUser('var_Dp'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>N<sub>P</sub></td>
+                        <td>Pinion Teeth</td>
+                        <td><input type="number" id="var_NP" step="1" oninput="syncAllInstances('var_NP'); markAsUser('var_NP'); calculate()"></td>
+                        <td>teeth</td>
+                    </tr>
+                    <tr>
+                        <td>N<sub>G</sub></td>
+                        <td>Gear Teeth</td>
+                        <td><input type="number" id="var_NG" step="1" oninput="syncAllInstances('var_NG'); markAsUser('var_NG'); calculate()"></td>
+                        <td>teeth</td>
+                    </tr>
+                    <tr>
+                        <td>P<sub>d</sub></td>
+                        <td>Diametral Pitch</td>
+                        <td><input type="number" id="var_Pd" step="0.1" oninput="syncAllInstances('var_Pd'); markAsUser('var_Pd'); calculate()"></td>
+                        <td>teeth/in</td>
+                    </tr>
+                    <tr>
+                        <td>F</td>
+                        <td>Face Width</td>
+                        <td><input type="number" id="var_F" step="0.0001" oninput="syncAllInstances('var_F'); markAsUser('var_F'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>v<sub>t</sub></td>
+                        <td>Pitch Line Velocity</td>
+                        <td><input type="number" id="var_vt" step="0.0001" oninput="syncAllInstances('var_vt'); markAsUser('var_vt'); calculate()"></td>
+                        <td>ft/min</td>
+                    </tr>
+                    <tr>
+                        <td>W<sub>t</sub></td>
+                        <td>Transmitted Load</td>
+                        <td><input type="number" id="var_Wt" step="0.0001" oninput="syncAllInstances('var_Wt'); markAsUser('var_Wt'); calculate()"></td>
+                        <td>lbs</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Bending Stress Factors</td></tr>
+                    <tr>
+                        <td>K<sub>o</sub></td>
+                        <td>Overload Factor</td>
+                        <td><input type="number" id="var_Ko" step="0.01" oninput="syncAllInstances('var_Ko'); markAsUser('var_Ko'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>s</sub></td>
+                        <td>Size Factor (Bevel-Specific)</td>
+                        <td><input type="number" id="var_Ks" step="0.0001" oninput="syncAllInstances('var_Ks'); markAsUser('var_Ks'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>mb</sub></td>
+                        <td>Mounting Factor</td>
+                        <td><input type="number" id="var_Kmb" step="0.01" oninput="syncAllInstances('var_Kmb'); markAsUser('var_Kmb'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>m</sub></td>
+                        <td>Load Distribution Factor</td>
+                        <td><input type="number" id="var_Km" step="0.0001" oninput="syncAllInstances('var_Km'); markAsUser('var_Km'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>v</sub></td>
+                        <td>Dynamic Factor</td>
+                        <td><input type="number" id="var_Kv" step="0.0001" oninput="syncAllInstances('var_Kv'); markAsUser('var_Kv'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>A<sub>v</sub></td>
+                        <td>Quality Number</td>
+                        <td><input type="number" id="var_Av" step="1" oninput="syncAllInstances('var_Av'); markAsUser('var_Av'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>J</td>
+                        <td>Geometry Factor (Bending)</td>
+                        <td><input type="number" id="var_J" step="0.0001" oninput="syncAllInstances('var_J'); markAsUser('var_J'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Bending Stress Analysis</td></tr>
+                    <tr>
+                        <td>s<sub>t</sub></td>
+                        <td>Bending Stress</td>
+                        <td><input type="number" id="var_st" step="0.0001" oninput="syncAllInstances('var_st'); markAsUser('var_st'); calculate()"></td>
+                        <td>psi</td>
+                    </tr>
+                    <tr>
+                        <td>SF (assumed)</td>
+                        <td>Assumed Safety Factor</td>
+                        <td><input type="number" id="var_SF_assumed" step="0.01" oninput="syncAllInstances('var_SF_assumed'); markAsUser('var_SF_assumed'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>R</sub></td>
+                        <td>Reliability Factor</td>
+                        <td><input type="number" id="var_KR" step="0.01" oninput="syncAllInstances('var_KR'); markAsUser('var_KR'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Lifetime</td>
+                        <td>Design Lifetime</td>
+                        <td><input type="number" id="var_lifetime" step="1" oninput="syncAllInstances('var_lifetime'); markAsUser('var_lifetime'); calculate()"></td>
+                        <td>hours</td>
+                    </tr>
+                    <tr>
+                        <td>N<sub>L</sub></td>
+                        <td>Load Cycles</td>
+                        <td><input type="number" id="var_NL" step="1" oninput="syncAllInstances('var_NL'); markAsUser('var_NL'); calculate()"></td>
+                        <td>cycles</td>
+                    </tr>
+                    <tr>
+                        <td>K<sub>L</sub></td>
+                        <td>Stress Cycle Factor (Bevel)</td>
+                        <td><input type="number" id="var_KL" step="0.0001" oninput="syncAllInstances('var_KL'); markAsUser('var_KL'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>at</sub> (required)</td>
+                        <td>Required Allowable Bending Stress</td>
+                        <td><input type="number" id="var_sat_required" step="0.0001" oninput="syncAllInstances('var_sat_required'); markAsUser('var_sat_required'); calculate()"></td>
+                        <td>psi</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>at</sub> (required)</td>
+                        <td>Required Allowable Bending Stress</td>
+                        <td><input type="number" id="var_sat_required_ksi" step="0.0001" oninput="syncAllInstances('var_sat_required_ksi'); markAsUser('var_sat_required_ksi'); calculate()"></td>
+                        <td>ksi</td>
+                    </tr>
+                    <tr>
+                        <td>HB (required)</td>
+                        <td>Required Brinell Hardness</td>
+                        <td><input type="number" id="var_HB_required" step="1" oninput="syncAllInstances('var_HB_required'); markAsUser('var_HB_required'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Material</td>
+                        <td>Selected Material</td>
+                        <td><input type="text" id="var_material" style="width: 200px;" oninput="syncAllInstances('var_material'); markAsUser('var_material'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>HB (actual)</td>
+                        <td>Actual Brinell Hardness</td>
+                        <td><input type="number" id="var_HB_actual" step="1" oninput="syncAllInstances('var_HB_actual'); markAsUser('var_HB_actual'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>at</sub> (actual)</td>
+                        <td>Actual Allowable Bending Stress</td>
+                        <td><input type="number" id="var_sat_actual_ksi" step="0.0001" oninput="syncAllInstances('var_sat_actual_ksi'); markAsUser('var_sat_actual_ksi'); calculate()"></td>
+                        <td>ksi</td>
+                    </tr>
+                    <tr>
+                        <td>SF<sub>bending</sub></td>
+                        <td>Actual Safety Factor (Bending)</td>
+                        <td><input type="number" id="var_SF_bending" step="0.0001" oninput="syncAllInstances('var_SF_bending'); markAsUser('var_SF_bending'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Contact Stress Analysis</td></tr>
+                    <tr>
+                        <td>C<sub>p</sub></td>
+                        <td>Elastic Coefficient</td>
+                        <td><input type="number" id="var_Cp" step="1" oninput="syncAllInstances('var_Cp'); markAsUser('var_Cp'); calculate()"></td>
+                        <td>psi<sup>1/2</sup></td>
+                    </tr>
+                    <tr>
+                        <td>C<sub>s</sub></td>
+                        <td>Pitting Size Factor (Bevel)</td>
+                        <td><input type="number" id="var_Cs" step="0.0001" oninput="syncAllInstances('var_Cs'); markAsUser('var_Cs'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>C<sub>xc</sub></td>
+                        <td>Crown Factor (Bevel)</td>
+                        <td><input type="number" id="var_Cxc" step="0.1" oninput="syncAllInstances('var_Cxc'); markAsUser('var_Cxc'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>I</td>
+                        <td>Pitting Geometry Factor</td>
+                        <td><input type="number" id="var_I" step="0.0001" oninput="syncAllInstances('var_I'); markAsUser('var_I'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>c</sub></td>
+                        <td>Contact Stress</td>
+                        <td><input type="number" id="var_sc" step="0.0001" oninput="syncAllInstances('var_sc'); markAsUser('var_sc'); calculate()"></td>
+                        <td>psi</td>
+                    </tr>
+                    <tr>
+                        <td>C<sub>R</sub></td>
+                        <td>Reliability Factor (Contact)</td>
+                        <td><input type="number" id="var_CR" step="0.01" oninput="syncAllInstances('var_CR'); markAsUser('var_CR'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>C<sub>L</sub></td>
+                        <td>Stress Cycle Factor (Bevel, Contact)</td>
+                        <td><input type="number" id="var_CL" step="0.0001" oninput="syncAllInstances('var_CL'); markAsUser('var_CL'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>ac</sub> (required)</td>
+                        <td>Required Allowable Contact Stress</td>
+                        <td><input type="number" id="var_sac_required" step="0.0001" oninput="syncAllInstances('var_sac_required'); markAsUser('var_sac_required'); calculate()"></td>
+                        <td>psi</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>ac</sub> (required)</td>
+                        <td>Required Allowable Contact Stress</td>
+                        <td><input type="number" id="var_sac_required_ksi" step="0.0001" oninput="syncAllInstances('var_sac_required_ksi'); markAsUser('var_sac_required_ksi'); calculate()"></td>
+                        <td>ksi</td>
+                    </tr>
+                    <tr>
+                        <td>HB (contact, required)</td>
+                        <td>Required Hardness (Contact)</td>
+                        <td><input type="number" id="var_HB_contact_required" step="1" oninput="syncAllInstances('var_HB_contact_required'); markAsUser('var_HB_contact_required'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>ac</sub> (actual)</td>
+                        <td>Actual Allowable Contact Stress</td>
+                        <td><input type="number" id="var_sac_actual_ksi" step="0.0001" oninput="syncAllInstances('var_sac_actual_ksi'); markAsUser('var_sac_actual_ksi'); calculate()"></td>
+                        <td>ksi</td>
+                    </tr>
+                    <tr>
+                        <td>SF<sub>contact</sub></td>
+                        <td>Actual Safety Factor (Contact)</td>
+                        <td><input type="number" id="var_SF_contact" step="0.0001" oninput="syncAllInstances('var_SF_contact'); markAsUser('var_SF_contact'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script>
@@ -1008,8 +1606,110 @@
                 mainEl.value = sourceEl.value;
             }
 
+            // Sync to all instances including Variables tab
+            syncAllInstances(sourceId);
             markAsUser(mainId);
             calculate();
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeTab = document.getElementById(tabName + '-tab');
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            event.currentTarget.classList.add('active');
+
+            if (typeof MathJax !== 'undefined' && activeTab) {
+                MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+            }
+        }
+
+        // Variable Instance Mapping for syncing across tabs
+        const varInstanceMap = {
+            'P': ['P', 'var_P', 'P_eq1'],
+            'n': ['n', 'var_n', 'n_eq1', 'n_eq13'],
+            'D': ['D', 'var_D', 'D_eq1'],
+            'Dp': ['Dp', 'var_Dp', 'Dp_eq1', 'Dp_eq21'],
+            'NP': ['NP', 'var_NP'],
+            'NG': ['NG', 'var_NG'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq1', 'Pd_eq10'],
+            'F': ['F', 'var_F', 'F_eq1', 'F_eq2', 'F_eq3', 'F_eq4', 'F_eq10', 'F_eq18', 'F_eq21'],
+            'vt': ['vt', 'var_vt', 'vt_eq1', 'vt_eq2'],
+            'Wt': ['Wt', 'var_Wt', 'Wt_eq1', 'Wt_eq2', 'Wt_eq3', 'Wt_eq10', 'Wt_eq21'],
+            'Ko': ['Ko', 'var_Ko', 'Ko_eq1', 'Ko_eq2', 'Ko_eq10', 'Ko_eq21'],
+            'Ks': ['Ks', 'var_Ks', 'Ks_eq1', 'Ks_eq10'],
+            'Kmb': ['Kmb', 'var_Kmb', 'Kmb_eq', 'Kmb_eq1'],
+            'Km': ['Km', 'var_Km', 'Km_eq1', 'Km_eq2', 'Km_eq3', 'Km_eq10', 'Km_eq21'],
+            'Kv': ['Kv', 'var_Kv', 'Kv_eq1', 'Kv_eq2', 'Kv_eq10', 'Kv_eq21'],
+            'Av': ['Av', 'var_Av'],
+            'J': ['J', 'var_J', 'J_eq1', 'J_eq10'],
+            'st': ['st', 'var_st', 'st_eq1', 'st_eq2', 'st_eq15', 'st_eq16'],
+            'SF_assumed': ['SF_assumed', 'var_SF_assumed', 'SF_eq15', 'SF_eq24'],
+            'KR': ['KR', 'var_KR', 'KR_eq1', 'KR_eq15', 'KR_eq16'],
+            'lifetime': ['lifetime', 'var_lifetime'],
+            'NL': ['NL', 'var_NL'],
+            'KL': ['KL', 'var_KL', 'KL_eq1', 'KL_eq15', 'KL_eq16'],
+            'sat_required': ['sat_required', 'var_sat_required'],
+            'sat_required_ksi': ['sat_required_ksi', 'var_sat_required_ksi'],
+            'HB_required': ['HB_required', 'var_HB_required'],
+            'material': ['material', 'var_material'],
+            'HB_actual': ['HB_actual', 'var_HB_actual'],
+            'sat': ['sat', 'sat_eq1'],
+            'sat_actual_ksi': ['sat_actual_ksi', 'var_sat_actual_ksi', 'sat_actual_ksi_eq16'],
+            'SF_bending': ['SF_bending', 'var_SF_bending', 'SF_bending_eq1'],
+            'Cp': ['Cp', 'var_Cp', 'Cp_eq1', 'Cp_eq21'],
+            'Cs': ['Cs', 'var_Cs', 'Cs_eq1', 'Cs_eq2', 'Cs_eq21'],
+            'Cxc': ['Cxc', 'var_Cxc', 'Cxc_eq1', 'Cxc_eq21'],
+            'I': ['I', 'var_I', 'I_eq1', 'I_eq21'],
+            'sc': ['sc', 'var_sc', 'sc_eq1', 'sc_eq2', 'sc_eq24', 'sc_eq25'],
+            'CR': ['CR', 'var_CR', 'CR_eq1', 'CR_eq24', 'CR_eq25'],
+            'CL': ['CL', 'var_CL', 'CL_eq1', 'CL_eq24', 'CL_eq25'],
+            'sac_required': ['sac_required', 'var_sac_required'],
+            'sac_required_ksi': ['sac_required_ksi', 'var_sac_required_ksi'],
+            'HB_contact_required': ['HB_contact_required', 'var_HB_contact_required'],
+            'sac': ['sac', 'sac_eq1'],
+            'sac_actual_ksi': ['sac_actual_ksi', 'var_sac_actual_ksi', 'sac_actual_ksi_eq25'],
+            'SF_contact': ['SF_contact', 'var_SF_contact', 'SF_contact_eq1']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            const underscoreIndex = id.indexOf('_eq');
+            if (underscoreIndex !== -1) {
+                return id.substring(0, underscoreIndex);
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVarName(changedId);
+            const instances = varInstanceMap[baseVar];
+            if (!instances) return;
+
+            const changedInput = document.getElementById(changedId);
+            if (!changedInput) return;
+
+            const newValue = changedInput.value;
+
+            instances.forEach(instanceId => {
+                if (instanceId !== changedId) {
+                    const input = document.getElementById(instanceId);
+                    if (input) {
+                        input.value = newValue;
+                    }
+                }
+            });
         }
 
         // Mark field as user-modified
@@ -1037,6 +1737,8 @@
                 // Add computed class for visual feedback
                 if (!userValues.has(id)) {
                     el.classList.add('computed');
+                    // Sync to all instances including Variables tab
+                    syncAllInstances(id);
                 } else {
                     el.classList.remove('computed');
                 }

@@ -221,6 +221,44 @@
             padding: 5px 0;
             font-size: 14px;
         }
+
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s;
+        }
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none !important;
+        }
+        .tab-content.active {
+            display: block !important;
+        }
+        .procedure-content {
+            display: none !important;
+        }
+        .procedure-content.active {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -239,34 +277,49 @@
             <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+            <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+            <button class="tab-button" onclick="showTab('variables')">Variables</button>
+        </div>
+
+        <!-- Procedure Tab -->
+        <div id="procedure-tab" class="tab-content active">
+
         <!-- Given Information -->
         <div class="section">
             <h2>Given Information</h2>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>P<sub>d</sub> =</label>
-                <input type="number" id="PD" step="0.1" oninput="markAsUser('PD'); calculate()">
+                <input type="number" id="PD" step="0.1" oninput="syncAllInstances('PD'); markAsUser('PD'); calculate()">
                 <span class="unit">teeth/in (diametral pitch)</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>N<sub>P</sub> =</label>
-                <input type="number" id="NP" step="1" oninput="markAsUser('NP'); calculate()">
+                <input type="number" id="NP" step="1" oninput="syncAllInstances('NP'); markAsUser('NP'); calculate()">
                 <span class="unit">teeth (pinion)</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>n<sub>P</sub> =</label>
-                <input type="number" id="np" step="0.1" oninput="markAsUser('np'); calculate()">
+                <input type="number" id="np" step="0.1" oninput="syncAllInstances('np'); markAsUser('np'); calculate()">
                 <span class="unit">rpm (pinion speed)</span>
             </div>
 
             <div class="var-input">
                 <label>s<sub>rack</sub> =</label>
-                <input type="number" id="srack" step="0.01" oninput="markAsUser('srack'); calculate()">
+                <input type="number" id="srack" step="0.01" oninput="syncAllInstances('srack'); markAsUser('srack'); calculate()">
                 <span class="unit">ft (rack travel distance, optional)</span>
             </div>
         </div>
+
+        </div> <!-- End Procedure Tab -->
+
+        <!-- Equations Tab -->
+        <div id="equations-tab" class="tab-content">
 
         <!-- General Equations -->
         <div class="section">
@@ -280,7 +333,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>v<sub>t</sub> =</label>
-                        <input type="number" id="vt_gen" step="0.0001" oninput="markAsUser('vt_gen'); calculate()">
+                        <input type="number" id="vt_gen" step="0.0001" oninput="syncAllInstances('vt_gen'); markAsUser('vt_gen'); calculate()">
                         <span class="unit">ft/min (pitch line speed)</span>
                     </div>
                     <span>=</span>
@@ -306,7 +359,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>V<sub>rack</sub> =</label>
-                        <input type="number" id="Vrack_gen" step="0.0001" oninput="markAsUser('Vrack_gen'); calculate()">
+                        <input type="number" id="Vrack_gen" step="0.0001" oninput="syncAllInstances('Vrack_gen'); markAsUser('Vrack_gen'); calculate()">
                         <span class="unit">ft/min (rack speed)</span>
                     </div>
                     <span>=</span>
@@ -332,7 +385,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>S<sub>rack</sub> =</label>
-                        <input type="number" id="Srack_gen" step="0.0001" oninput="markAsUser('Srack_gen'); calculate()">
+                        <input type="number" id="Srack_gen" step="0.0001" oninput="syncAllInstances('Srack_gen'); markAsUser('Srack_gen'); calculate()">
                         <span class="unit">ft (distance traveled)</span>
                     </div>
                     <span>=</span>
@@ -352,6 +405,11 @@
             </div>
         </div>
 
+        </div> <!-- End Equations Tab -->
+
+        <!-- Continue Procedure Tab (Steps) -->
+        <div id="procedure-tab-steps" class="tab-content procedure-content active">
+
         <!-- Step 1: Pitch Diameter -->
         <div class="section">
             <h2>Step 1: Calculate Pitch Diameter</h2>
@@ -363,7 +421,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>P</sub> =</label>
-                        <input type="number" id="Dp" step="0.0001" oninput="markAsUser('Dp'); calculate()">
+                        <input type="number" id="Dp" step="0.0001" oninput="syncAllInstances('Dp'); markAsUser('Dp'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -461,7 +519,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>V<sub>rack</sub> =</label>
-                        <input type="number" id="Vrack" step="0.0001" oninput="markAsUser('Vrack'); calculate()">
+                        <input type="number" id="Vrack" step="0.0001" oninput="syncAllInstances('Vrack'); markAsUser('Vrack'); calculate()">
                         <span class="unit">ft/min</span>
                     </div>
                     <span>= (π / 6) × (</span>
@@ -548,9 +606,189 @@
                 <div class="summary-item">Revolutions: θ<sub>P</sub> = <span id="summary_thetaP">-</span> rev</div>
             </div>
         </div>
+
+        </div> <!-- End Procedure Tab Steps -->
+
+        <!-- Variables Tab -->
+        <div id="variables-tab" class="tab-content">
+            <div class="section">
+                <h2>All Variables Reference</h2>
+                <div style="background: #e3f2fd; padding: 15px; margin: 15px 0; border-left: 4px solid #2196f3; border-radius: 5px;">
+                    📋 All variables used in this calculator. Values entered here sync with other tabs.
+                </div>
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Description</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                    <tr>
+                        <td>P<sub>d</sub></td>
+                        <td>Diametral Pitch</td>
+                        <td><input type="number" id="var_PD" step="0.1" oninput="syncAllInstances('var_PD'); markAsUser('var_PD'); calculate()"></td>
+                        <td>teeth/in</td>
+                    </tr>
+                    <tr>
+                        <td>N<sub>P</sub></td>
+                        <td>Number of Teeth (pinion)</td>
+                        <td><input type="number" id="var_NP" step="1" oninput="syncAllInstances('var_NP'); markAsUser('var_NP'); calculate()"></td>
+                        <td>teeth</td>
+                    </tr>
+                    <tr>
+                        <td>n<sub>P</sub></td>
+                        <td>Pinion Speed</td>
+                        <td><input type="number" id="var_np" step="0.1" oninput="syncAllInstances('var_np'); markAsUser('var_np'); calculate()"></td>
+                        <td>rpm</td>
+                    </tr>
+                    <tr>
+                        <td>D<sub>P</sub></td>
+                        <td>Pitch Diameter</td>
+                        <td><input type="number" id="var_Dp" step="0.0001" oninput="syncAllInstances('var_Dp'); markAsUser('var_Dp'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>V<sub>rack</sub></td>
+                        <td>Rack Velocity</td>
+                        <td><input type="number" id="var_Vrack" step="0.0001" oninput="syncAllInstances('var_Vrack'); markAsUser('var_Vrack'); calculate()"></td>
+                        <td>ft/min</td>
+                    </tr>
+                    <tr>
+                        <td>s<sub>rack</sub></td>
+                        <td>Rack Travel Distance</td>
+                        <td><input type="number" id="var_srack" step="0.01" oninput="syncAllInstances('var_srack'); markAsUser('var_srack'); calculate()"></td>
+                        <td>ft</td>
+                    </tr>
+                    <tr>
+                        <td>B</td>
+                        <td>Pitch to Back Distance</td>
+                        <td><input type="number" id="var_B" step="0.001" oninput="syncAllInstances('var_B'); markAsUser('var_B'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>B-C</td>
+                        <td>Back to Centerline Distance</td>
+                        <td><input type="number" id="var_BC" step="0.0001" oninput="syncAllInstances('var_BC'); markAsUser('var_BC'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>t</td>
+                        <td>Time to Move Distance</td>
+                        <td><input type="number" id="var_t" step="0.0001" oninput="syncAllInstances('var_t'); markAsUser('var_t'); calculate()"></td>
+                        <td>seconds</td>
+                    </tr>
+                    <tr>
+                        <td>θ<sub>P</sub></td>
+                        <td>Number of Revolutions</td>
+                        <td><input type="number" id="var_thetaP" step="0.0001" oninput="syncAllInstances('var_thetaP'); markAsUser('var_thetaP'); calculate()"></td>
+                        <td>rev</td>
+                    </tr>
+                    <tr>
+                        <td>v<sub>t</sub></td>
+                        <td>Pitch Line Speed</td>
+                        <td><input type="number" id="var_vt_gen" step="0.0001" oninput="syncAllInstances('var_vt_gen'); markAsUser('var_vt_gen'); calculate()"></td>
+                        <td>ft/min</td>
+                    </tr>
+                    <tr>
+                        <td>S<sub>rack</sub></td>
+                        <td>Rack Distance Traveled</td>
+                        <td><input type="number" id="var_Srack_gen" step="0.0001" oninput="syncAllInstances('var_Srack_gen'); markAsUser('var_Srack_gen'); calculate()"></td>
+                        <td>ft</td>
+                    </tr>
+                    <tr>
+                        <td>ρ</td>
+                        <td>Revolutions Input</td>
+                        <td><input type="number" id="var_rho" step="0.01" oninput="syncAllInstances('var_rho'); markAsUser('var_rho'); calculate()"></td>
+                        <td>rev</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <script>
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.procedure-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            if (tabName === 'procedure') {
+                document.getElementById('procedure-tab').classList.add('active');
+                document.getElementById('procedure-tab-steps').classList.add('active');
+            } else {
+                const activeTab = document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+            }
+
+            // Activate button
+            event.currentTarget.classList.add('active');
+
+            // Re-render MathJax for the active tab
+            if (typeof MathJax !== 'undefined') {
+                const activeTab = tabName === 'procedure' ?
+                    document.getElementById('procedure-tab') :
+                    document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+                }
+            }
+        }
+
+        // Variable Instance Mapping for Bidirectional Sync
+        const varInstanceMap = {
+            'PD': ['PD', 'var_PD'],
+            'NP': ['NP', 'var_NP'],
+            'np': ['np', 'var_np', 'np_gen1', 'np_gen2', 'np_eq4'],
+            'Dp': ['Dp', 'var_Dp', 'Dp_gen1', 'Dp_gen2', 'Dp_gen3', 'Dp_eq1', 'Dp_eq2', 'Dp_eq3', 'Dp_eq4', 'Dp_eq5', 'Dp_eq6'],
+            'Vrack': ['Vrack', 'var_Vrack', 'Vrack_gen', 'Vrack_eq2', 'Vrack_eq3', 'Vrack_eq4', 'Vrack_eq5'],
+            'srack': ['srack', 'var_srack', 'srack_eq5', 'srack_eq6'],
+            'vt_gen': ['vt_gen', 'var_vt_gen'],
+            'Srack_gen': ['Srack_gen', 'var_Srack_gen'],
+            'rho': ['rho', 'var_rho'],
+            'B': ['B', 'var_B', 'B_eq3'],
+            'BC': ['BC', 'var_BC'],
+            't': ['t', 'var_t'],
+            'thetaP': ['thetaP', 'var_thetaP']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'Dp_eq1', 'np_gen2', etc.
+            const eqMatch = id.match(/^(.+)_(eq\d*|gen\d*)$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) el.value = value;
+                }
+            });
+        }
+
         const userValues = new Set();
 
         function syncInput(mainId, sourceId) {
@@ -565,6 +803,12 @@
 
         function markAsUser(fieldId) {
             userValues.add(fieldId);
+            const baseVar = getBaseVarName(fieldId);
+            if (varInstanceMap[baseVar]) {
+                varInstanceMap[baseVar].forEach(instanceId => {
+                    userValues.add(instanceId);
+                });
+            }
         }
 
         function getValue(id) {

@@ -237,6 +237,44 @@
         .input-row input, .input-row select {
             flex: 1;
         }
+
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s;
+        }
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none !important;
+        }
+        .tab-content.active {
+            display: block !important;
+        }
+        .procedure-content {
+            display: none !important;
+        }
+        .procedure-content.active {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -246,6 +284,16 @@
         </div>
         <div class="calculator-column">
             <h1>Worm Gear Calculator</h1>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
 
             <!-- Given Information -->
             <div class="section">
@@ -258,52 +306,52 @@
 
                 <div class="input-row">
                     <label>\(N_G\) - Number of Teeth on Gear:</label>
-                    <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
+                    <input type="number" id="NG" step="1" oninput="syncAllInstances('NG'); markAsUser('NG'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(N_W\) - Number of Worm Threads:</label>
-                    <input type="number" id="NW" step="1" oninput="markAsUser('NW'); calculate()">
+                    <input type="number" id="NW" step="1" oninput="syncAllInstances('NW'); markAsUser('NW'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(D_G\) - Pitch Diameter of Gear (in):</label>
-                    <input type="number" id="DG" step="any" oninput="markAsUser('DG'); calculate()">
+                    <input type="number" id="DG" step="any" oninput="syncAllInstances('DG'); markAsUser('DG'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(D_W\) - Pitch Diameter of Worm (in):</label>
-                    <input type="number" id="DW" step="any" oninput="markAsUser('DW'); calculate()">
+                    <input type="number" id="DW" step="any" oninput="syncAllInstances('DW'); markAsUser('DW'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(P_d\) - Diametral Pitch (teeth/in):</label>
-                    <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
+                    <input type="number" id="Pd" step="any" oninput="syncAllInstances('Pd'); markAsUser('Pd'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(\phi_n\) - Normal Pressure Angle (deg):</label>
-                    <input type="number" id="phi_n" step="any" oninput="markAsUser('phi_n'); calculate()">
+                    <input type="number" id="phi_n" step="any" oninput="syncAllInstances('phi_n'); markAsUser('phi_n'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(n_W\) - Speed of Worm (rpm):</label>
-                    <input type="number" id="nW" step="any" oninput="markAsUser('nW'); calculate()">
+                    <input type="number" id="nW" step="any" oninput="syncAllInstances('nW'); markAsUser('nW'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(n_G\) - Speed of Gear (rpm):</label>
-                    <input type="number" id="nG" step="any" oninput="markAsUser('nG'); calculate()">
+                    <input type="number" id="nG" step="any" oninput="syncAllInstances('nG'); markAsUser('nG'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(P_o\) - Output Power (hp):</label>
-                    <input type="number" id="Po" step="any" oninput="markAsUser('Po'); calculate()">
+                    <input type="number" id="Po" step="any" oninput="syncAllInstances('Po'); markAsUser('Po'); calculate()">
                 </div>
 
                 <div class="input-row">
                     <label>\(F\) - Face Width of Wormgear (in):</label>
-                    <input type="number" id="F" step="any" oninput="markAsUser('F'); calculate()">
+                    <input type="number" id="F" step="any" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
                 </div>
 
                 <div class="input-row">
@@ -316,6 +364,11 @@
                     </select>
                 </div>
             </div>
+
+            </div> <!-- End Procedure Tab -->
+
+            <!-- Equations Tab -->
+            <div id="equations-tab" class="tab-content">
 
             <!-- General Equations -->
             <div class="section">
@@ -332,8 +385,21 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>p =</label>
-                            <input type="number" id="p_gen" step="0.0001" oninput="markAsUser('p_gen'); calculate()">
-                            <span class="unit">in (circular pitch)</span>
+                            <input type="number" id="p_gen" step="0.0001" oninput="syncAllInstances('p_gen'); markAsUser('p_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <span>(π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen1" step="0.0001" oninput="syncAllInstances('DG_gen1'); markAsUser('DG_gen1'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>) /</span>
+                        <div class="var-input">
+                            <label>N<sub>G</sub> =</label>
+                            <input type="number" id="NG_gen1" step="1" oninput="syncAllInstances('NG_gen1'); markAsUser('NG_gen1'); calculate()">
+                            <span class="unit">teeth</span>
                         </div>
                     </div>
                 </div>
@@ -345,8 +411,26 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>P<sub>d</sub> =</label>
-                            <input type="number" id="Pd_gen" step="0.0001" oninput="markAsUser('Pd_gen'); calculate()">
-                            <span class="unit">teeth/in (diametral pitch)</span>
+                            <input type="number" id="Pd_gen" step="0.0001" oninput="syncAllInstances('Pd_gen'); markAsUser('Pd_gen'); calculate()">
+                            <span class="unit">teeth/in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>N<sub>G</sub> =</label>
+                            <input type="number" id="NG_gen2" step="1" oninput="syncAllInstances('NG_gen2'); markAsUser('NG_gen2'); calculate()">
+                            <span class="unit">teeth</span>
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen2" step="0.0001" oninput="syncAllInstances('DG_gen2'); markAsUser('DG_gen2'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= π /</span>
+                        <div class="var-input">
+                            <label>p =</label>
+                            <input type="number" id="p_gen2" step="0.0001" oninput="syncAllInstances('p_gen2'); markAsUser('p_gen2'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -359,9 +443,22 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>C =</label>
-                            <input type="number" id="C_gen" step="0.0001" oninput="markAsUser('C_gen'); calculate()">
-                            <span class="unit">in (center distance)</span>
+                            <input type="number" id="C_gen" step="0.0001" oninput="syncAllInstances('C_gen'); markAsUser('C_gen'); calculate()">
+                            <span class="unit">in</span>
                         </div>
+                        <span>= (</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub> =</label>
+                            <input type="number" id="DW_gen1" step="0.0001" oninput="syncAllInstances('DW_gen1'); markAsUser('DW_gen1'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>+</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen3" step="0.0001" oninput="syncAllInstances('DG_gen3'); markAsUser('DG_gen3'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>) / 2</span>
                     </div>
                 </div>
 
@@ -372,8 +469,14 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>a =</label>
-                            <input type="number" id="a_gen" step="0.0001" oninput="markAsUser('a_gen'); calculate()">
-                            <span class="unit">in (addendum)</span>
+                            <input type="number" id="a_gen" step="0.0001" oninput="syncAllInstances('a_gen'); markAsUser('a_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= 1 /</span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen2" step="0.0001" oninput="syncAllInstances('Pd_gen2'); markAsUser('Pd_gen2'); calculate()">
+                            <span class="unit">teeth/in</span>
                         </div>
                     </div>
                 </div>
@@ -385,8 +488,14 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>h<sub>t</sub> =</label>
-                            <input type="number" id="ht_gen" step="0.0001" oninput="markAsUser('ht_gen'); calculate()">
-                            <span class="unit">in (whole depth)</span>
+                            <input type="number" id="ht_gen" step="0.0001" oninput="syncAllInstances('ht_gen'); markAsUser('ht_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= 2.157 /</span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen3" step="0.0001" oninput="syncAllInstances('Pd_gen3'); markAsUser('Pd_gen3'); calculate()">
+                            <span class="unit">teeth/in</span>
                         </div>
                     </div>
                 </div>
@@ -398,8 +507,20 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>b =</label>
-                            <input type="number" id="b_gen" step="0.0001" oninput="markAsUser('b_gen'); calculate()">
-                            <span class="unit">in (dedendum)</span>
+                            <input type="number" id="b_gen" step="0.0001" oninput="syncAllInstances('b_gen'); markAsUser('b_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>h<sub>t</sub> =</label>
+                            <input type="number" id="ht_gen2" step="0.0001" oninput="syncAllInstances('ht_gen2'); markAsUser('ht_gen2'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>−</span>
+                        <div class="var-input">
+                            <label>a =</label>
+                            <input type="number" id="a_gen2" step="0.0001" oninput="syncAllInstances('a_gen2'); markAsUser('a_gen2'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -411,8 +532,20 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>D<sub>rW</sub> =</label>
-                            <input type="number" id="DrW_gen" step="0.0001" oninput="markAsUser('DrW_gen'); calculate()">
-                            <span class="unit">in (worm root diameter)</span>
+                            <input type="number" id="DrW_gen" step="0.0001" oninput="syncAllInstances('DrW_gen'); markAsUser('DrW_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub> =</label>
+                            <input type="number" id="DW_gen2" step="0.0001" oninput="syncAllInstances('DW_gen2'); markAsUser('DW_gen2'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>− 2 ×</span>
+                        <div class="var-input">
+                            <label>b =</label>
+                            <input type="number" id="b_gen2" step="0.0001" oninput="syncAllInstances('b_gen2'); markAsUser('b_gen2'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -424,8 +557,20 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>D<sub>oW</sub> =</label>
-                            <input type="number" id="DoW_gen" step="0.0001" oninput="markAsUser('DoW_gen'); calculate()">
-                            <span class="unit">in (worm outside diameter)</span>
+                            <input type="number" id="DoW_gen" step="0.0001" oninput="syncAllInstances('DoW_gen'); markAsUser('DoW_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub> =</label>
+                            <input type="number" id="DW_gen3" step="0.0001" oninput="syncAllInstances('DW_gen3'); markAsUser('DW_gen3'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>+ 2 ×</span>
+                        <div class="var-input">
+                            <label>a =</label>
+                            <input type="number" id="a_gen3" step="0.0001" oninput="syncAllInstances('a_gen3'); markAsUser('a_gen3'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -437,8 +582,20 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>D<sub>rG</sub> =</label>
-                            <input type="number" id="DrG_gen" step="0.0001" oninput="markAsUser('DrG_gen'); calculate()">
-                            <span class="unit">in (gear root diameter)</span>
+                            <input type="number" id="DrG_gen" step="0.0001" oninput="syncAllInstances('DrG_gen'); markAsUser('DrG_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen4" step="0.0001" oninput="syncAllInstances('DG_gen4'); markAsUser('DG_gen4'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>− 2 ×</span>
+                        <div class="var-input">
+                            <label>b =</label>
+                            <input type="number" id="b_gen3" step="0.0001" oninput="syncAllInstances('b_gen3'); markAsUser('b_gen3'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -450,8 +607,20 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>D<sub>t</sub> =</label>
-                            <input type="number" id="Dt_gen" step="0.0001" oninput="markAsUser('Dt_gen'); calculate()">
-                            <span class="unit">in (gear throat diameter)</span>
+                            <input type="number" id="Dt_gen" step="0.0001" oninput="syncAllInstances('Dt_gen'); markAsUser('Dt_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen5" step="0.0001" oninput="syncAllInstances('DG_gen5'); markAsUser('DG_gen5'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>+ 2 ×</span>
+                        <div class="var-input">
+                            <label>a =</label>
+                            <input type="number" id="a_gen4" step="0.0001" oninput="syncAllInstances('a_gen4'); markAsUser('a_gen4'); calculate()">
+                            <span class="unit">in</span>
                         </div>
                     </div>
                 </div>
@@ -464,9 +633,22 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>v<sub>W</sub> =</label>
-                            <input type="number" id="vW_gen" step="0.0001" oninput="markAsUser('vW_gen'); calculate()">
-                            <span class="unit">ft/min (worm pitch line speed)</span>
+                            <input type="number" id="vW_gen" step="0.0001" oninput="syncAllInstances('vW_gen'); markAsUser('vW_gen'); calculate()">
+                            <span class="unit">ft/min</span>
                         </div>
+                        <span>= (π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>W</sub> =</label>
+                            <input type="number" id="DW_gen4" step="0.0001" oninput="syncAllInstances('DW_gen4'); markAsUser('DW_gen4'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>W</sub> =</label>
+                            <input type="number" id="nW_gen1" step="0.01" oninput="syncAllInstances('nW_gen1'); markAsUser('nW_gen1'); calculate()">
+                            <span class="unit">rpm</span>
+                        </div>
+                        <span>) / 12</span>
                     </div>
                 </div>
 
@@ -477,9 +659,22 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>v<sub>G</sub> =</label>
-                            <input type="number" id="vG_gen" step="0.0001" oninput="markAsUser('vG_gen'); calculate()">
-                            <span class="unit">ft/min (gear pitch line speed)</span>
+                            <input type="number" id="vG_gen" step="0.0001" oninput="syncAllInstances('vG_gen'); markAsUser('vG_gen'); calculate()">
+                            <span class="unit">ft/min</span>
                         </div>
+                        <span>= (π ×</span>
+                        <div class="var-input">
+                            <label>D<sub>G</sub> =</label>
+                            <input type="number" id="DG_gen6" step="0.0001" oninput="syncAllInstances('DG_gen6'); markAsUser('DG_gen6'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>n<sub>G</sub> =</label>
+                            <input type="number" id="nG_gen1" step="0.01" oninput="syncAllInstances('nG_gen1'); markAsUser('nG_gen1'); calculate()">
+                            <span class="unit">rpm</span>
+                        </div>
+                        <span>) / 12</span>
                     </div>
                 </div>
 
@@ -490,12 +685,29 @@
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>VR =</label>
-                            <input type="number" id="VR_gen" step="0.0001" oninput="markAsUser('VR_gen'); calculate()">
-                            <span class="unit">(velocity ratio)</span>
+                            <input type="number" id="VR_gen" step="0.0001" oninput="syncAllInstances('VR_gen'); markAsUser('VR_gen'); calculate()">
+                            <span class="unit"></span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>n<sub>W</sub> =</label>
+                            <input type="number" id="nW_gen2" step="0.01" oninput="syncAllInstances('nW_gen2'); markAsUser('nW_gen2'); calculate()">
+                            <span class="unit">rpm</span>
+                        </div>
+                        <span>/</span>
+                        <div class="var-input">
+                            <label>n<sub>G</sub> =</label>
+                            <input type="number" id="nG_gen2" step="0.01" oninput="syncAllInstances('nG_gen2'); markAsUser('nG_gen2'); calculate()">
+                            <span class="unit">rpm</span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            </div> <!-- End Equations Tab -->
+
+            <!-- Continue Procedure Tab (Steps) -->
+            <div id="procedure-tab-steps" class="tab-content procedure-content active">
 
             <!-- Step 1: Lead and Lead Angle -->
             <div class="section">
@@ -1145,6 +1357,314 @@
                 </div>
             </div>
 
+            </div> <!-- End Procedure Tab Steps -->
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>All Variables Reference</h2>
+                    <div class="info-box">
+                        📋 All variables used in this calculator. Values entered here sync with other tabs.
+                    </div>
+                    <table>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                        <tr>
+                            <td>N<sub>G</sub></td>
+                            <td>Number of Teeth on Gear</td>
+                            <td><input type="number" id="var_NG" step="1" oninput="syncAllInstances('var_NG'); markAsUser('var_NG'); calculate()"></td>
+                            <td>teeth</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>W</sub></td>
+                            <td>Number of Worm Threads</td>
+                            <td><input type="number" id="var_NW" step="1" oninput="syncAllInstances('var_NW'); markAsUser('var_NW'); calculate()"></td>
+                            <td>threads</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>G</sub></td>
+                            <td>Pitch Diameter of Gear</td>
+                            <td><input type="number" id="var_DG" step="any" oninput="syncAllInstances('var_DG'); markAsUser('var_DG'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>W</sub></td>
+                            <td>Pitch Diameter of Worm</td>
+                            <td><input type="number" id="var_DW" step="any" oninput="syncAllInstances('var_DW'); markAsUser('var_DW'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>d</sub></td>
+                            <td>Diametral Pitch</td>
+                            <td><input type="number" id="var_Pd" step="any" oninput="syncAllInstances('var_Pd'); markAsUser('var_Pd'); calculate()"></td>
+                            <td>teeth/in</td>
+                        </tr>
+                        <tr>
+                            <td>φ<sub>n</sub></td>
+                            <td>Normal Pressure Angle</td>
+                            <td><input type="number" id="var_phi_n" step="any" oninput="syncAllInstances('var_phi_n'); markAsUser('var_phi_n'); calculate()"></td>
+                            <td>deg</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>W</sub></td>
+                            <td>Speed of Worm</td>
+                            <td><input type="number" id="var_nW" step="any" oninput="syncAllInstances('var_nW'); markAsUser('var_nW'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>G</sub></td>
+                            <td>Speed of Gear</td>
+                            <td><input type="number" id="var_nG" step="any" oninput="syncAllInstances('var_nG'); markAsUser('var_nG'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>o</sub></td>
+                            <td>Output Power</td>
+                            <td><input type="number" id="var_Po" step="any" oninput="syncAllInstances('var_Po'); markAsUser('var_Po'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>F</td>
+                            <td>Face Width of Wormgear</td>
+                            <td><input type="number" id="var_F" step="any" oninput="syncAllInstances('var_F'); markAsUser('var_F'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>p</td>
+                            <td>Circular Pitch</td>
+                            <td><input type="number" id="var_p" step="any" oninput="syncAllInstances('var_p'); markAsUser('var_p'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td>Center Distance</td>
+                            <td><input type="number" id="var_C" step="any" oninput="syncAllInstances('var_C'); markAsUser('var_C'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>L</td>
+                            <td>Lead</td>
+                            <td><input type="number" id="var_L" step="any" oninput="syncAllInstances('var_L'); markAsUser('var_L'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>λ</td>
+                            <td>Lead Angle</td>
+                            <td><input type="number" id="var_lambda" step="any" oninput="syncAllInstances('var_lambda'); markAsUser('var_lambda'); calculate()"></td>
+                            <td>deg</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>x</sub></td>
+                            <td>Axial Pitch</td>
+                            <td><input type="number" id="var_Px" step="any" oninput="syncAllInstances('var_Px'); markAsUser('var_Px'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>CD</td>
+                            <td>Center Distance</td>
+                            <td><input type="number" id="var_CD" step="any" oninput="syncAllInstances('var_CD'); markAsUser('var_CD'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>ν<sub>tG</sub></td>
+                            <td>Pitch Line Speed of Gear</td>
+                            <td><input type="number" id="var_vtG" step="any" oninput="syncAllInstances('var_vtG'); markAsUser('var_vtG'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>ν<sub>s</sub></td>
+                            <td>Sliding Speed</td>
+                            <td><input type="number" id="var_vs" step="any" oninput="syncAllInstances('var_vs'); markAsUser('var_vs'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>μ</td>
+                            <td>Coefficient of Friction</td>
+                            <td><input type="number" id="var_mu" step="any" oninput="syncAllInstances('var_mu'); markAsUser('var_mu'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>T<sub>o</sub></td>
+                            <td>Output Torque</td>
+                            <td><input type="number" id="var_To" step="any" oninput="syncAllInstances('var_To'); markAsUser('var_To'); calculate()"></td>
+                            <td>lb-in</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>tG</sub></td>
+                            <td>Transmitted Force on Gear</td>
+                            <td><input type="number" id="var_WtG" step="any" oninput="syncAllInstances('var_WtG'); markAsUser('var_WtG'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>xG</sub></td>
+                            <td>Axial Force on Gear</td>
+                            <td><input type="number" id="var_WxG" step="any" oninput="syncAllInstances('var_WxG'); markAsUser('var_WxG'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>rG</sub></td>
+                            <td>Radial Force on Gear</td>
+                            <td><input type="number" id="var_WrG" step="any" oninput="syncAllInstances('var_WrG'); markAsUser('var_WrG'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>f</sub></td>
+                            <td>Friction Force</td>
+                            <td><input type="number" id="var_Wf" step="any" oninput="syncAllInstances('var_Wf'); markAsUser('var_Wf'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>L</sub></td>
+                            <td>Power Loss</td>
+                            <td><input type="number" id="var_PL" step="any" oninput="syncAllInstances('var_PL'); markAsUser('var_PL'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>i</sub></td>
+                            <td>Input Power</td>
+                            <td><input type="number" id="var_Pi" step="any" oninput="syncAllInstances('var_Pi'); markAsUser('var_Pi'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>η</td>
+                            <td>Efficiency</td>
+                            <td><input type="number" id="var_eta" step="any" oninput="syncAllInstances('var_eta'); markAsUser('var_eta'); calculate()"></td>
+                            <td>%</td>
+                        </tr>
+                        <tr>
+                            <td>y</td>
+                            <td>Lewis Form Factor</td>
+                            <td><input type="number" id="var_y" step="any" oninput="syncAllInstances('var_y'); markAsUser('var_y'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>p<sub>n</sub></td>
+                            <td>Normal Circular Pitch</td>
+                            <td><input type="number" id="var_pn" step="any" oninput="syncAllInstances('var_pn'); markAsUser('var_pn'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>v</sub></td>
+                            <td>Dynamic Factor</td>
+                            <td><input type="number" id="var_Kv" step="any" oninput="syncAllInstances('var_Kv'); markAsUser('var_Kv'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>d</sub></td>
+                            <td>Dynamic Load</td>
+                            <td><input type="number" id="var_Wd" step="any" oninput="syncAllInstances('var_Wd'); markAsUser('var_Wd'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>σ</td>
+                            <td>Stress in Gear Teeth</td>
+                            <td><input type="number" id="var_sigma" step="any" oninput="syncAllInstances('var_sigma'); markAsUser('var_sigma'); calculate()"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>C<sub>s</sub></td>
+                            <td>Materials Factor</td>
+                            <td><input type="number" id="var_Cs" step="any" oninput="syncAllInstances('var_Cs'); markAsUser('var_Cs'); calculate()"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>m<sub>G</sub></td>
+                            <td>Gear Ratio</td>
+                            <td><input type="number" id="var_mG" step="any" oninput="syncAllInstances('var_mG'); markAsUser('var_mG'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>C<sub>m</sub></td>
+                            <td>Ratio Correction Factor</td>
+                            <td><input type="number" id="var_Cm" step="any" oninput="syncAllInstances('var_Cm'); markAsUser('var_Cm'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>C<sub>v</sub></td>
+                            <td>Velocity Factor</td>
+                            <td><input type="number" id="var_Cv" step="any" oninput="syncAllInstances('var_Cv'); markAsUser('var_Cv'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>e</sub></td>
+                            <td>Effective Face Width</td>
+                            <td><input type="number" id="var_Fe" step="any" oninput="syncAllInstances('var_Fe'); markAsUser('var_Fe'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>tR</sub></td>
+                            <td>Rated Tangential Load</td>
+                            <td><input type="number" id="var_WtR" step="any" oninput="syncAllInstances('var_WtR'); markAsUser('var_WtR'); calculate()"></td>
+                            <td>lb</td>
+                        </tr>
+                        <tr>
+                            <td>a</td>
+                            <td>Addendum</td>
+                            <td><input type="number" id="var_a" step="any" oninput="syncAllInstances('var_a'); markAsUser('var_a'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>h<sub>t</sub></td>
+                            <td>Whole Depth</td>
+                            <td><input type="number" id="var_ht" step="any" oninput="syncAllInstances('var_ht'); markAsUser('var_ht'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>b</td>
+                            <td>Dedendum</td>
+                            <td><input type="number" id="var_b" step="any" oninput="syncAllInstances('var_b'); markAsUser('var_b'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>rW</sub></td>
+                            <td>Worm Root Diameter</td>
+                            <td><input type="number" id="var_DrW" step="any" oninput="syncAllInstances('var_DrW'); markAsUser('var_DrW'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>oW</sub></td>
+                            <td>Worm Outside Diameter</td>
+                            <td><input type="number" id="var_DoW" step="any" oninput="syncAllInstances('var_DoW'); markAsUser('var_DoW'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>rG</sub></td>
+                            <td>Gear Root Diameter</td>
+                            <td><input type="number" id="var_DrG" step="any" oninput="syncAllInstances('var_DrG'); markAsUser('var_DrG'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>t</sub></td>
+                            <td>Gear Throat Diameter</td>
+                            <td><input type="number" id="var_Dt" step="any" oninput="syncAllInstances('var_Dt'); markAsUser('var_Dt'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>v<sub>W</sub></td>
+                            <td>Worm Pitch Line Speed</td>
+                            <td><input type="number" id="var_vW" step="any" oninput="syncAllInstances('var_vW'); markAsUser('var_vW'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>v<sub>G</sub></td>
+                            <td>Gear Pitch Line Speed</td>
+                            <td><input type="number" id="var_vG" step="any" oninput="syncAllInstances('var_vG'); markAsUser('var_vG'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>VR</td>
+                            <td>Velocity Ratio</td>
+                            <td><input type="number" id="var_VR" step="any" oninput="syncAllInstances('var_VR'); markAsUser('var_VR'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
             <!-- Buttons -->
             <div class="button-group">
                 <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
@@ -1184,10 +1704,132 @@
     </div>
 
     <script>
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.procedure-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            if (tabName === 'procedure') {
+                document.getElementById('procedure-tab').classList.add('active');
+                document.getElementById('procedure-tab-steps').classList.add('active');
+            } else {
+                const activeTab = document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+            }
+
+            // Activate button
+            event.currentTarget.classList.add('active');
+
+            // Re-render MathJax for the active tab
+            if (typeof MathJax !== 'undefined') {
+                const activeTab = tabName === 'procedure' ?
+                    document.getElementById('procedure-tab') :
+                    document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+                }
+            }
+        }
+
+        // Variable Instance Mapping for Bidirectional Sync
+        const varInstanceMap = {
+            'NG': ['NG', 'var_NG', 'NG_gen1'],
+            'NW': ['NW', 'var_NW'],
+            'DG': ['DG', 'var_DG', 'DG_gen1', 'DG_gen2', 'DG_gen3', 'DG_gen4', 'DG_gen5', 'DG_gen6'],
+            'DW': ['DW', 'var_DW', 'DW_gen1', 'DW_gen2', 'DW_gen3', 'DW_gen4'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq1', 'Pd_gen', 'Pd_gen2', 'Pd_gen3'],
+            'phi_n': ['phi_n', 'var_phi_n'],
+            'nW': ['nW', 'var_nW', 'nW_gen1', 'nW_gen2'],
+            'nG': ['nG', 'var_nG', 'nG_gen1', 'nG_gen2'],
+            'Po': ['Po', 'var_Po'],
+            'F': ['F', 'var_F'],
+            'p': ['p', 'var_p', 'p_eq2', 'p_gen', 'p_gen2'],
+            'C': ['C', 'var_C', 'C_gen'],
+            'L': ['L', 'var_L'],
+            'lambda': ['lambda', 'var_lambda'],
+            'Px': ['Px', 'var_Px'],
+            'CD': ['CD', 'var_CD'],
+            'vtG': ['vtG', 'var_vtG'],
+            'vs': ['vs', 'var_vs'],
+            'mu': ['mu', 'var_mu'],
+            'To': ['To', 'var_To'],
+            'WtG': ['WtG', 'var_WtG'],
+            'WxG': ['WxG', 'var_WxG'],
+            'WrG': ['WrG', 'var_WrG'],
+            'Wf': ['Wf', 'var_Wf'],
+            'PL': ['PL', 'var_PL'],
+            'Pi': ['Pi', 'var_Pi'],
+            'eta': ['eta', 'var_eta'],
+            'y': ['y', 'var_y'],
+            'pn': ['pn', 'var_pn'],
+            'Kv': ['Kv', 'var_Kv'],
+            'Wd': ['Wd', 'var_Wd'],
+            'sigma': ['sigma', 'var_sigma'],
+            'Cs': ['Cs', 'var_Cs'],
+            'mG': ['mG', 'var_mG'],
+            'Cm': ['Cm', 'var_Cm'],
+            'Cv': ['Cv', 'var_Cv'],
+            'Fe': ['Fe', 'var_Fe'],
+            'WtR': ['WtR', 'var_WtR'],
+            'a': ['a_gen', 'var_a', 'a_gen2', 'a_gen3', 'a_gen4'],
+            'ht': ['ht_gen', 'var_ht', 'ht_gen2'],
+            'b': ['b_gen', 'var_b', 'b_gen2', 'b_gen3'],
+            'DrW': ['DrW_gen', 'var_DrW'],
+            'DoW': ['DoW_gen', 'var_DoW'],
+            'DrG': ['DrG_gen', 'var_DrG'],
+            'Dt': ['Dt_gen', 'var_Dt'],
+            'vW': ['vW_gen', 'var_vW'],
+            'vG': ['vG_gen', 'var_vG'],
+            'VR': ['VR_gen', 'var_VR']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'Pd_eq1', 'p_eq2', 'C_gen', etc.
+            const eqMatch = id.match(/^(.+)_(eq\d*|gen)$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) el.value = value;
+                }
+            });
+        }
+
         const userValues = new Set();
 
         function markAsUser(varId) {
             userValues.add(varId);
+            const baseVar = getBaseVarName(varId);
+            if (varInstanceMap[baseVar]) {
+                varInstanceMap[baseVar].forEach(instanceId => {
+                    userValues.add(instanceId);
+                });
+            }
         }
 
         function syncInput(mainId, sourceId) {

@@ -221,6 +221,40 @@
             font-style: italic;
             font-weight: bold;
         }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-content {
+            display: none !important;
+        }
+        .tab-content.active {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -239,6 +273,15 @@
             <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+            <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+            <button class="tab-button" onclick="showTab('variables')">Variables</button>
+        </div>
+
+        <!-- Procedure Tab -->
+        <div id="procedure-tab" class="tab-content active">
         <!-- Given Information -->
         <div class="section">
             <h2>Given Information</h2>
@@ -247,25 +290,25 @@
             <div class="given-inputs">
                 <div class="var-input">
                     <label>P<sub>d</sub> =</label>
-                    <input type="number" id="Pd" step="0.0001" oninput="markAsUser('Pd'); calculate()">
+                    <input type="number" id="Pd" step="0.0001" oninput="syncAllInstances('Pd'); markAsUser('Pd'); calculate()">
                     <span class="unit">teeth/in</span>
                 </div>
 
                 <div class="var-input">
                     <label>φ =</label>
-                    <input type="number" id="phi" step="0.01" oninput="markAsUser('phi'); calculate()">
+                    <input type="number" id="phi" step="0.01" oninput="syncAllInstances('phi'); markAsUser('phi'); calculate()">
                     <span class="unit">deg</span>
                 </div>
 
                 <div class="var-input">
                     <label>N<sub>P</sub> =</label>
-                    <input type="number" id="Np" step="1" oninput="markAsUser('Np'); calculate()">
+                    <input type="number" id="Np" step="1" oninput="syncAllInstances('Np'); markAsUser('Np'); calculate()">
                     <span class="unit">(teeth - pinion)</span>
                 </div>
 
                 <div class="var-input">
                     <label>N<sub>G</sub> =</label>
-                    <input type="number" id="Ng" step="1" oninput="markAsUser('Ng'); calculate()">
+                    <input type="number" id="Ng" step="1" oninput="syncAllInstances('Ng'); markAsUser('Ng'); calculate()">
                     <span class="unit">(teeth - gear)</span>
                 </div>
             </div>
@@ -298,7 +341,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>P</sub> =</label>
-                        <input type="number" id="DP" step="0.0001" oninput="markAsUser('DP'); calculate()">
+                        <input type="number" id="DP" step="0.0001" oninput="syncAllInstances('DP'); markAsUser('DP'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -322,7 +365,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>G</sub> =</label>
-                        <input type="number" id="DG" step="0.0001" oninput="markAsUser('DG'); calculate()">
+                        <input type="number" id="DG" step="0.0001" oninput="syncAllInstances('DG'); markAsUser('DG'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -351,7 +394,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>p =</label>
-                        <input type="number" id="p" step="0.0001" oninput="markAsUser('p'); calculate()">
+                        <input type="number" id="p" step="0.0001" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= π /</span>
@@ -376,7 +419,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>a =</label>
-                        <input type="number" id="a" step="0.0001" oninput="markAsUser('a'); calculate()">
+                        <input type="number" id="a" step="0.0001" oninput="syncAllInstances('a'); markAsUser('a'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= 1 /</span>
@@ -395,7 +438,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>b =</label>
-                        <input type="number" id="b" step="0.0001" oninput="markAsUser('b'); calculate()">
+                        <input type="number" id="b" step="0.0001" oninput="syncAllInstances('b'); markAsUser('b'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span id="b-formula-text">= 1.25 /</span>
@@ -414,7 +457,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>c =</label>
-                        <input type="number" id="c" step="0.0001" oninput="markAsUser('c'); calculate()">
+                        <input type="number" id="c" step="0.0001" oninput="syncAllInstances('c'); markAsUser('c'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span id="c-formula-text">= 0.25 /</span>
@@ -438,7 +481,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>oP</sub> =</label>
-                        <input type="number" id="DoP" step="0.0001" oninput="markAsUser('DoP'); calculate()">
+                        <input type="number" id="DoP" step="0.0001" oninput="syncAllInstances('DoP'); markAsUser('DoP'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= (</span>
@@ -462,7 +505,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>oG</sub> =</label>
-                        <input type="number" id="DoG" step="0.0001" oninput="markAsUser('DoG'); calculate()">
+                        <input type="number" id="DoG" step="0.0001" oninput="syncAllInstances('DoG'); markAsUser('DoG'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= (</span>
@@ -491,7 +534,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>RP</sub> =</label>
-                        <input type="number" id="DRP" step="0.0001" oninput="markAsUser('DRP'); calculate()">
+                        <input type="number" id="DRP" step="0.0001" oninput="syncAllInstances('DRP'); markAsUser('DRP'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -516,7 +559,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>RG</sub> =</label>
-                        <input type="number" id="DRG" step="0.0001" oninput="markAsUser('DRG'); calculate()">
+                        <input type="number" id="DRG" step="0.0001" oninput="syncAllInstances('DRG'); markAsUser('DRG'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -546,7 +589,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>h<sub>t</sub> =</label>
-                        <input type="number" id="ht" step="0.0001" oninput="markAsUser('ht'); calculate()">
+                        <input type="number" id="ht" step="0.0001" oninput="syncAllInstances('ht'); markAsUser('ht'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -571,7 +614,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>h<sub>k</sub> =</label>
-                        <input type="number" id="hk" step="0.0001" oninput="markAsUser('hk'); calculate()">
+                        <input type="number" id="hk" step="0.0001" oninput="syncAllInstances('hk'); markAsUser('hk'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= 2 ×</span>
@@ -595,7 +638,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>t =</label>
-                        <input type="number" id="t" step="0.0001" oninput="markAsUser('t'); calculate()">
+                        <input type="number" id="t" step="0.0001" oninput="syncAllInstances('t'); markAsUser('t'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= π / (2 ×</span>
@@ -620,7 +663,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>C =</label>
-                        <input type="number" id="C" step="0.0001" oninput="markAsUser('C'); calculate()">
+                        <input type="number" id="C" step="0.0001" oninput="syncAllInstances('C'); markAsUser('C'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>= (</span>
@@ -655,7 +698,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>bP</sub> =</label>
-                        <input type="number" id="DbP" step="0.0001" oninput="markAsUser('DbP'); calculate()">
+                        <input type="number" id="DbP" step="0.0001" oninput="syncAllInstances('DbP'); markAsUser('DbP'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -681,7 +724,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D<sub>bG</sub> =</label>
-                        <input type="number" id="DbG" step="0.0001" oninput="markAsUser('DbG'); calculate()">
+                        <input type="number" id="DbG" step="0.0001" oninput="syncAllInstances('DbG'); markAsUser('DbG'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -701,9 +744,195 @@
             </div>
 
             <div class="divider"></div>
+            <div class="success">✅ All calculations complete!</div>
+        </div> <!-- End Procedure Tab -->
 
-            <div class="success">✅ You're done!</div>
-        </div>
+        <!-- General Equations Tab -->
+        <div id="equations-tab" class="tab-content">
+            <div class="section">
+                <h2>Spur Gear General Equations</h2>
+                <p class="info-box">⚙️ General equations for spur gears. These are the same equations used in the Procedure tab.</p>
+
+                <h3>Pitch Relationships</h3>
+                <div class="equation-latex">$$P_d = \frac{N}{D} \quad \text{(Diametral Pitch)}$$</div>
+                <div class="equation-latex">$$p = \frac{\pi}{P_d} \quad \text{(Circular Pitch)}$$</div>
+                <div class="equation-latex">$$m = \frac{25.4}{P_d} \quad \text{(Module)}$$</div>
+
+                <h3>Pitch Diameters</h3>
+                <div class="equation-latex">$$D_P = \frac{N_P}{P_d}, \quad D_G = \frac{N_G}{P_d}$$</div>
+                <div class="equation-latex">$$C = \frac{D_P + D_G}{2}$$</div>
+
+                <h3>Tooth Dimensions (Coarse Pitch: P<sub>d</sub> < 20)</h3>
+                <div class="equation-latex">$$a = \frac{1.00}{P_d} \quad \text{(Addendum)}$$</div>
+                <div class="equation-latex">$$b = \frac{1.25}{P_d} \quad \text{(Dedendum)}$$</div>
+                <div class="equation-latex">$$c = \frac{0.25}{P_d} \quad \text{(Clearance)}$$</div>
+                <div class="equation-latex">$$h_t = \frac{2.25}{P_d} \quad \text{(Whole Depth)}$$</div>
+
+                <h3>Tooth Dimensions (Fine Pitch: P<sub>d</sub> ≥ 20)</h3>
+                <div class="equation-latex">$$a = \frac{1.00}{P_d} \quad \text{(Addendum)}$$</div>
+                <div class="equation-latex">$$b = \frac{1.20}{P_d} + 0.002 \quad \text{(Dedendum)}$$</div>
+                <div class="equation-latex">$$c = \frac{0.20}{P_d} + 0.002 \quad \text{(Clearance)}$$</div>
+
+                <h3>Other Diameters</h3>
+                <div class="equation-latex">$$D_o = D + 2a \quad \text{(Outside Diameter)}$$</div>
+                <div class="equation-latex">$$D_R = D - 2b \quad \text{(Root Diameter)}$$</div>
+                <div class="equation-latex">$$D_b = D \cos(\phi) \quad \text{(Base Diameter)}$$</div>
+            </div>
+        </div> <!-- End General Equations Tab -->
+
+        <!-- Variables Tab -->
+        <div id="variables-tab" class="tab-content">
+            <div class="section">
+                <h2>📋 All Variables Reference</h2>
+                <p style="margin-bottom: 15px; color: #666;">All variables used in this calculator. Edit values here to update calculations.</p>
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #3498db; color: white;">
+                            <th style="padding: 10px; text-align: left;">Variable</th>
+                            <th style="padding: 10px; text-align: left;">Description</th>
+                            <th style="padding: 10px; text-align: left;">Value</th>
+                            <th style="padding: 10px; text-align: left;">Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Basic Parameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">N<sub>P</sub></td>
+                            <td style="padding: 8px;">Number of Teeth (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Np" step="1" oninput="syncAllInstances('var_Np'); markAsUser('var_Np'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">N<sub>G</sub></td>
+                            <td style="padding: 8px;">Number of Teeth (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Ng" step="1" oninput="syncAllInstances('var_Ng'); markAsUser('var_Ng'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">P<sub>d</sub></td>
+                            <td style="padding: 8px;">Diametral Pitch</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Pd" step="any" oninput="syncAllInstances('var_Pd'); markAsUser('var_Pd'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth/in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">φ</td>
+                            <td style="padding: 8px;">Pressure Angle</td>
+                            <td style="padding: 8px;"><input type="number" id="var_phi" step="any" oninput="syncAllInstances('var_phi'); markAsUser('var_phi'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">deg</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">m</td>
+                            <td style="padding: 8px;">Module</td>
+                            <td style="padding: 8px;"><input type="number" id="var_m" step="any" oninput="syncAllInstances('var_m'); markAsUser('var_m'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">mm</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Pitch Diameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>P</sub></td>
+                            <td style="padding: 8px;">Pitch Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DP" step="any" oninput="syncAllInstances('var_DP'); markAsUser('var_DP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>G</sub></td>
+                            <td style="padding: 8px;">Pitch Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DG" step="any" oninput="syncAllInstances('var_DG'); markAsUser('var_DG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">p</td>
+                            <td style="padding: 8px;">Circular Pitch</td>
+                            <td style="padding: 8px;"><input type="number" id="var_p" step="any" oninput="syncAllInstances('var_p'); markAsUser('var_p'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Tooth Dimensions</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">a</td>
+                            <td style="padding: 8px;">Addendum</td>
+                            <td style="padding: 8px;"><input type="number" id="var_a" step="any" oninput="syncAllInstances('var_a'); markAsUser('var_a'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">b</td>
+                            <td style="padding: 8px;">Dedendum</td>
+                            <td style="padding: 8px;"><input type="number" id="var_b" step="any" oninput="syncAllInstances('var_b'); markAsUser('var_b'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">c</td>
+                            <td style="padding: 8px;">Clearance</td>
+                            <td style="padding: 8px;"><input type="number" id="var_c" step="any" oninput="syncAllInstances('var_c'); markAsUser('var_c'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">h<sub>t</sub></td>
+                            <td style="padding: 8px;">Whole Depth</td>
+                            <td style="padding: 8px;"><input type="number" id="var_ht" step="any" oninput="syncAllInstances('var_ht'); markAsUser('var_ht'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">h<sub>k</sub></td>
+                            <td style="padding: 8px;">Working Depth</td>
+                            <td style="padding: 8px;"><input type="number" id="var_hk" step="any" oninput="syncAllInstances('var_hk'); markAsUser('var_hk'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">t</td>
+                            <td style="padding: 8px;">Tooth Thickness</td>
+                            <td style="padding: 8px;"><input type="number" id="var_t" step="any" oninput="syncAllInstances('var_t'); markAsUser('var_t'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Other Diameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>oP</sub></td>
+                            <td style="padding: 8px;">Outside Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DoP" step="any" oninput="syncAllInstances('var_DoP'); markAsUser('var_DoP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>oG</sub></td>
+                            <td style="padding: 8px;">Outside Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DoG" step="any" oninput="syncAllInstances('var_DoG'); markAsUser('var_DoG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>RP</sub></td>
+                            <td style="padding: 8px;">Root Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DRP" step="any" oninput="syncAllInstances('var_DRP'); markAsUser('var_DRP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>RG</sub></td>
+                            <td style="padding: 8px;">Root Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DRG" step="any" oninput="syncAllInstances('var_DRG'); markAsUser('var_DRG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>bP</sub></td>
+                            <td style="padding: 8px;">Base Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DbP" step="any" oninput="syncAllInstances('var_DbP'); markAsUser('var_DbP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>bG</sub></td>
+                            <td style="padding: 8px;">Base Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DbG" step="any" oninput="syncAllInstances('var_DbG'); markAsUser('var_DbG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">C</td>
+                            <td style="padding: 8px;">Center Distance</td>
+                            <td style="padding: 8px;"><input type="number" id="var_C" step="any" oninput="syncAllInstances('var_C'); markAsUser('var_C'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- End Variables Tab -->
+
     </div>
 
     <script>
@@ -721,6 +950,96 @@
             document.getElementById(mainId).value = value;
             markAsUser(mainId);
             calculate();
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Activate button
+            event.target.classList.add('active');
+
+            // Re-render MathJax for the active tab
+            if (tabName === 'equations' || tabName === 'procedure') {
+                const activeTab = document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+                }
+            }
+        }
+
+        // Variable Instance Mapping for Bidirectional Sync
+        const varInstanceMap = {
+            'Np': ['Np', 'var_Np', 'Np_eq1', 'Np_eq7', 'Np_eq14'],
+            'Ng': ['Ng', 'var_Ng', 'Ng_eq2', 'Ng_eq8', 'Ng_eq14'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq1', 'Pd_eq2', 'Pd_eq3', 'Pd_eq4', 'Pd_eq5', 'Pd_eq6', 'Pd_eq7', 'Pd_eq8', 'Pd_eq13', 'Pd_eq14'],
+            'phi': ['phi', 'var_phi', 'phi_eq15', 'phi_eq16'],
+            'm': ['m', 'var_m'],
+            'DP': ['DP', 'var_DP', 'DP_eq9', 'DP_eq15'],
+            'DG': ['DG', 'var_DG', 'DG_eq10', 'DG_eq16'],
+            'p': ['p', 'var_p'],
+            'a': ['a', 'var_a', 'a_eq11', 'a_eq12'],
+            'b': ['b', 'var_b', 'b_eq9', 'b_eq10', 'b_eq11'],
+            'c': ['c', 'var_c'],
+            'ht': ['ht', 'var_ht'],
+            'hk': ['hk', 'var_hk'],
+            't': ['t', 'var_t'],
+            'C': ['C', 'var_C'],
+            'DoP': ['DoP', 'var_DoP'],
+            'DoG': ['DoG', 'var_DoG'],
+            'DRP': ['DRP', 'var_DRP'],
+            'DRG': ['DRG', 'var_DRG'],
+            'DbP': ['DbP', 'var_DbP'],
+            'DbG': ['DbG', 'var_DbG']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'Np_eq1', 'Pd_eq14', etc.
+            const eqMatch = id.match(/^(.+)_eq\d+$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVarName(changedId);
+            const instances = varInstanceMap[baseVar];
+
+            if (!instances) {
+                // Variable not in map, try syncing directly
+                return;
+            }
+
+            const changedInput = document.getElementById(changedId);
+            if (!changedInput) return;
+
+            const newValue = changedInput.value;
+
+            // Update all other instances
+            instances.forEach(instanceId => {
+                if (instanceId !== changedId) {
+                    const input = document.getElementById(instanceId);
+                    if (input) {
+                        input.value = newValue;
+                    }
+                }
+            });
         }
 
         // Get value with fallback

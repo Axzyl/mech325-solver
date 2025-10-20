@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Helical Gear Design Calculator (Fizz)</title>
+    <title>Bevel Gear Design Calculator (Fizz)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -164,6 +164,14 @@
             margin: 10px 0;
             font-size: 0.9em;
         }
+        .piecewise-indicator {
+            background: #e1f5fe;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            border: 1px solid #01579b;
+        }
         button {
             padding: 10px 20px;
             background: #dc3545;
@@ -251,10 +259,10 @@
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/gears/fizz_helical.pdf" type="application/pdf">
+            <embed src="../../documents/gears/fizz_bevel.pdf" type="application/pdf">
         </div>
         <div class="calculator-column">
-            <h1>Helical Gear Design Calculator</h1>
+            <h1>Bevel Gear Design Calculator</h1>
 
             <!-- Tab Navigation -->
             <div class="tabs">
@@ -266,9 +274,9 @@
             <!-- Procedure Tab -->
             <div id="procedure-tab" class="tab-content active">
 
-            <!-- HELICAL-SPECIFIC STEPS 1-13 -->
+            <!-- BEVEL-SPECIFIC STEPS 1-26 -->
             <div class="section">
-                <h2>Given Information (Helical)</h2>
+                <h2>Given Information (Bevel)</h2>
                 <div class="input-row">
                     <label>P - Power (hp):</label>
                     <input type="number" id="P" step="any" oninput="markAsUser('P'); calculate()">
@@ -291,14 +299,10 @@
                     <input type="number" id="NG" step="1" oninput="markAsUser('NG'); calculate()">
                 </div>
                 <div class="input-row">
-                    <label>ψ - Helix Angle (deg):</label>
-                    <input type="number" id="psi" step="any" oninput="markAsUser('psi'); calculate()">
+                    <label>P<sub>d</sub> - Diametral Pitch:</label>
+                    <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
                 </div>
-                <div class="input-row">
-                    <label>P<sub>nd</sub> - Normal Diametral Pitch:</label>
-                    <input type="number" id="Pnd" step="any" oninput="markAsUser('Pnd'); calculate()">
-                </div>
-                <div class="note">Choose standard P<sub>nd</sub> from Table 8-2 in PDF</div>
+                <div class="note">Choose standard P<sub>d</sub> from Table 8-2 in PDF</div>
                 <div class="input-row">
                     <label>F - Face Width (in):</label>
                     <input type="number" id="F" step="any" oninput="markAsUser('F'); calculate()">
@@ -306,31 +310,7 @@
             </div>
 
             <div class="section">
-                <h2>Step 3: Transverse Diametral Pitch</h2>
-                <div class="equation-block">
-                    <div class="equation-latex">$$P_d = P_{nd} \cos(\psi)$$</div>
-                    <div class="equation-inputs">
-                        <div class="var-input">
-                            <label>P<sub>d</sub> =</label>
-                            <input type="number" id="Pd" step="any" oninput="markAsUser('Pd'); calculate()">
-                        </div>
-                        <span>=</span>
-                        <div class="var-input">
-                            <label>P<sub>nd</sub></label>
-                            <input type="number" id="Pnd_eq3" step="any" oninput="syncInput('Pnd', 'Pnd_eq3')">
-                        </div>
-                        <span>× cos(</span>
-                        <div class="var-input">
-                            <label>ψ</label>
-                            <input type="number" id="psi_eq3" step="any" oninput="syncInput('psi', 'psi_eq3')">
-                        </div>
-                        <span>)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Step 4-6: Gear Geometry</h2>
+                <h2>Step 1-4: Gear Geometry</h2>
                 <div class="equation-block">
                     <div class="equation-latex">$$D_P = \frac{N_P}{P_d}$$</div>
                     <div class="equation-inputs">
@@ -341,12 +321,12 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>N<sub>P</sub></label>
-                            <input type="number" id="NP_eq4" step="1" oninput="syncInput('NP', 'NP_eq4')">
+                            <input type="number" id="NP_eq1" step="1" oninput="syncInput('NP', 'NP_eq1')">
                         </div>
                         <span>/</span>
                         <div class="var-input">
                             <label>P<sub>d</sub></label>
-                            <input type="number" id="Pd_eq4" step="any" oninput="syncInput('Pd', 'Pd_eq4')">
+                            <input type="number" id="Pd_eq1" step="any" oninput="syncInput('Pd', 'Pd_eq1')">
                         </div>
                     </div>
                 </div>
@@ -361,37 +341,74 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>N<sub>G</sub></label>
-                            <input type="number" id="NG_eq5" step="1" oninput="syncInput('NG', 'NG_eq5')">
+                            <input type="number" id="NG_eq2" step="1" oninput="syncInput('NG', 'NG_eq2')">
                         </div>
                         <span>/</span>
                         <div class="var-input">
                             <label>P<sub>d</sub></label>
-                            <input type="number" id="Pd_eq5" step="any" oninput="syncInput('Pd', 'Pd_eq5')">
+                            <input type="number" id="Pd_eq2" step="any" oninput="syncInput('Pd', 'Pd_eq2')">
                         </div>
                     </div>
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$C = \frac{D_P + D_G}{2}$$</div>
+                    <div class="equation-latex">$$m = \frac{N_G}{N_P}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>C (in) =</label>
-                            <input type="number" id="C" step="any" oninput="markAsUser('C'); calculate()">
+                            <label>m (ratio) =</label>
+                            <input type="number" id="m" step="any" oninput="markAsUser('m'); calculate()">
                         </div>
                         <span>=</span>
-                        <span>(</span>
                         <div class="var-input">
-                            <label>D<sub>P</sub></label>
-                            <input type="number" id="DP_eq6" step="any" oninput="syncInput('DP', 'DP_eq6')">
+                            <label>N<sub>G</sub></label>
+                            <input type="number" id="NG_eq3" step="1" oninput="syncInput('NG', 'NG_eq3')">
                         </div>
-                        <span>+</span>
+                        <span>/</span>
                         <div class="var-input">
-                            <label>D<sub>G</sub></label>
-                            <input type="number" id="DG_eq6" step="any" oninput="syncInput('DG', 'DG_eq6')">
+                            <label>N<sub>P</sub></label>
+                            <input type="number" id="NP_eq3" step="1" oninput="syncInput('NP', 'NP_eq3')">
                         </div>
-                        <span>) / 2</span>
                     </div>
                 </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\gamma = \arctan\left(\frac{1}{m}\right)$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>γ (deg) =</label>
+                            <input type="number" id="gamma" step="any" oninput="markAsUser('gamma'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$\Gamma = 90° - \gamma$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>Γ (deg) =</label>
+                            <input type="number" id="Gamma" step="any" oninput="markAsUser('Gamma'); calculate()">
+                        </div>
+                        <span>= 90° -</span>
+                        <div class="var-input">
+                            <label>γ</label>
+                            <input type="number" id="gamma_eq5" step="any" oninput="syncInput('gamma', 'gamma_eq5')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 5-6: Cone Distance</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$A_o = \frac{D_P}{2\sin(\gamma)}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>A<sub>o</sub> (in) =</label>
+                            <input type="number" id="Ao" step="any" oninput="markAsUser('Ao'); calculate()">
+                        </div>
+                    </div>
+                </div>
+                <div class="note">Choose F ≤ A<sub>o</sub>/3 for best results</div>
             </div>
 
             <div class="section">
@@ -420,7 +437,7 @@
             </div>
 
             <div class="section">
-                <h2>Step 8-10: Quality and Dynamic Factor</h2>
+                <h2>Step 8-9: Quality and Dynamic Factor</h2>
                 <div class="input-row">
                     <label>Q<sub>v</sub> - Quality Number:</label>
                     <input type="number" id="Qv" step="1" oninput="markAsUser('Qv'); calculate()">
@@ -434,26 +451,7 @@
             </div>
 
             <div class="section">
-                <h2>Step 11-12: Pressure Angles</h2>
-                <div class="input-row">
-                    <label>φ<sub>n</sub> - Normal Pressure Angle (deg):</label>
-                    <input type="number" id="phi_n" step="any" value="20" oninput="markAsUser('phi_n'); calculate()">
-                </div>
-                <div class="note">Typically 20° for helical gears</div>
-
-                <div class="equation-block">
-                    <div class="equation-latex">$$\phi_t = \arctan\left(\frac{\tan(\phi_n)}{\cos(\psi)}\right)$$</div>
-                    <div class="equation-inputs">
-                        <div class="var-input">
-                            <label>φ<sub>t</sub> (deg) =</label>
-                            <input type="number" id="phi_t" step="any" oninput="markAsUser('phi_t'); calculate()">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Step 13: Geometry Factors</h2>
+                <h2>Step 10-11: Geometry Factors</h2>
                 <div class="input-row">
                     <label>J<sub>P</sub> - Bending Factor (Pinion):</label>
                     <input type="number" id="JP" step="any" oninput="markAsUser('JP'); calculate()">
@@ -466,58 +464,80 @@
                     <label>I - Contact Geometry Factor:</label>
                     <input type="number" id="I" step="any" oninput="markAsUser('I'); calculate()">
                 </div>
-                <div class="note">Look up from Figures 8-16 to 8-18 based on N<sub>P</sub>, N<sub>G</sub>, and φ<sub>t</sub></div>
-            </div>
-
-            <!-- TRANSITION TO SPUR GUIDE -->
-            <div class="section-divider">
-                ⬇ Continue with Spur Guide Steps 32-40 ⬇
+                <div class="note">Look up from bevel gear charts based on N<sub>P</sub>, N<sub>G</sub>, pitch angles</div>
             </div>
 
             <div class="section">
-                <h2>Spur Step 32-34: Life Factors</h2>
+                <h2>Step 12-14: Size Factor (Piecewise)</h2>
+                <div class="piecewise-indicator" id="Ks-indicator">
+                    Formula used: (calculating...)
+                </div>
+                <div class="input-row">
+                    <label>K<sub>s</sub> - Size Factor:</label>
+                    <input type="number" id="Ks" step="any" oninput="markAsUser('Ks'); calculate()">
+                </div>
+                <div class="note">
+                    If P<sub>d</sub> ≥ 5: K<sub>s</sub> = 0.4867 + 0.2132/P<sub>d</sub><br>
+                    If P<sub>d</sub> < 5: K<sub>s</sub> = 0.5 - 0.007P<sub>d</sub>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 15-17: Load Distribution</h2>
+                <div class="input-row">
+                    <label>K<sub>mb</sub> - Base Load Distribution:</label>
+                    <input type="number" id="Kmb" step="any" oninput="markAsUser('Kmb'); calculate()">
+                </div>
+                <div class="note">Look up from Figure 8-16 based on F</div>
+                <div class="input-row">
+                    <label>C<sub>s</sub> - Mounting Factor:</label>
+                    <input type="number" id="Cs" step="any" value="1.0" oninput="markAsUser('Cs'); calculate()">
+                </div>
+                <div class="input-row">
+                    <label>C<sub>xc</sub> - Crowning Factor:</label>
+                    <input type="number" id="Cxc" step="any" value="1.0" oninput="markAsUser('Cxc'); calculate()">
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">$$K_m = K_{mb} + C_s(K_{mb} - 1)C_{xc}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>K<sub>m</sub> =</label>
+                            <input type="number" id="Km" step="any" oninput="markAsUser('Km'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 18: Rim Thickness Factor</h2>
+                <div class="input-row">
+                    <label>K<sub>B</sub> - Rim Thickness Factor:</label>
+                    <input type="number" id="KB" step="any" value="1.0" oninput="markAsUser('KB'); calculate()">
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 19-20: Life Factors</h2>
                 <div class="input-row">
                     <label>N<sub>c</sub> - Design Life Cycles:</label>
                     <input type="number" id="Nc" step="any" oninput="markAsUser('Nc'); calculate()">
                 </div>
                 <div class="input-row">
-                    <label>Y<sub>N</sub> - Stress Cycle Factor (Bending):</label>
-                    <input type="number" id="YN" step="any" oninput="markAsUser('YN'); calculate()">
-                </div>
-                <div class="note">Look up from Figure 8-14 in spur PDF</div>
-                <div class="input-row">
-                    <label>Z<sub>N</sub> - Stress Cycle Factor (Contact):</label>
-                    <input type="number" id="ZN" step="any" oninput="markAsUser('ZN'); calculate()">
-                </div>
-                <div class="note">Look up from Figure 8-15 in spur PDF</div>
-                <div class="input-row">
-                    <label>K<sub>m</sub> - Load Distribution Factor:</label>
-                    <input type="number" id="Km" step="any" value="1.0" oninput="markAsUser('Km'); calculate()">
+                    <label>K<sub>L</sub> - Life Factor (Bending):</label>
+                    <input type="number" id="KL" step="any" oninput="markAsUser('KL'); calculate()">
                 </div>
                 <div class="input-row">
-                    <label>K<sub>s</sub> - Size Factor:</label>
-                    <input type="number" id="Ks" step="any" value="1.0" oninput="markAsUser('Ks'); calculate()">
+                    <label>C<sub>L</sub> - Life Factor (Contact):</label>
+                    <input type="number" id="CL" step="any" oninput="markAsUser('CL'); calculate()">
                 </div>
-                <div class="input-row">
-                    <label>K<sub>B</sub> - Rim Thickness Factor:</label>
-                    <input type="number" id="KB" step="any" value="1.0" oninput="markAsUser('KB'); calculate()">
-                </div>
-                <div class="input-row">
-                    <label>C<sub>p</sub> - Elastic Coefficient:</label>
-                    <input type="number" id="Cp" step="any" oninput="markAsUser('Cp'); calculate()">
-                </div>
-                <div class="note">Typically 2300 for steel (Table 8-8)</div>
-                <div class="input-row">
-                    <label>K<sub>R</sub> - Reliability Factor:</label>
-                    <input type="number" id="KR" step="any" value="1.0" oninput="markAsUser('KR'); calculate()">
-                </div>
-                <div class="note">Typically 1.0 for 99% reliability</div>
+                <div class="note">Look up from bevel life factor charts based on N<sub>c</sub></div>
             </div>
 
             <div class="section">
-                <h2>Spur Step 35: Bending Strength</h2>
+                <h2>Step 21: Transmitted Load</h2>
                 <div class="equation-block">
-                    <div class="equation-latex">$$W_t = \frac{33000 \times P_{des}}{V_t}$$</div>
+                    <div class="equation-latex">$$W_t = \frac{33000 \times P \times K_O}{V_t}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>W<sub>t</sub> (lb) =</label>
@@ -525,9 +545,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="section">
+                <h2>Step 22-23: Bending Stress</h2>
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{tP} = \frac{W_t P_d}{F J_P} K_O K_s K_m K_B K_v$$</div>
+                    <div class="equation-latex">$$\sigma_{tP} = \frac{W_t P_d}{F J_P} K_O K_m K_s K_B K_v$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>σ<sub>tP</sub> (psi) =</label>
@@ -537,7 +560,7 @@
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{tG} = \frac{W_t P_d}{F J_G} K_O K_s K_m K_B K_v$$</div>
+                    <div class="equation-latex">$$\sigma_{tG} = \frac{W_t P_d}{F J_G} K_O K_m K_s K_B K_v$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>σ<sub>tG</sub> (psi) =</label>
@@ -545,9 +568,31 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 24-25: Contact Stress</h2>
+                <div class="input-row">
+                    <label>C<sub>p</sub> - Elastic Coefficient:</label>
+                    <input type="number" id="Cp" step="any" oninput="markAsUser('Cp'); calculate()">
+                </div>
+                <div class="note">Typically 2300 for steel (Table 8-8)</div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{acP} = \frac{\sigma_{tP}}{Y_N}$$</div>
+                    <div class="equation-latex">$$\sigma_c = C_p \sqrt{\frac{W_t K_O K_m K_s K_v}{F D_P I}}$$</div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>σ<sub>c</sub> (psi) =</label>
+                            <input type="number" id="sc" step="any" oninput="markAsUser('sc'); calculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Step 26: Allowable Stresses</h2>
+                <div class="equation-block">
+                    <div class="equation-latex">$$\sigma_{acP} = \frac{\sigma_{tP}}{K_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>σ<sub>acP</sub> (psi) =</label>
@@ -556,18 +601,18 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>tP</sub></label>
-                            <input type="number" id="stP_eq" step="any" oninput="syncInput('stP', 'stP_eq')">
+                            <input type="number" id="stP_eq26" step="any" oninput="syncInput('stP', 'stP_eq26')">
                         </div>
                         <span>/</span>
                         <div class="var-input">
-                            <label>Y<sub>N</sub></label>
-                            <input type="number" id="YN_eq" step="any" oninput="syncInput('YN', 'YN_eq')">
+                            <label>K<sub>L</sub></label>
+                            <input type="number" id="KL_eq26" step="any" oninput="syncInput('KL', 'KL_eq26')">
                         </div>
                     </div>
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{acG} = \frac{\sigma_{tG}}{Y_N}$$</div>
+                    <div class="equation-latex">$$\sigma_{acG} = \frac{\sigma_{tG}}{K_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>σ<sub>acG</sub> (psi) =</label>
@@ -576,31 +621,18 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>tG</sub></label>
-                            <input type="number" id="stG_eq" step="any" oninput="syncInput('stG', 'stG_eq')">
+                            <input type="number" id="stG_eq26" step="any" oninput="syncInput('stG', 'stG_eq26')">
                         </div>
                         <span>/</span>
                         <div class="var-input">
-                            <label>Y<sub>N</sub></label>
-                            <input type="number" id="YN_eq2" step="any" oninput="syncInput('YN', 'YN_eq2')">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Spur Step 36: Contact Strength</h2>
-                <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_c = C_p \sqrt{\frac{W_t K_O K_s K_m K_v}{F D_P I}}$$</div>
-                    <div class="equation-inputs">
-                        <div class="var-input">
-                            <label>σ<sub>c</sub> (psi) =</label>
-                            <input type="number" id="sc" step="any" oninput="markAsUser('sc'); calculate()">
+                            <label>K<sub>L</sub></label>
+                            <input type="number" id="KL_eq26b" step="any" oninput="syncInput('KL', 'KL_eq26b')">
                         </div>
                     </div>
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{ac} = \frac{\sigma_c}{Z_N}$$</div>
+                    <div class="equation-latex">$$\sigma_{ac} = \frac{\sigma_c}{C_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
                             <label>σ<sub>ac</sub> (psi) =</label>
@@ -609,15 +641,29 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>c</sub></label>
-                            <input type="number" id="sc_eq" step="any" oninput="syncInput('sc', 'sc_eq')">
+                            <input type="number" id="sc_eq26" step="any" oninput="syncInput('sc', 'sc_eq26')">
                         </div>
                         <span>/</span>
                         <div class="var-input">
-                            <label>Z<sub>N</sub></label>
-                            <input type="number" id="ZN_eq" step="any" oninput="syncInput('ZN', 'ZN_eq')">
+                            <label>C<sub>L</sub></label>
+                            <input type="number" id="CL_eq26" step="any" oninput="syncInput('CL', 'CL_eq26')">
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- TRANSITION TO SPUR GUIDE -->
+            <div class="section-divider">
+                ⬇ Continue with Spur Guide Steps 35-40 ⬇
+            </div>
+
+            <div class="section">
+                <h2>Spur Step 37: Reliability Factor</h2>
+                <div class="input-row">
+                    <label>K<sub>R</sub> - Reliability Factor:</label>
+                    <input type="number" id="KR" step="any" value="1.0" oninput="markAsUser('KR'); calculate()">
+                </div>
+                <div class="note">Typically 1.0 for 99% reliability</div>
             </div>
 
             <div class="section">
@@ -632,12 +678,12 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>acP</sub></label>
-                            <input type="number" id="sacP_eq" step="any" oninput="syncInput('sacP', 'sacP_eq')">
+                            <input type="number" id="sacP_eq38" step="any" oninput="syncInput('sacP', 'sacP_eq38')">
                         </div>
                         <span>×</span>
                         <div class="var-input">
                             <label>K<sub>R</sub></label>
-                            <input type="number" id="KR_eq" step="any" oninput="syncInput('KR', 'KR_eq')">
+                            <input type="number" id="KR_eq38" step="any" oninput="syncInput('KR', 'KR_eq38')">
                         </div>
                     </div>
                 </div>
@@ -652,12 +698,12 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>acG</sub></label>
-                            <input type="number" id="sacG_eq" step="any" oninput="syncInput('sacG', 'sacG_eq')">
+                            <input type="number" id="sacG_eq38" step="any" oninput="syncInput('sacG', 'sacG_eq38')">
                         </div>
                         <span>×</span>
                         <div class="var-input">
                             <label>K<sub>R</sub></label>
-                            <input type="number" id="KR_eq2" step="any" oninput="syncInput('KR', 'KR_eq2')">
+                            <input type="number" id="KR_eq38b" step="any" oninput="syncInput('KR', 'KR_eq38b')">
                         </div>
                     </div>
                 </div>
@@ -672,12 +718,12 @@
                         <span>=</span>
                         <div class="var-input">
                             <label>σ<sub>ac</sub></label>
-                            <input type="number" id="sac_eq2" step="any" oninput="syncInput('sac', 'sac_eq2')">
+                            <input type="number" id="sac_eq38" step="any" oninput="syncInput('sac', 'sac_eq38')">
                         </div>
                         <span>×</span>
                         <div class="var-input">
                             <label>K<sub>R</sub></label>
-                            <input type="number" id="KR_eq3" step="any" oninput="syncInput('KR', 'KR_eq3')">
+                            <input type="number" id="KR_eq38c" step="any" oninput="syncInput('KR', 'KR_eq38c')">
                         </div>
                     </div>
                 </div>
@@ -727,320 +773,351 @@
             <!-- General Equations Tab -->
             <div id="equations-tab" class="tab-content">
                 <div class="section">
-                    <h2>Angle Relationships</h2>
+                    <h2>Basic Geometry</h2>
                     <div class="equation-block">
-                        <div class="equation-latex">$$\tan \phi_n = \tan \phi_t \cos \psi$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>φ<sub>n</sub> (°)</label>
-                                <input type="number" id="phi_n_eq" step="any" oninput="syncAllInstances('phi_n_eq'); markAsUser('phi_n_eq'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>φ<sub>t</sub> (°)</label>
-                                <input type="number" id="phi_t_eq" step="any" oninput="syncAllInstances('phi_t_eq'); markAsUser('phi_t_eq'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eq" step="any" oninput="syncAllInstances('psi_eq'); markAsUser('psi_eq'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Angle relationship between normal and transverse pressure angles</p>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2>Pitch Relationships</h2>
-                    <div class="equation-block">
-                        <div class="equation-latex">$$p_t = \frac{D_P}{N_P} = \frac{D_G}{N_G} = \frac{\pi}{P_d}$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>p<sub>t</sub> (in)</label>
-                                <input type="number" id="pt_eqg" step="any" oninput="syncAllInstances('pt_eqg'); markAsUser('pt_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D<sub>P</sub> (in)</label>
-                                <input type="number" id="DP_eqg" step="any" oninput="syncAllInstances('DP_eqg'); markAsUser('DP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>P</sub></label>
-                                <input type="number" id="NP_eqg" step="1" oninput="syncAllInstances('NP_eqg'); markAsUser('NP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D<sub>G</sub> (in)</label>
-                                <input type="number" id="DG_eqg" step="any" oninput="syncAllInstances('DG_eqg'); markAsUser('DG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>G</sub></label>
-                                <input type="number" id="NG_eqg" step="1" oninput="syncAllInstances('NG_eqg'); markAsUser('NG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_eqg" step="any" oninput="syncAllInstances('Pd_eqg'); markAsUser('Pd_eqg'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Transverse circular pitch</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$p_n = p_t \cos \psi$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>p<sub>n</sub> (in)</label>
-                                <input type="number" id="pn_eqg" step="any" oninput="syncAllInstances('pn_eqg'); markAsUser('pn_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>p<sub>t</sub> (in)</label>
-                                <input type="number" id="pt_eqg2" step="any" oninput="syncAllInstances('pt_eqg2'); markAsUser('pt_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eqg2" step="any" oninput="syncAllInstances('psi_eqg2'); markAsUser('psi_eqg2'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Normal circular pitch</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$p_x = \frac{p_t}{\tan \psi} = \frac{\pi}{P_d \tan \psi} = m\pi$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>p<sub>x</sub> (in)</label>
-                                <input type="number" id="px_eqg" step="any" oninput="syncAllInstances('px_eqg'); markAsUser('px_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>p<sub>t</sub> (in)</label>
-                                <input type="number" id="pt_eqg3" step="any" oninput="syncAllInstances('pt_eqg3'); markAsUser('pt_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eqg3" step="any" oninput="syncAllInstances('psi_eqg3'); markAsUser('psi_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_eqg2" step="any" oninput="syncAllInstances('Pd_eqg2'); markAsUser('Pd_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>m (mm)</label>
-                                <input type="number" id="m_eqg" step="any" oninput="syncAllInstances('m_eqg'); markAsUser('m_eqg'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Axial pitch</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$P_d = \frac{N}{D}$$</div>
+                        <div class="equation-latex">$$P_d = \frac{N_P}{d} = \frac{N_G}{D}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_eqg3" step="any" oninput="syncAllInstances('Pd_eqg3'); markAsUser('Pd_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N</label>
-                                <input type="number" id="N_eqg" step="1" oninput="syncAllInstances('N_eqg'); markAsUser('N_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_eqg" step="any" oninput="syncAllInstances('D_eqg'); markAsUser('D_eqg'); calculate()">
+                                <input type="number" id="Pd_beq" step="any" oninput="syncAllInstances('Pd_beq'); markAsUser('Pd_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Diametral pitch</p>
                     </div>
 
                     <div class="equation-block">
-                        <div class="equation-latex">$$P_{nd} = P_d \cos \psi$$</div>
+                        <div class="equation-latex">$$m_G = \frac{N_G}{N_P} = \frac{D}{d}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>P<sub>nd</sub> (teeth/in)</label>
-                                <input type="number" id="Pnd_eqg" step="any" oninput="syncAllInstances('Pnd_eqg'); markAsUser('Pnd_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_eqg4" step="any" oninput="syncAllInstances('Pd_eqg4'); markAsUser('Pd_eqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eqg4" step="any" oninput="syncAllInstances('psi_eqg4'); markAsUser('psi_eqg4'); calculate()">
+                                <label>m<sub>G</sub></label>
+                                <input type="number" id="mG_beq" step="any" oninput="syncAllInstances('mG_beq'); markAsUser('mG_beq'); calculate()">
                             </div>
                         </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Normal diametral pitch</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$m = \frac{D}{N}$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>m (mm)</label>
-                                <input type="number" id="m_eqg2" step="any" oninput="syncAllInstances('m_eqg2'); markAsUser('m_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_eqg2" step="any" oninput="syncAllInstances('D_eqg2'); markAsUser('D_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N</label>
-                                <input type="number" id="N_eqg2" step="1" oninput="syncAllInstances('N_eqg2'); markAsUser('N_eqg2'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Metric module</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$m_n = \frac{\cos \psi}{P_d} = \frac{D \cos \psi}{N} = m \cos \psi$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>m<sub>n</sub> (mm)</label>
-                                <input type="number" id="mn_eqg" step="any" oninput="syncAllInstances('mn_eqg'); markAsUser('mn_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eqg5" step="any" oninput="syncAllInstances('psi_eqg5'); markAsUser('psi_eqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_eqg5" step="any" oninput="syncAllInstances('Pd_eqg5'); markAsUser('Pd_eqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_eqg3" step="any" oninput="syncAllInstances('D_eqg3'); markAsUser('D_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N</label>
-                                <input type="number" id="N_eqg3" step="1" oninput="syncAllInstances('N_eqg3'); markAsUser('N_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>m (mm)</label>
-                                <input type="number" id="m_eqg3" step="any" oninput="syncAllInstances('m_eqg3'); markAsUser('m_eqg3'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Normal metric module</p>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear ratio</p>
                     </div>
                 </div>
 
                 <div class="section">
-                    <h2>Face Contact Ratio</h2>
+                    <h2>Cone Angles</h2>
                     <div class="equation-block">
-                        <div class="equation-latex">$$\text{Face Contact Ratio} = \frac{F}{p_x} > 2.0$$</div>
+                        <div class="equation-latex">$$\tan \gamma = \frac{N_P}{N_G} = \frac{d}{D}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>FCR</label>
-                                <input type="number" id="fcr_eqg" step="any" oninput="syncAllInstances('fcr_eqg'); markAsUser('fcr_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>F (in)</label>
-                                <input type="number" id="F_eqg" step="any" oninput="syncAllInstances('F_eqg'); markAsUser('F_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>p<sub>x</sub> (in)</label>
-                                <input type="number" id="px_eqg2" step="any" oninput="syncAllInstances('px_eqg2'); markAsUser('px_eqg2'); calculate()">
+                                <label>γ (°)</label>
+                                <input type="number" id="gamma_eq" step="any" oninput="syncAllInstances('gamma_eq'); markAsUser('gamma_eq'); calculate()">
                             </div>
                         </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Should be greater than 2.0</p>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion cone angle</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\tan \Gamma = \frac{N_G}{N_P} = \frac{D}{d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>Γ (°)</label>
+                                <input type="number" id="Gamma_eq" step="any" oninput="syncAllInstances('Gamma_eq'); markAsUser('Gamma_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear cone angle</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Cone Distances & Face Width</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$A_{oG} = \frac{D}{2 \sin \Gamma}, \quad A_{oP} = \frac{d}{2 \sin \gamma}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>A<sub>o</sub> (in)</label>
+                                <input type="number" id="Ao_eq" step="any" oninput="markAsUser('Ao_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Outer cone distance</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$F_{nom} = 0.3 A_o$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>nom</sub> (in)</label>
+                                <input type="number" id="Fnom_eq" step="any" oninput="markAsUser('Fnom_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Nominal face width</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$F_{max} = \min\left(\frac{A_o}{3}, \frac{10}{P_d}\right)$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>max</sub> (in)</label>
+                                <input type="number" id="Fmax_eq" step="any" oninput="markAsUser('Fmax_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Maximum face width</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$A_m = A_o - 0.5F$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>A<sub>m</sub> (in)</label>
+                                <input type="number" id="Am_eq" step="any" oninput="markAsUser('Am_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean cone distance</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Tooth Dimensions</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$p_m = \frac{\pi A_m}{P_d A_o}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>p<sub>m</sub> (in)</label>
+                                <input type="number" id="pm_eq" step="any" oninput="markAsUser('pm_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean circular pitch</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$h = \frac{2A_m}{P_d A_o}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>h (in)</label>
+                                <input type="number" id="h_beq" step="any" oninput="markAsUser('h_beq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean working depth</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$c = 0.125h$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>c (in)</label>
+                                <input type="number" id="c_beq" step="any" oninput="markAsUser('c_beq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Clearance</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$h_m = h + c$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>h<sub>m</sub> (in)</label>
+                                <input type="number" id="hm_eq" step="any" oninput="markAsUser('hm_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean whole depth</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$c_1 = 0.21 + \frac{0.29}{m_G^2}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>c<sub>1</sub></label>
+                                <input type="number" id="c1_eq" step="any" oninput="markAsUser('c1_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean addendum factor</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Addendum & Dedendum</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$a_G = c_1 h$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>a<sub>G</sub> (in)</label>
+                                <input type="number" id="aG_eq" step="any" oninput="markAsUser('aG_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear mean addendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$a_P = h - a_G$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>a<sub>P</sub> (in)</label>
+                                <input type="number" id="aP_eq" step="any" oninput="markAsUser('aP_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion mean addendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$b_G = h_m - a_G$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>b<sub>G</sub> (in)</label>
+                                <input type="number" id="bG_eq" step="any" oninput="markAsUser('bG_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear mean dedendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$b_P = h_m - a_P$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>b<sub>P</sub> (in)</label>
+                                <input type="number" id="bP_eq" step="any" oninput="markAsUser('bP_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion mean dedendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$\tan \delta_G = \frac{b_G}{A_{mG}}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>δ<sub>G</sub> (°)</label>
+                                <input type="number" id="deltaG_eq" step="any" oninput="markAsUser('deltaG_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear dedendum angle</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$\tan \delta_P = \frac{b_P}{A_{mP}}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>δ<sub>P</sub> (°)</label>
+                                <input type="number" id="deltaP_eq" step="any" oninput="markAsUser('deltaP_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion dedendum angle</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Outer Dimensions</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$a_{oG} = a_G + 0.5F \tan \delta_P$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>a<sub>oG</sub> (in)</label>
+                                <input type="number" id="aoG_eq" step="any" oninput="markAsUser('aoG_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear outer addendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$a_{oP} = a_P + 0.5F \tan \delta_G$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>a<sub>oP</sub> (in)</label>
+                                <input type="number" id="aoP_eq" step="any" oninput="markAsUser('aoP_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion outer addendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$D_o = D + 2a_{oG}\cos \Gamma$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>o</sub> (in)</label>
+                                <input type="number" id="Do_beq" step="any" oninput="markAsUser('Do_beq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear outside diameter</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$d_o = d + 2a_{oP}\cos \gamma$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>d<sub>o</sub> (in)</label>
+                                <input type="number" id="do_eq" step="any" oninput="markAsUser('do_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion outside diameter</p>
                     </div>
                 </div>
 
                 <div class="section">
                     <h2>Forces and Motion</h2>
                     <div class="equation-block">
-                        <div class="equation-latex">$$T = \frac{63000P}{n}$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>T (lbf·in)</label>
-                                <input type="number" id="T_eqg" step="any" oninput="syncAllInstances('T_eqg'); markAsUser('T_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P (hp)</label>
-                                <input type="number" id="P_eqg" step="any" oninput="syncAllInstances('P_eqg'); markAsUser('P_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n (rpm)</label>
-                                <input type="number" id="n_eqg" step="any" oninput="syncAllInstances('n_eqg'); markAsUser('n_eqg'); calculate()">
-                            </div>
-                        </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Torque</p>
-                    </div>
-
-                    <div class="equation-block">
-                        <div class="equation-latex">$$v_t = \frac{\pi D n}{12}$$</div>
+                        <div class="equation-latex">$v_t = \frac{\pi Dn_G}{12} = \frac{\pi dn_P}{12}$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>v<sub>t</sub> (ft/min)</label>
-                                <input type="number" id="vt_eqg" step="any" oninput="syncAllInstances('vt_eqg'); markAsUser('vt_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_eqg4" step="any" oninput="syncAllInstances('D_eqg4'); markAsUser('D_eqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n (rpm)</label>
-                                <input type="number" id="n_eqg2" step="any" oninput="syncAllInstances('n_eqg2'); markAsUser('n_eqg2'); calculate()">
+                                <input type="number" id="vt_beq" step="any" oninput="markAsUser('vt_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pitch line speed</p>
                     </div>
 
                     <div class="equation-block">
-                        <div class="equation-latex">$$W_t = \frac{33000P}{v_t} = \frac{126000P}{nD}$$</div>
+                        <div class="equation-latex">$T = \frac{63000P}{n}$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_eqg" step="any" oninput="syncAllInstances('Wt_eqg'); markAsUser('Wt_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P (hp)</label>
-                                <input type="number" id="P_eqg2" step="any" oninput="syncAllInstances('P_eqg2'); markAsUser('P_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>v<sub>t</sub> (ft/min)</label>
-                                <input type="number" id="vt_eqg2" step="any" oninput="syncAllInstances('vt_eqg2'); markAsUser('vt_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n (rpm)</label>
-                                <input type="number" id="n_eqg3" step="any" oninput="syncAllInstances('n_eqg3'); markAsUser('n_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_eqg5" step="any" oninput="syncAllInstances('D_eqg5'); markAsUser('D_eqg5'); calculate()">
+                                <label>T (lbf·in)</label>
+                                <input type="number" id="T_beq" step="any" oninput="markAsUser('T_beq'); calculate()">
                             </div>
                         </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Tangential force</p>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Torque</p>
                     </div>
 
                     <div class="equation-block">
-                        <div class="equation-latex">$$W_r = W_t \tan \phi_t$$</div>
+                        <div class="equation-latex">$r_m = \frac{dF}{2} - \frac{F}{2\sin \gamma}, \quad R_m = \frac{DF}{2} - \frac{F}{2\sin \Gamma}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>r<sub>m</sub> (in)</label>
+                                <input type="number" id="rm_eq" step="any" oninput="markAsUser('rm_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>R<sub>m</sub> (in)</label>
+                                <input type="number" id="Rm_eq" step="any" oninput="markAsUser('Rm_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean radius</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$W_t = \frac{T_P}{r_m} = \frac{T_G}{R_m}$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>W<sub>t</sub> (lbf)</label>
+                                <input type="number" id="Wt_beq" step="any" oninput="markAsUser('Wt_beq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Transmitted load</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$W_r = W_t \tan \phi \cos \gamma = W_t \tan \phi \cos \Gamma$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>W<sub>r</sub> (lbf)</label>
-                                <input type="number" id="Wr_eqg" step="any" oninput="syncAllInstances('Wr_eqg'); markAsUser('Wr_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_eqg2" step="any" oninput="syncAllInstances('Wt_eqg2'); markAsUser('Wt_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>φ<sub>t</sub> (°)</label>
-                                <input type="number" id="phi_t_eqg2" step="any" oninput="syncAllInstances('phi_t_eqg2'); markAsUser('phi_t_eqg2'); calculate()">
+                                <input type="number" id="Wr_beq" step="any" oninput="markAsUser('Wr_beq'); calculate()">
                             </div>
                         </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Radial force</p>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Radial load</p>
                     </div>
 
                     <div class="equation-block">
-                        <div class="equation-latex">$$W_x = W_t \tan \psi$$</div>
+                        <div class="equation-latex">$W_x = W_t \tan \phi \sin \gamma = W_t \tan \phi \sin \Gamma$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>W<sub>x</sub> (lbf)</label>
-                                <input type="number" id="Wx_eqg" step="any" oninput="syncAllInstances('Wx_eqg'); markAsUser('Wx_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_eqg3" step="any" oninput="syncAllInstances('Wt_eqg3'); markAsUser('Wt_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>ψ (°)</label>
-                                <input type="number" id="psi_eqg6" step="any" oninput="syncAllInstances('psi_eqg6'); markAsUser('psi_eqg6'); calculate()">
+                                <input type="number" id="Wx_beq" step="any" oninput="markAsUser('Wx_beq'); calculate()">
                             </div>
                         </div>
-                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Axial force</p>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Axial load</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$W_t = \frac{126000P}{Dn} = \frac{33000P}{v_t}$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Alternate transmitted load formula (for design selection)</p>
                     </div>
                 </div>
             </div>
@@ -1074,34 +1151,46 @@
                             <td>teeth</td>
                         </tr>
                         <tr>
-                            <td>D<sub>P</sub></td>
-                            <td>Pitch diameter of pinion</td>
-                            <td><input type="number" id="var_DP" step="any" oninput="syncVarInput('var_DP')"></td>
+                            <td>P<sub>d</sub></td>
+                            <td>Diametral pitch</td>
+                            <td><input type="number" id="var_Pd" step="any" oninput="syncVarInput('var_Pd')"></td>
+                            <td>teeth/in</td>
+                        </tr>
+                        <tr>
+                            <td>d</td>
+                            <td>Diameter of pinion</td>
+                            <td><input type="number" id="var_d" step="any" oninput="syncVarInput('var_d')"></td>
                             <td>in</td>
                         </tr>
                         <tr>
-                            <td>D<sub>G</sub></td>
-                            <td>Pitch diameter of gear</td>
-                            <td><input type="number" id="var_DG" step="any" oninput="syncVarInput('var_DG')"></td>
+                            <td>D</td>
+                            <td>Diameter of gear</td>
+                            <td><input type="number" id="var_D" step="any" oninput="syncVarInput('var_D')"></td>
                             <td>in</td>
                         </tr>
                         <tr>
-                            <td>ψ</td>
-                            <td>Helix angle</td>
-                            <td><input type="number" id="var_psi" step="any" oninput="syncVarInput('var_psi')"></td>
+                            <td>γ</td>
+                            <td>Cone angle of pinion</td>
+                            <td><input type="number" id="var_gamma" step="any" oninput="syncVarInput('var_gamma')"></td>
                             <td>degrees</td>
                         </tr>
                         <tr>
-                            <td>φ<sub>n</sub></td>
-                            <td>Normal pressure angle</td>
-                            <td><input type="number" id="var_phi_n" step="any" oninput="syncVarInput('var_phi_n')"></td>
+                            <td>Γ</td>
+                            <td>Cone angle of gear</td>
+                            <td><input type="number" id="var_Gamma" step="any" oninput="syncVarInput('var_Gamma')"></td>
                             <td>degrees</td>
                         </tr>
                         <tr>
-                            <td>φ<sub>t</sub></td>
-                            <td>Transverse pressure angle</td>
-                            <td><input type="number" id="var_phi_t" step="any" oninput="syncVarInput('var_phi_t')"></td>
+                            <td>φ</td>
+                            <td>Pressure angle</td>
+                            <td><input type="number" id="var_phi" step="any" oninput="syncVarInput('var_phi')"></td>
                             <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <td>A<sub>o</sub></td>
+                            <td>Outer cone distance</td>
+                            <td><input type="number" id="var_Ao" step="any" oninput="syncVarInput('var_Ao')"></td>
+                            <td>in</td>
                         </tr>
                         <tr>
                             <td>F</td>
@@ -1109,51 +1198,105 @@
                             <td><input type="number" id="var_F" step="any" oninput="syncVarInput('var_F')"></td>
                             <td>in</td>
                         </tr>
+                        <tr>
+                            <td>A<sub>m</sub></td>
+                            <td>Mean cone distance</td>
+                            <td><input type="number" id="var_Am" step="any" oninput="syncVarInput('var_Am')"></td>
+                            <td>in</td>
+                        </tr>
 
                         <tr class="var-category">
-                            <td colspan="4">Pitch Parameters</td>
+                            <td colspan="4">Tooth Dimensions</td>
                         </tr>
                         <tr>
-                            <td>p<sub>t</sub></td>
-                            <td>Transverse circular pitch</td>
-                            <td><input type="number" id="var_pt" step="any" oninput="syncVarInput('var_pt')"></td>
+                            <td>p<sub>m</sub></td>
+                            <td>Mean circular pitch</td>
+                            <td><input type="number" id="var_pm" step="any" oninput="syncVarInput('var_pm')"></td>
                             <td>in</td>
                         </tr>
                         <tr>
-                            <td>p<sub>n</sub></td>
-                            <td>Normal circular pitch</td>
-                            <td><input type="number" id="var_pn" step="any" oninput="syncVarInput('var_pn')"></td>
+                            <td>h</td>
+                            <td>Mean working depth</td>
+                            <td><input type="number" id="var_h" step="any" oninput="syncVarInput('var_h')"></td>
                             <td>in</td>
                         </tr>
                         <tr>
-                            <td>p<sub>x</sub></td>
-                            <td>Axial pitch</td>
-                            <td><input type="number" id="var_px" step="any" oninput="syncVarInput('var_px')"></td>
+                            <td>c</td>
+                            <td>Clearance</td>
+                            <td><input type="number" id="var_c" step="any" oninput="syncVarInput('var_c')"></td>
                             <td>in</td>
                         </tr>
                         <tr>
-                            <td>P<sub>d</sub></td>
-                            <td>Diametral pitch</td>
-                            <td><input type="number" id="var_Pd" step="any" oninput="syncVarInput('var_Pd')"></td>
-                            <td>teeth/in</td>
+                            <td>h<sub>m</sub></td>
+                            <td>Mean whole depth</td>
+                            <td><input type="number" id="var_hm" step="any" oninput="syncVarInput('var_hm')"></td>
+                            <td>in</td>
                         </tr>
                         <tr>
-                            <td>P<sub>nd</sub></td>
-                            <td>Normal diametral pitch</td>
-                            <td><input type="number" id="var_Pnd" step="any" oninput="syncVarInput('var_Pnd')"></td>
-                            <td>teeth/in</td>
+                            <td>c<sub>1</sub></td>
+                            <td>Mean addendum factor</td>
+                            <td><input type="number" id="var_c1" step="any" oninput="syncVarInput('var_c1')"></td>
+                            <td>-</td>
                         </tr>
                         <tr>
-                            <td>m</td>
-                            <td>Metric module</td>
-                            <td><input type="number" id="var_m" step="any" oninput="syncVarInput('var_m')"></td>
-                            <td>mm</td>
+                            <td>a<sub>G</sub></td>
+                            <td>Gear mean addendum</td>
+                            <td><input type="number" id="var_aG" step="any" oninput="syncVarInput('var_aG')"></td>
+                            <td>in</td>
                         </tr>
                         <tr>
-                            <td>m<sub>n</sub></td>
-                            <td>Normal metric module</td>
-                            <td><input type="number" id="var_mn" step="any" oninput="syncVarInput('var_mn')"></td>
-                            <td>mm</td>
+                            <td>a<sub>P</sub></td>
+                            <td>Pinion mean addendum</td>
+                            <td><input type="number" id="var_aP" step="any" oninput="syncVarInput('var_aP')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>b<sub>G</sub></td>
+                            <td>Gear mean dedendum</td>
+                            <td><input type="number" id="var_bG" step="any" oninput="syncVarInput('var_bG')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>b<sub>P</sub></td>
+                            <td>Pinion mean dedendum</td>
+                            <td><input type="number" id="var_bP" step="any" oninput="syncVarInput('var_bP')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>δ<sub>G</sub></td>
+                            <td>Gear dedendum angle</td>
+                            <td><input type="number" id="var_deltaG" step="any" oninput="syncVarInput('var_deltaG')"></td>
+                            <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <td>δ<sub>P</sub></td>
+                            <td>Pinion dedendum angle</td>
+                            <td><input type="number" id="var_deltaP" step="any" oninput="syncVarInput('var_deltaP')"></td>
+                            <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <td>a<sub>oG</sub></td>
+                            <td>Gear outer addendum</td>
+                            <td><input type="number" id="var_aoG" step="any" oninput="syncVarInput('var_aoG')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>a<sub>oP</sub></td>
+                            <td>Pinion outer addendum</td>
+                            <td><input type="number" id="var_aoP" step="any" oninput="syncVarInput('var_aoP')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>o</sub></td>
+                            <td>Gear outside diameter</td>
+                            <td><input type="number" id="var_Do" step="any" oninput="syncVarInput('var_Do')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>d<sub>o</sub></td>
+                            <td>Pinion outside diameter</td>
+                            <td><input type="number" id="var_do" step="any" oninput="syncVarInput('var_do')"></td>
+                            <td>in</td>
                         </tr>
 
                         <tr class="var-category">
@@ -1206,7 +1349,7 @@
                             <td>lbf</td>
                         </tr>
                         <tr>
-                            <td>W<sub>a</sub>, W<sub>x</sub></td>
+                            <td>W<sub>x</sub></td>
                             <td>Axial load</td>
                             <td><input type="number" id="var_Wx" step="any" oninput="syncVarInput('var_Wx')"></td>
                             <td>lbf</td>
@@ -1244,44 +1387,46 @@
 
         // Map of all variable instances across all tabs
         const varInstanceMap = {
-            'NP': ['NP', 'var_NP', 'NP_eq4', 'NP_eqg'],
-            'NG': ['NG', 'var_NG', 'NG_eq5', 'NG_eqg'],
-            'Pd': ['Pd', 'var_Pd', 'Pd_eq4', 'Pd_eq5', 'Pd_geq', 'Pd_eqg', 'Pd_eqg2', 'Pd_eqg3', 'Pd_eqg4', 'Pd_eqg5'],
-            'DP': ['DP', 'var_DP', 'DP_eq6', 'DP_eq7', 'DP_eqg'],
-            'DG': ['DG', 'var_DG', 'DG_eq6', 'DG_eqg'],
-            'psi': ['psi', 'var_psi', 'psi_eq3', 'psi_eq', 'psi_eqg', 'psi_eqg2', 'psi_eqg3', 'psi_eqg4', 'psi_eqg5', 'psi_eqg6'],
-            'phi_n': ['phi_n', 'var_phi_n', 'phi_n_eq', 'phi_n_eqg'],
-            'phi_t': ['phi_t', 'var_phi_t', 'phi_t_eq', 'phi_t_eqg', 'phi_t_eqg2'],
-            'F': ['F', 'var_F', 'F_eqg'],
-            'pt': ['pt', 'var_pt', 'pt_eq', 'pt_eqg', 'pt_eqg2', 'pt_eqg3'],
-            'pn': ['pn', 'var_pn', 'pn_eq', 'pn_eqg'],
-            'px': ['px', 'var_px', 'px_eq', 'px_eqg', 'px_eqg2'],
-            'Pnd': ['Pnd', 'var_Pnd', 'Pnd_eq3', 'Pnd_eq', 'Pnd_eqg'],
-            'm': ['m', 'var_m', 'm_eq', 'm_eqg', 'm_eqg2', 'm_eqg3'],
-            'mn': ['mn', 'var_mn', 'mn_eq', 'mn_eqg'],
-            'P': ['P', 'var_P', 'P_eqg', 'P_eqg2'],
-            'nP': ['nP', 'var_nP', 'nP_eq7'],
+            'NP': ['NP', 'var_NP'],
+            'NG': ['NG', 'var_NG'],
+            'Pd': ['Pd', 'var_Pd'],
+            'd': ['d', 'var_d'],
+            'D': ['D', 'var_D'],
+            'gamma': ['gamma', 'var_gamma'],
+            'Gamma': ['Gamma', 'var_Gamma'],
+            'phi': ['phi', 'var_phi'],
+            'Ao': ['Ao', 'var_Ao'],
+            'F': ['F', 'var_F'],
+            'Am': ['Am', 'var_Am'],
+            'pm': ['pm', 'var_pm'],
+            'h': ['h', 'var_h'],
+            'c': ['c', 'var_c'],
+            'hm': ['hm', 'var_hm'],
+            'c1': ['c1', 'var_c1'],
+            'aG': ['aG', 'var_aG'],
+            'aP': ['aP', 'var_aP'],
+            'bG': ['bG', 'var_bG'],
+            'bP': ['bP', 'var_bP'],
+            'deltaG': ['deltaG', 'var_deltaG'],
+            'deltaP': ['deltaP', 'var_deltaP'],
+            'aoG': ['aoG', 'var_aoG'],
+            'aoP': ['aoP', 'var_aoP'],
+            'Do': ['Do', 'var_Do'],
+            'do': ['do', 'var_do'],
+            'P': ['P', 'var_P'],
+            'nP': ['nP', 'var_nP'],
             'nG': ['nG', 'var_nG'],
-            'n': ['n_eqg', 'n_eqg2', 'n_eqg3'],
-            'N': ['N_eqg', 'N_eqg2', 'N_eqg3'],
-            'D': ['D_eqg', 'D_eqg2', 'D_eqg3', 'D_eqg4', 'D_eqg5'],
-            'T': ['T', 'var_T', 'T_geq', 'T_eqg'],
-            'vt': ['vt', 'var_vt', 'vt_geq', 'vt_eqg', 'vt_eqg2'],
-            'Wt': ['Wt', 'var_Wt', 'Wt_geq', 'Wt_eqg', 'Wt_eqg2', 'Wt_eqg3'],
-            'Wr': ['Wr', 'var_Wr', 'Wr_geq', 'Wr_eqg'],
-            'Wx': ['Wx', 'var_Wx', 'Wx_eq', 'Wx_eqg'],
-            'fcr': ['fcr_eq', 'fcr_eqg']
+            'T': ['T', 'var_T'],
+            'vt': ['vt', 'var_vt'],
+            'Wt': ['Wt', 'var_Wt'],
+            'Wr': ['Wr', 'var_Wr'],
+            'Wx': ['Wx', 'var_Wx']
         };
 
         function getBaseVarName(id) {
-            if (id.startsWith('var_')) {
-                return id.substring(4);
-            }
-            // Match patterns like: phi_n_eqg, phi_n_eqg2, phi_n_eq, phi_n_eq2, Pd_geq, etc.
-            const eqMatch = id.match(/^(.+)_(eq|eqg|beq|beqg|geq)\d*$/);
-            if (eqMatch) {
-                return eqMatch[1];
-            }
+            if (id.startsWith('var_')) return id.substring(4);
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
+            if (eqMatch) return eqMatch[1];
             return id;
         }
 
@@ -1339,23 +1484,21 @@
 
         function syncAllFields() {
             const mainVars = {
-                'Pnd': ['Pnd', 'Pnd_eq3'],
-                'psi': ['psi', 'psi_eq3'],
-                'Pd': ['Pd', 'Pd_eq4', 'Pd_eq5'],
-                'NP': ['NP', 'NP_eq4'],
-                'NG': ['NG', 'NG_eq5'],
-                'DP': ['DP', 'DP_eq6', 'DP_eq7'],
-                'DG': ['DG', 'DG_eq6'],
+                'NP': ['NP', 'NP_eq1', 'NP_eq3'],
+                'NG': ['NG', 'NG_eq2', 'NG_eq3'],
+                'Pd': ['Pd', 'Pd_eq1', 'Pd_eq2'],
+                'DP': ['DP', 'DP_eq7'],
                 'nP': ['nP', 'nP_eq7'],
-                'stP': ['stP', 'stP_eq'],
-                'stG': ['stG', 'stG_eq'],
-                'YN': ['YN', 'YN_eq', 'YN_eq2'],
-                'ZN': ['ZN', 'ZN_eq'],
-                'sc': ['sc', 'sc_eq'],
-                'sacP': ['sacP', 'sacP_eq'],
-                'sacG': ['sacG', 'sacG_eq'],
-                'sac': ['sac', 'sac_eq2'],
-                'KR': ['KR', 'KR_eq', 'KR_eq2', 'KR_eq3']
+                'gamma': ['gamma', 'gamma_eq5'],
+                'stP': ['stP', 'stP_eq26'],
+                'stG': ['stG', 'stG_eq26'],
+                'sc': ['sc', 'sc_eq26'],
+                'KL': ['KL', 'KL_eq26', 'KL_eq26b'],
+                'CL': ['CL', 'CL_eq26'],
+                'sacP': ['sacP', 'sacP_eq38'],
+                'sacG': ['sacG', 'sacG_eq38'],
+                'sac': ['sac', 'sac_eq38'],
+                'KR': ['KR', 'KR_eq38', 'KR_eq38b', 'KR_eq38c']
             };
 
             for (let mainVar in mainVars) {
@@ -1380,96 +1523,122 @@
             const nP = getValue('nP');
             const NP = getValue('NP');
             const NG = getValue('NG');
-            const psi = getValue('psi');
-            const Pnd = getValue('Pnd');
+            const Pd = getValue('Pd');
             const F = getValue('F');
             const Kv = getValue('Kv');
-            const phi_n = getValue('phi_n');
             const JP = getValue('JP');
             const JG = getValue('JG');
             const I = getValue('I');
-            const YN = getValue('YN');
-            const ZN = getValue('ZN');
-            const Km = getValue('Km');
-            const Ks = getValue('Ks');
+            const Kmb = getValue('Kmb');
+            const Cs = getValue('Cs');
+            const Cxc = getValue('Cxc');
             const KB = getValue('KB');
+            const KL = getValue('KL');
+            const CL = getValue('CL');
             const Cp = getValue('Cp');
             const KR = getValue('KR');
 
-            // Step 3: Pd = Pnd * cos(psi)
-            if (Pnd !== null && psi !== null && !userValues.has('Pd')) {
-                const psiRad = psi * Math.PI / 180;
-                const Pd = Pnd * Math.cos(psiRad);
-                setValue('Pd', Pd);
-            }
-
-            const Pd = getValue('Pd');
-
-            // Step 4-6: Geometry
-            if (NP !== null && Pd && !userValues.has('DP')) {
+            // Step 1-4: Geometry
+            if (NP && Pd && !userValues.has('DP')) {
                 setValue('DP', NP / Pd);
             }
-            if (NG !== null && Pd && !userValues.has('DG')) {
+            if (NG && Pd && !userValues.has('DG')) {
                 setValue('DG', NG / Pd);
             }
 
             const DP = getValue('DP');
             const DG = getValue('DG');
 
-            if (DP && DG && !userValues.has('C')) {
-                setValue('C', (DP + DG) / 2);
+            if (NG && NP && !userValues.has('m')) {
+                setValue('m', NG / NP);
+            }
+
+            const m = getValue('m');
+
+            if (m && !userValues.has('gamma')) {
+                const gamma_rad = Math.atan(1 / m);
+                setValue('gamma', gamma_rad * 180 / Math.PI);
+            }
+
+            const gamma = getValue('gamma');
+
+            if (gamma !== null && !userValues.has('Gamma')) {
+                setValue('Gamma', 90 - gamma);
+            }
+
+            // Step 5: Cone distance
+            if (DP && gamma !== null && !userValues.has('Ao')) {
+                const gamma_rad = gamma * Math.PI / 180;
+                setValue('Ao', DP / (2 * Math.sin(gamma_rad)));
             }
 
             // Step 7: Velocity
-            if (DP && nP !== null && !userValues.has('Vt')) {
+            if (DP && nP && !userValues.has('Vt')) {
                 setValue('Vt', Math.PI * DP * nP / 12);
             }
 
             const Vt = getValue('Vt');
 
-            // Step 12: phi_t
-            if (phi_n !== null && psi !== null && !userValues.has('phi_t')) {
-                const psiRad = psi * Math.PI / 180;
-                const phi_nRad = phi_n * Math.PI / 180;
-                const phi_tRad = Math.atan(Math.tan(phi_nRad) / Math.cos(psiRad));
-                setValue('phi_t', phi_tRad * 180 / Math.PI);
+            // Step 12-14: Size factor (piecewise)
+            if (Pd && !userValues.has('Ks')) {
+                let Ks;
+                let Ks_formula;
+                if (Pd >= 5) {
+                    Ks = 0.4867 + 0.2132 / Pd;
+                    Ks_formula = `K_s = 0.4867 + 0.2132/P_d (P_d = ${Pd.toFixed(2)} ≥ 5)`;
+                } else {
+                    Ks = 0.5 - 0.007 * Pd;
+                    Ks_formula = `K_s = 0.5 - 0.007·P_d (P_d = ${Pd.toFixed(2)} < 5)`;
+                }
+                setValue('Ks', Ks);
+                document.getElementById('Ks-indicator').textContent = Ks_formula;
             }
 
-            // Step 35: Wt and stresses
-            if (P !== null && KO && Vt && !userValues.has('Wt')) {
-                const Pdes = P * KO;
-                setValue('Wt', 33000 * Pdes / Vt);
+            const Ks = getValue('Ks');
+
+            // Step 15-17: Load distribution
+            if (Kmb && Cs && Cxc && !userValues.has('Km')) {
+                const Km = Kmb + Cs * (Kmb - 1) * Cxc;
+                setValue('Km', Km);
+            }
+
+            const Km = getValue('Km');
+
+            // Step 21: Transmitted load
+            if (P && KO && Vt && !userValues.has('Wt')) {
+                setValue('Wt', 33000 * P * KO / Vt);
             }
 
             const Wt = getValue('Wt');
 
-            if (Wt && Pd && F && JP && KO && Ks && Km && KB && Kv && !userValues.has('stP')) {
-                setValue('stP', (Wt * Pd / (F * JP)) * KO * Ks * Km * KB * Kv);
+            // Step 22-23: Bending stress
+            if (Wt && Pd && F && JP && KO && Km && Ks && KB && Kv && !userValues.has('stP')) {
+                setValue('stP', (Wt * Pd / (F * JP)) * KO * Km * Ks * KB * Kv);
             }
 
-            if (Wt && Pd && F && JG && KO && Ks && Km && KB && Kv && !userValues.has('stG')) {
-                setValue('stG', (Wt * Pd / (F * JG)) * KO * Ks * Km * KB * Kv);
+            if (Wt && Pd && F && JG && KO && Km && Ks && KB && Kv && !userValues.has('stG')) {
+                setValue('stG', (Wt * Pd / (F * JG)) * KO * Km * Ks * KB * Kv);
             }
 
             const stP = getValue('stP');
             const stG = getValue('stG');
 
-            if (stP && YN && !userValues.has('sacP')) {
-                setValue('sacP', stP / YN);
-            }
-            if (stG && YN && !userValues.has('sacG')) {
-                setValue('sacG', stG / YN);
-            }
-
-            // Contact stress
-            if (Wt && KO && Ks && Km && Kv && F && DP && I && Cp && !userValues.has('sc')) {
-                setValue('sc', Cp * Math.sqrt((Wt * KO * Ks * Km * Kv) / (F * DP * I)));
+            // Step 24-25: Contact stress
+            if (Wt && KO && Km && Ks && Kv && F && DP && I && Cp && !userValues.has('sc')) {
+                setValue('sc', Cp * Math.sqrt((Wt * KO * Km * Ks * Kv) / (F * DP * I)));
             }
 
             const sc = getValue('sc');
 
-            if (sc && ZN && !userValues.has('sac')) {
-                setValue('sac', sc / ZN);
+            // Step 26: Allowable stresses
+            if (stP && KL && !userValues.has('sacP')) {
+                setValue('sacP', stP / KL);
+            }
+            if (stG && KL && !userValues.has('sacG')) {
+                setValue('sacG', stG / KL);
+            }
+            if (sc && CL && !userValues.has('sac')) {
+                setValue('sac', sc / CL);
             }
 
             const sacP = getValue('sacP');
@@ -1511,11 +1680,11 @@
                 if (input.value) state[input.id] = input.value;
             });
             state.userValues = Array.from(userValues);
-            localStorage.setItem('helical_session', JSON.stringify(state));
+            localStorage.setItem('bevel_session', JSON.stringify(state));
         }
 
         function loadSession() {
-            const saved = localStorage.getItem('helical_session');
+            const saved = localStorage.getItem('bevel_session');
             if (saved) {
                 const state = JSON.parse(saved);
                 userValues.clear();
@@ -1535,12 +1704,13 @@
 
         function resetAll() {
             if (confirm('Reset all values?')) {
-                localStorage.removeItem('helical_session');
+                localStorage.removeItem('bevel_session');
                 userValues.clear();
                 document.querySelectorAll('input[type="number"]').forEach(input => {
                     input.value = '';
                     input.classList.remove('computed');
                 });
+                document.getElementById('Ks-indicator').textContent = 'Formula used: (calculating...)';
             }
         }
 

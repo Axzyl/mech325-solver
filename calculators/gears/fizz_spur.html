@@ -193,6 +193,85 @@
             color: white;
             border-left-color: white;
         }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Variables Table */
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .variables-table input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .variables-table input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
     </style>
 </head>
 <body>
@@ -206,6 +285,15 @@
                 ⚠️ This follows the Fizz design process. Many parameters require manual lookup from tables/graphs in the PDF. Reference the PDF for complete design process (40 steps total).
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
             <div class="section">
                 <h2>Basic Input Parameters</h2>
                 <div class="input-row">
@@ -671,14 +759,706 @@
                 <p><strong>Bending Stress Pinion:</strong> <span id="sum_stP">-</span> psi</p>
                 <p><strong>Contact Stress:</strong> <span id="sum_sc">-</span> psi</p>
             </div>
+            </div>
+            <!-- End Procedure Tab -->
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="info-box">
+                    📐 Reference equations from Section 2.1.3 Formulae. These are general formulas you can use for calculations.
+                </div>
+
+                <div class="section">
+                    <h2>Geometry Equations</h2>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$p = \frac{\pi D_P}{N_P} = \frac{\pi D_G}{N_G} = \frac{\pi}{P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>p (in)</label>
+                                <input type="number" id="p_eq" step="any" oninput="markAsUser('p_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D<sub>P</sub> (in)</label>
+                                <input type="number" id="DP_eq" step="any" oninput="markAsUser('DP_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>P</sub></label>
+                                <input type="number" id="NP_eq" step="1" oninput="markAsUser('NP_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D<sub>G</sub> (in)</label>
+                                <input type="number" id="DG_eq" step="any" oninput="markAsUser('DG_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>G</sub></label>
+                                <input type="number" id="NG_eq" step="1" oninput="markAsUser('NG_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq" step="any" oninput="markAsUser('Pd_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Circular pitch</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$m = \frac{D_P}{N_P} = \frac{D_G}{N_G} = \frac{1}{P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>m (mm)</label>
+                                <input type="number" id="m_eq" step="any" oninput="markAsUser('m_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D<sub>P</sub> (in)</label>
+                                <input type="number" id="DP_eq2" step="any" oninput="markAsUser('DP_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>P</sub></label>
+                                <input type="number" id="NP_eq2" step="1" oninput="markAsUser('NP_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq2" step="any" oninput="markAsUser('Pd_eq2'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Module</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$m_G = \frac{N_G}{N_P}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>m<sub>G</sub></label>
+                                <input type="number" id="mG_eq" step="any" oninput="markAsUser('mG_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>G</sub></label>
+                                <input type="number" id="NG_eq2" step="1" oninput="markAsUser('NG_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>P</sub></label>
+                                <input type="number" id="NP_eq3" step="1" oninput="markAsUser('NP_eq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear ratio</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D_o = \frac{N + 2}{P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>o</sub> (in)</label>
+                                <input type="number" id="Do_eq" step="any" oninput="markAsUser('Do_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N</label>
+                                <input type="number" id="N_eq" step="1" oninput="markAsUser('N_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq3" step="any" oninput="markAsUser('Pd_eq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Outside diameter</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D_R = D - 2b$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>R</sub> (in)</label>
+                                <input type="number" id="DR_eq" step="any" oninput="markAsUser('DR_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq" step="any" oninput="markAsUser('D_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>b (in)</label>
+                                <input type="number" id="b_eq2" step="any" oninput="markAsUser('b_eq2'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Root diameter</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$a = \frac{1}{P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>a (in)</label>
+                                <input type="number" id="a_eq" step="any" oninput="markAsUser('a_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq4" step="any" oninput="markAsUser('Pd_eq4'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Addendum</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$b = \begin{cases} \frac{1.25}{P_d} & P_d < 20 \\ \frac{1.20}{P_d} + 0.002 & P_d \geq 20 \end{cases}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>b (in)</label>
+                                <input type="number" id="b_eq" step="any" oninput="markAsUser('b_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq5" step="any" oninput="markAsUser('Pd_eq5'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Dedendum (piecewise)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$c = \begin{cases} \frac{0.25}{P_d} & P_d < 20 \\ \frac{0.20}{P_d} + 0.002 & P_d \geq 20 \end{cases}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>c (in)</label>
+                                <input type="number" id="c_eq" step="any" oninput="markAsUser('c_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq6" step="any" oninput="markAsUser('Pd_eq6'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Clearance (piecewise)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$h_f = a + b$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>h<sub>f</sub> (in)</label>
+                                <input type="number" id="hf_eq" step="any" oninput="markAsUser('hf_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>a (in)</label>
+                                <input type="number" id="a_eq2" step="any" oninput="markAsUser('a_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>b (in)</label>
+                                <input type="number" id="b_eq3" step="any" oninput="markAsUser('b_eq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Whole depth</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$h_k = 2a$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>h<sub>k</sub> (in)</label>
+                                <input type="number" id="hk_eq" step="any" oninput="markAsUser('hk_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>a (in)</label>
+                                <input type="number" id="a_eq3" step="any" oninput="markAsUser('a_eq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Working depth</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$t = \frac{p}{2} = \frac{\pi}{2P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>t (in)</label>
+                                <input type="number" id="t_eq" step="any" oninput="markAsUser('t_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>p (in)</label>
+                                <input type="number" id="p_eq2" step="any" oninput="markAsUser('p_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq7" step="any" oninput="markAsUser('Pd_eq7'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Tooth thickness</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{nominal} = \frac{12}{P_d} \quad \left(\frac{8}{P_d} < F < \frac{16}{P_d}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F (in)</label>
+                                <input type="number" id="F_eq" step="any" oninput="markAsUser('F_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq8" step="any" oninput="markAsUser('Pd_eq8'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Face width (nominal)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C = \frac{D_P + D_G}{2} = \frac{N_P + N_G}{2P_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>C (in)</label>
+                                <input type="number" id="C_eq" step="any" oninput="markAsUser('C_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D<sub>P</sub> (in)</label>
+                                <input type="number" id="DP_eq3" step="any" oninput="markAsUser('DP_eq3'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D<sub>G</sub> (in)</label>
+                                <input type="number" id="DG_eq2" step="any" oninput="markAsUser('DG_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>P</sub></label>
+                                <input type="number" id="NP_eq4" step="1" oninput="markAsUser('NP_eq4'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>G</sub></label>
+                                <input type="number" id="NG_eq3" step="1" oninput="markAsUser('NG_eq3'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq9" step="any" oninput="markAsUser('Pd_eq9'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Center distance</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D_b = \frac{N_p}{P_d} \cos \phi$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>b</sub> (in)</label>
+                                <input type="number" id="Db_eq" step="any" oninput="markAsUser('Db_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>P</sub></label>
+                                <input type="number" id="NP_eq5" step="1" oninput="markAsUser('NP_eq5'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>d</sub> (teeth/in)</label>
+                                <input type="number" id="Pd_eq10" step="any" oninput="markAsUser('Pd_eq10'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>φ (deg)</label>
+                                <input type="number" id="phi_eq" step="any" oninput="markAsUser('phi_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Base circle diameter</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Forces and Motion</h2>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{t,x-y} = W_t$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>t</sub> (lbf)</label>
+                                <input type="number" id="Ft_eq" step="any" oninput="markAsUser('Ft_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>W<sub>t</sub> (lbf)</label>
+                                <input type="number" id="Wt_eq" step="any" oninput="markAsUser('Wt_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Transmitted force</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{r,x-y} = F_{t,x-y} \tan \phi$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>r</sub> (lbf)</label>
+                                <input type="number" id="Fr_eq" step="any" oninput="markAsUser('Fr_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>F<sub>t</sub> (lbf)</label>
+                                <input type="number" id="Ft_eq2" step="any" oninput="markAsUser('Ft_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>φ (deg)</label>
+                                <input type="number" id="phi_eq2" step="any" oninput="markAsUser('phi_eq2'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Radial force</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T = W_t \frac{d}{2}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T (lbf·in)</label>
+                                <input type="number" id="T_eq" step="any" oninput="markAsUser('T_eq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>W<sub>t</sub> (lbf)</label>
+                                <input type="number" id="Wt_eq2" step="any" oninput="markAsUser('Wt_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq" step="any" oninput="markAsUser('d_eq'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Torque</p>
+                    </div>
+                </div>
+            </div>
+            <!-- End General Equations Tab -->
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="info-box">
+                    📝 Complete list of variables from Section 2.1.2 Nomenclature. Values sync with the calculator.
+                </div>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="var-category">
+                            <td colspan="4">Basic Gear Parameters</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>P</sub></td>
+                            <td>Number of teeth on pinion (input)</td>
+                            <td><input type="number" id="var_NP" step="1" oninput="syncVarInput('var_NP')"></td>
+                            <td>teeth</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>G</sub></td>
+                            <td>Number of teeth on gear (output)</td>
+                            <td><input type="number" id="var_NG" step="1" oninput="syncVarInput('var_NG')"></td>
+                            <td>teeth</td>
+                        </tr>
+                        <tr>
+                            <td>p</td>
+                            <td>Circular pitch</td>
+                            <td><input type="number" id="var_p" step="any" oninput="syncVarInput('var_p')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>P<sub>d</sub></td>
+                            <td>Diametral pitch</td>
+                            <td><input type="number" id="var_Pd" step="any" oninput="syncVarInput('var_Pd')"></td>
+                            <td>teeth/in</td>
+                        </tr>
+                        <tr>
+                            <td>m</td>
+                            <td>Module</td>
+                            <td><input type="number" id="var_m" step="any" oninput="syncVarInput('var_m')"></td>
+                            <td>mm</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>P</sub></td>
+                            <td>Pitch diameter of pinion</td>
+                            <td><input type="number" id="var_DP" step="any" oninput="syncVarInput('var_DP')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D<sub>G</sub></td>
+                            <td>Pitch diameter of gear</td>
+                            <td><input type="number" id="var_DG" step="any" oninput="syncVarInput('var_DG')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>φ</td>
+                            <td>Pressure angle</td>
+                            <td><input type="number" id="var_phi" step="any" oninput="syncVarInput('var_phi')"></td>
+                            <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <td>F</td>
+                            <td>Face width</td>
+                            <td><input type="number" id="var_F" step="any" oninput="syncVarInput('var_F')"></td>
+                            <td>in</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Tooth Dimensions</td>
+                        </tr>
+                        <tr>
+                            <td>a</td>
+                            <td>Addendum</td>
+                            <td><input type="number" id="var_a" step="any" oninput="syncVarInput('var_a')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>b</td>
+                            <td>Dedendum</td>
+                            <td><input type="number" id="var_b" step="any" oninput="syncVarInput('var_b')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>c</td>
+                            <td>Clearance</td>
+                            <td><input type="number" id="var_c" step="any" oninput="syncVarInput('var_c')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>h<sub>f</sub></td>
+                            <td>Whole depth</td>
+                            <td><input type="number" id="var_hf" step="any" oninput="syncVarInput('var_hf')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>h<sub>k</sub></td>
+                            <td>Working depth</td>
+                            <td><input type="number" id="var_hk" step="any" oninput="syncVarInput('var_hk')"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>t</td>
+                            <td>Tooth thickness</td>
+                            <td><input type="number" id="var_t" step="any" oninput="syncVarInput('var_t')"></td>
+                            <td>in</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Power and Motion</td>
+                        </tr>
+                        <tr>
+                            <td>P</td>
+                            <td>Transmitted power</td>
+                            <td><input type="number" id="var_P" step="any" oninput="syncVarInput('var_P')"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>P</sub></td>
+                            <td>Pinion speed (input)</td>
+                            <td><input type="number" id="var_nP" step="any" oninput="syncVarInput('var_nP')"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>G</sub></td>
+                            <td>Gear speed (output)</td>
+                            <td><input type="number" id="var_nG" step="any" oninput="syncVarInput('var_nG')"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>v<sub>t</sub></td>
+                            <td>Pitch-line velocity</td>
+                            <td><input type="number" id="var_vt" step="any" oninput="syncVarInput('var_vt')"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>t</sub></td>
+                            <td>Transmitted load</td>
+                            <td><input type="number" id="var_Wt" step="any" oninput="syncVarInput('var_Wt')"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>W<sub>r</sub></td>
+                            <td>Radial force</td>
+                            <td><input type="number" id="var_Wr" step="any" oninput="syncVarInput('var_Wr')"></td>
+                            <td>lbf</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Stress Analysis Factors</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>O</sub></td>
+                            <td>Overload Factor</td>
+                            <td><input type="number" id="var_KO" step="any" oninput="syncVarInput('var_KO')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>v</sub></td>
+                            <td>Dynamic factor</td>
+                            <td><input type="number" id="var_Kv" step="any" oninput="syncVarInput('var_Kv')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>m</sub></td>
+                            <td>Load-distribution factor</td>
+                            <td><input type="number" id="var_Km" step="any" oninput="syncVarInput('var_Km')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>s</sub></td>
+                            <td>Size factor</td>
+                            <td><input type="number" id="var_Ks" step="any" oninput="syncVarInput('var_Ks')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>B</sub></td>
+                            <td>Rim thickness factor</td>
+                            <td><input type="number" id="var_KB" step="any" oninput="syncVarInput('var_KB')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>J<sub>P</sub></td>
+                            <td>Bending geometry factor of the pinion</td>
+                            <td><input type="number" id="var_JP" step="any" oninput="syncVarInput('var_JP')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>J<sub>G</sub></td>
+                            <td>Bending geometry factor of the gear</td>
+                            <td><input type="number" id="var_JG" step="any" oninput="syncVarInput('var_JG')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>I</td>
+                            <td>Pitting geometry factor</td>
+                            <td><input type="number" id="var_I" step="any" oninput="syncVarInput('var_I')"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>C<sub>P</sub></td>
+                            <td>Elastic coefficient</td>
+                            <td><input type="number" id="var_CP" step="any" oninput="syncVarInput('var_CP')"></td>
+                            <td>√psi</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Stress Values</td>
+                        </tr>
+                        <tr>
+                            <td>σ<sub>tP</sub></td>
+                            <td>Expected bending stress in pinion</td>
+                            <td><input type="number" id="var_stP" step="any" oninput="syncVarInput('var_stP')"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>σ<sub>tG</sub></td>
+                            <td>Expected bending stress in gear</td>
+                            <td><input type="number" id="var_stG" step="any" oninput="syncVarInput('var_stG')"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>σ<sub>c</sub></td>
+                            <td>Expected contact stress</td>
+                            <td><input type="number" id="var_sc" step="any" oninput="syncVarInput('var_sc')"></td>
+                            <td>psi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Variables Tab -->
+
         </div>
     </div>
 
     <script>
         const userValues = new Set();
 
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Re-render MathJax for the new tab
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+            }
+        }
+
+        // Map of all variable instances across all tabs
+        const varInstanceMap = {
+            'NP': ['NP', 'var_NP', 'NP_eq', 'NP_eq2', 'NP_eq3', 'NP_eq4', 'NP_eq5'],
+            'NG': ['NG', 'var_NG', 'NG_eq', 'NG_eq2', 'NG_eq3'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq', 'Pd_eq2', 'Pd_eq3', 'Pd_eq4', 'Pd_eq5', 'Pd_eq6', 'Pd_eq7', 'Pd_eq8', 'Pd_eq9', 'Pd_eq10'],
+            'DP': ['DP', 'var_DP', 'DP_eq', 'DP_eq2', 'DP_eq3'],
+            'DG': ['DG', 'var_DG', 'DG_eq', 'DG_eq2'],
+            'p': ['p', 'var_p', 'p_eq', 'p_eq2'],
+            'phi': ['phi', 'var_phi', 'phi_eq', 'phi_eq2'],
+            'F': ['F', 'var_F', 'F_eq'],
+            'P': ['P', 'var_P', 'P_eq'],
+            'nP': ['nP', 'var_nP', 'nP_eq'],
+            'nG': ['nG', 'var_nG', 'nG_eq'],
+            'vt': ['vt', 'var_vt', 'vt_eq'],
+            'Wt': ['Wt', 'var_Wt', 'Wt_eq', 'Wt_eq2'],
+            'Wr': ['Wr', 'var_Wr', 'Wr_eq'],
+            'Ft': ['Ft', 'Ft_eq', 'Ft_eq2'],
+            'Fr': ['Fr', 'Fr_eq'],
+            'KO': ['KO', 'var_KO', 'KO_eq'],
+            'Kv': ['Kv', 'var_Kv', 'Kv_eq'],
+            'Km': ['Km', 'var_Km', 'Km_eq'],
+            'Ks': ['Ks', 'var_Ks', 'Ks_eq'],
+            'KB': ['KB', 'var_KB', 'KB_eq'],
+            'JP': ['JP', 'var_JP', 'JP_eq'],
+            'JG': ['JG', 'var_JG', 'JG_eq'],
+            'I': ['I', 'var_I', 'I_eq'],
+            'CP': ['CP', 'var_CP', 'CP_eq'],
+            'stP': ['stP', 'var_stP', 'stP_eq'],
+            'stG': ['stG', 'var_stG', 'stG_eq'],
+            'sc': ['sc', 'var_sc', 'sc_eq'],
+            'a': ['a', 'var_a', 'a_eq', 'a_eq2', 'a_eq3'],
+            'b': ['b', 'var_b', 'b_eq', 'b_eq2', 'b_eq3'],
+            'c': ['c', 'var_c', 'c_eq'],
+            'hf': ['hf', 'var_hf', 'hf_eq'],
+            'hk': ['hk', 'var_hk', 'hk_eq'],
+            't': ['t', 'var_t', 't_eq'],
+            'C': ['C', 'var_C', 'C_eq'],
+            'Db': ['Db', 'Db_eq'],
+            'DR': ['DR', 'DR_eq'],
+            'Do': ['Do', 'Do_eq'],
+            'D': ['D', 'D_eq'],
+            'N': ['N', 'N_eq'],
+            'd': ['d', 'd_eq'],
+            'T': ['T', 'T_eq'],
+            'm': ['m', 'var_m', 'm_eq'],
+            'mG': ['mG', 'var_mG', 'mG_eq']
+        };
+
+        // Get base variable name from any instance ID
+        function getBaseVarName(id) {
+            // Check if id starts with 'var_'
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'NP_eq', 'NP_eq2', 'Pd_eq10', etc.
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            // Otherwise it's the base name
+            return id;
+        }
+
+        // Sync a value across all instances of a variable
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+
+            // Update all instances of this variable
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
         function markAsUser(varId) {
             userValues.add(varId);
+            syncAllInstances(varId);
         }
 
         function syncInput(mainId, sourceId) {
@@ -688,6 +1468,11 @@
                 mainEl.value = sourceEl.value;
             }
             markAsUser(mainId);
+            calculate();
+        }
+
+        function syncVarInput(varId) {
+            markAsUser(varId);
             calculate();
         }
 
@@ -707,48 +1492,16 @@
                         el.classList.add('computed');
                     }
                 }
+                // Sync to all instances
+                syncAllInstances(id);
                 const sumEl = document.getElementById('sum_' + id);
                 if (sumEl) sumEl.textContent = value.toFixed(4);
             }
         }
 
         function syncAllFields() {
-            const mainVars = {
-                'P': ['P', 'P_eq1', 'P_eq6'],
-                'KO': ['KO', 'KO_eq1'],
-                'Pd': ['Pd', 'Pd_eq2', 'Pd_eq3'],
-                'NP': ['NP', 'NP_eq2'],
-                'NG': ['NG', 'NG_eq3'],
-                'nP': ['nP', 'nP_eq5'],
-                'DP': ['DP', 'DP_eq4', 'DP_eq5'],
-                'DG': ['DG', 'DG_eq4'],
-                'vt': ['vt', 'vt_eq6'],
-                'stP': ['stP', 'stP_eq8', 'stP_eq10'],
-                'stG': ['stG', 'stG_eq11'],
-                'JP': ['JP', 'JP_eq8'],
-                'JG': ['JG', 'JG_eq8'],
-                'sc': ['sc', 'sc_eq12', 'sc_eq13'],
-                'KR': ['KR', 'KR_eq10', 'KR_eq11', 'KR_eq12', 'KR_eq13'],
-                'YNP': ['YNP', 'YNP_eq10'],
-                'YNG': ['YNG', 'YNG_eq11'],
-                'ZNP': ['ZNP', 'ZNP_eq12'],
-                'ZNG': ['ZNG', 'ZNG_eq13'],
-                'sacP': ['sacP', 'sacP_eq14'],
-                'satP': ['satP', 'satP_eq15']
-            };
-
-            for (let mainVar in mainVars) {
-                const mainEl = document.getElementById(mainVar);
-                if (mainEl && mainEl.value) {
-                    const value = mainEl.value;
-                    mainVars[mainVar].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.value = value;
-                        }
-                    });
-                }
-            }
+            // This function is now handled by syncAllInstances automatically
+            // Kept for compatibility
         }
 
         function calculate() {

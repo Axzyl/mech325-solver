@@ -225,6 +225,80 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none !important;
+        }
+
+        .tab-content.active {
+            display: block !important;
+        }
+
+        /* Variables Tab */
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .var-category {
+            background: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -243,6 +317,16 @@
             <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
         </div>
 
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+            <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+            <button class="tab-button" onclick="showTab('variables')">Variables</button>
+        </div>
+
+        <!-- Procedure Tab -->
+        <div id="procedure-tab" class="tab-content active">
+
         <!-- Given Information -->
         <div class="section">
             <h2>Given Information</h2>
@@ -252,19 +336,19 @@
             <div class="given-inputs">
                 <div class="var-input">
                     <label>N =</label>
-                    <input type="number" id="N" step="1" oninput="markAsUser('N'); calculate()">
+                    <input type="number" id="N" step="1" oninput="syncAllInstances('N'); markAsUser('N'); calculate()">
                     <span class="unit">(teeth)</span>
                 </div>
 
                 <div class="var-input">
                     <label>F =</label>
-                    <input type="number" id="F" step="0.0001" oninput="markAsUser('F'); calculate()">
+                    <input type="number" id="F" step="0.0001" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
                     <span class="unit">in (face width)</span>
                 </div>
 
                 <div class="var-input">
                     <label>ψ =</label>
-                    <input type="number" id="psi" step="0.01" oninput="markAsUser('psi'); calculate()">
+                    <input type="number" id="psi" step="0.01" oninput="syncAllInstances('psi'); markAsUser('psi'); calculate()">
                     <span class="unit">deg (helix angle)</span>
                 </div>
             </div>
@@ -277,13 +361,13 @@
                 <div class="given-inputs">
                     <div class="var-input">
                         <label>P<sub>d</sub> =</label>
-                        <input type="number" id="Pd" step="0.0001" oninput="markAsUserPd('Pd'); calculate()">
+                        <input type="number" id="Pd" step="0.0001" oninput="syncAllInstances('Pd'); markAsUserPd('Pd'); calculate()">
                         <span class="unit">teeth/in (transverse)</span>
                     </div>
 
                     <div class="var-input">
                         <label>P<sub>nd</sub> =</label>
-                        <input type="number" id="Pnd" step="0.0001" oninput="markAsUserPd('Pnd'); calculate()">
+                        <input type="number" id="Pnd" step="0.0001" oninput="syncAllInstances('Pnd'); markAsUserPd('Pnd'); calculate()">
                         <span class="unit">teeth/in (normal)</span>
                     </div>
                 </div>
@@ -298,13 +382,13 @@
                 <div class="given-inputs">
                     <div class="var-input">
                         <label>φ<sub>t</sub> =</label>
-                        <input type="number" id="phi_t" step="0.01" oninput="markAsUserPhi('phi_t'); calculate()">
+                        <input type="number" id="phi_t" step="0.01" oninput="syncAllInstances('phi_t'); markAsUserPhi('phi_t'); calculate()">
                         <span class="unit">deg (transverse)</span>
                     </div>
 
                     <div class="var-input">
                         <label>φ<sub>n</sub> =</label>
-                        <input type="number" id="phi_n" step="0.01" oninput="markAsUserPhi('phi_n'); calculate()">
+                        <input type="number" id="phi_n" step="0.01" oninput="syncAllInstances('phi_n'); markAsUserPhi('phi_n'); calculate()">
                         <span class="unit">deg (normal)</span>
                     </div>
                 </div>
@@ -360,7 +444,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>p<sub>t</sub> =</label>
-                        <input type="number" id="pt" step="0.0001" oninput="markAsUser('pt'); calculate()">
+                        <input type="number" id="pt" step="0.0001" oninput="syncAllInstances('pt'); markAsUser('pt'); calculate()">
                         <span class="unit">in (transverse)</span>
                     </div>
                     <span>= π /</span>
@@ -379,7 +463,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>p<sub>n</sub> =</label>
-                        <input type="number" id="pn" step="0.0001" oninput="markAsUser('pn'); calculate()">
+                        <input type="number" id="pn" step="0.0001" oninput="syncAllInstances('pn'); markAsUser('pn'); calculate()">
                         <span class="unit">in (normal)</span>
                     </div>
                     <span>=</span>
@@ -410,7 +494,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>p<sub>x</sub> =</label>
-                        <input type="number" id="px" step="0.0001" oninput="markAsUser('px'); calculate()">
+                        <input type="number" id="px" step="0.0001" oninput="syncAllInstances('px'); markAsUser('px'); calculate()">
                         <span class="unit">in (axial)</span>
                     </div>
                     <span>=</span>
@@ -441,7 +525,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>D =</label>
-                        <input type="number" id="D" step="0.0001" oninput="markAsUser('D'); calculate()">
+                        <input type="number" id="D" step="0.0001" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>=</span>
@@ -501,7 +585,7 @@
                 <div class="equation-inputs">
                     <div class="var-input">
                         <label>N<sub>ax</sub> =</label>
-                        <input type="number" id="Nax" step="0.01" oninput="markAsUser('Nax'); calculate()">
+                        <input type="number" id="Nax" step="0.01" oninput="syncAllInstances('Nax'); markAsUser('Nax'); calculate()">
                         <span class="unit">(dimensionless)</span>
                     </div>
                     <span>=</span>
@@ -523,9 +607,374 @@
 
             <div class="success">✅ You're done!</div>
         </div>
+
+        </div> <!-- End Procedure Tab -->
+
+        <!-- General Equations Tab -->
+        <div id="equations-tab" class="tab-content">
+            <div class="section">
+                <h2>Helical Gear General Equations</h2>
+
+                <h3>Pitch Relationships</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$P_{nd} = \frac{P_d}{\cos(\psi)}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>P<sub>nd</sub> =</label>
+                            <input type="number" id="Pnd_gen" step="0.0001" oninput="syncAllInstances('Pnd_gen'); markAsUserPd('Pnd_gen'); calculate()">
+                            <span class="unit">teeth/in</span>
+                        </div>
+                        <span>= </span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen" step="0.0001" oninput="syncAllInstances('Pd_gen'); markAsUserPd('Pd_gen'); calculate()">
+                            <span class="unit">teeth/in</span>
+                        </div>
+                        <span>/ cos(</span>
+                        <div class="var-input">
+                            <label>ψ =</label>
+                            <input type="number" id="psi_gen" step="0.01" oninput="syncAllInstances('psi_gen'); markAsUser('psi_gen'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$p_t = \frac{\pi}{P_d}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p<sub>t</sub> =</label>
+                            <input type="number" id="pt_gen" step="0.0001" oninput="syncAllInstances('pt_gen'); markAsUser('pt_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= π / </span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen2" step="0.0001" oninput="syncAllInstances('Pd_gen2'); markAsUserPd('Pd_gen2'); calculate()">
+                            <span class="unit">teeth/in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$p_n = p_t \cos(\psi)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p<sub>n</sub> =</label>
+                            <input type="number" id="pn_gen" step="0.0001" oninput="syncAllInstances('pn_gen'); markAsUser('pn_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= </span>
+                        <div class="var-input">
+                            <label>p<sub>t</sub> =</label>
+                            <input type="number" id="pt_gen2" step="0.0001" oninput="syncAllInstances('pt_gen2'); markAsUser('pt_gen2'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>× cos(</span>
+                        <div class="var-input">
+                            <label>ψ =</label>
+                            <input type="number" id="psi_gen2" step="0.01" oninput="syncAllInstances('psi_gen2'); markAsUser('psi_gen2'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$p_x = \frac{p_t}{\tan(\psi)}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>p<sub>x</sub> =</label>
+                            <input type="number" id="px_gen" step="0.0001" oninput="syncAllInstances('px_gen'); markAsUser('px_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= </span>
+                        <div class="var-input">
+                            <label>p<sub>t</sub> =</label>
+                            <input type="number" id="pt_gen3" step="0.0001" oninput="syncAllInstances('pt_gen3'); markAsUser('pt_gen3'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>/ tan(</span>
+                        <div class="var-input">
+                            <label>ψ =</label>
+                            <input type="number" id="psi_gen3" step="0.01" oninput="syncAllInstances('psi_gen3'); markAsUser('psi_gen3'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <h3>Pressure Angle Relationships</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$\phi_n = \tan^{-1}(\tan(\phi_t) \cos(\psi))$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>φ<sub>n</sub> =</label>
+                            <input type="number" id="phi_n_gen" step="0.01" oninput="syncAllInstances('phi_n_gen'); markAsUserPhi('phi_n_gen'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>= arctan(tan(</span>
+                        <div class="var-input">
+                            <label>φ<sub>t</sub> =</label>
+                            <input type="number" id="phi_t_gen" step="0.01" oninput="syncAllInstances('phi_t_gen'); markAsUserPhi('phi_t_gen'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>) × cos(</span>
+                        <div class="var-input">
+                            <label>ψ =</label>
+                            <input type="number" id="psi_gen4" step="0.01" oninput="syncAllInstances('psi_gen4'); markAsUser('psi_gen4'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>))</span>
+                    </div>
+                </div>
+
+                <h3>Diameter and Geometry</h3>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$D = \frac{N}{P_d}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>D =</label>
+                            <input type="number" id="D_gen" step="0.0001" oninput="syncAllInstances('D_gen'); markAsUser('D_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>= </span>
+                        <div class="var-input">
+                            <label>N =</label>
+                            <input type="number" id="N_gen" step="1" oninput="syncAllInstances('N_gen'); markAsUser('N_gen'); calculate()">
+                            <span class="unit">teeth</span>
+                        </div>
+                        <span>/ </span>
+                        <div class="var-input">
+                            <label>P<sub>d</sub> =</label>
+                            <input type="number" id="Pd_gen3" step="0.0001" oninput="syncAllInstances('Pd_gen3'); markAsUserPd('Pd_gen3'); calculate()">
+                            <span class="unit">teeth/in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$N_{ax} = \frac{F}{p_x}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>N<sub>ax</sub> =</label>
+                            <input type="number" id="Nax_gen" step="0.01" oninput="syncAllInstances('Nax_gen'); markAsUser('Nax_gen'); calculate()">
+                            <span class="unit"></span>
+                        </div>
+                        <span>= </span>
+                        <div class="var-input">
+                            <label>F =</label>
+                            <input type="number" id="F_gen" step="0.0001" oninput="syncAllInstances('F_gen'); markAsUser('F_gen'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>/ </span>
+                        <div class="var-input">
+                            <label>p<sub>x</sub> =</label>
+                            <input type="number" id="px_gen2" step="0.0001" oninput="syncAllInstances('px_gen2'); markAsUser('px_gen2'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variables Tab -->
+        <div id="variables-tab" class="tab-content">
+            <h2>All Variables</h2>
+            <table class="variables-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Description</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="var-category"><td colspan="4">Basic Parameters</td></tr>
+                    <tr>
+                        <td>N</td>
+                        <td>Number of Teeth</td>
+                        <td><input type="number" id="var_N" step="1" oninput="syncAllInstances('var_N'); markAsUser('var_N'); calculate()"></td>
+                        <td>teeth</td>
+                    </tr>
+                    <tr>
+                        <td>F</td>
+                        <td>Face Width</td>
+                        <td><input type="number" id="var_F" step="0.0001" oninput="syncAllInstances('var_F'); markAsUser('var_F'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>ψ</td>
+                        <td>Helix Angle</td>
+                        <td><input type="number" id="var_psi" step="0.01" oninput="syncAllInstances('var_psi'); markAsUser('var_psi'); calculate()"></td>
+                        <td>deg</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Diametral Pitch</td></tr>
+                    <tr>
+                        <td>P<sub>d</sub></td>
+                        <td>Diametral Pitch (Transverse)</td>
+                        <td><input type="number" id="var_Pd" step="0.0001" oninput="syncAllInstances('var_Pd'); markAsUserPd('var_Pd'); calculate()"></td>
+                        <td>teeth/in</td>
+                    </tr>
+                    <tr>
+                        <td>P<sub>nd</sub></td>
+                        <td>Diametral Pitch (Normal)</td>
+                        <td><input type="number" id="var_Pnd" step="0.0001" oninput="syncAllInstances('var_Pnd'); markAsUserPd('var_Pnd'); calculate()"></td>
+                        <td>teeth/in</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Pressure Angles</td></tr>
+                    <tr>
+                        <td>φ<sub>t</sub></td>
+                        <td>Pressure Angle (Transverse)</td>
+                        <td><input type="number" id="var_phi_t" step="0.01" oninput="syncAllInstances('var_phi_t'); markAsUserPhi('var_phi_t'); calculate()"></td>
+                        <td>deg</td>
+                    </tr>
+                    <tr>
+                        <td>φ<sub>n</sub></td>
+                        <td>Pressure Angle (Normal)</td>
+                        <td><input type="number" id="var_phi_n" step="0.01" oninput="syncAllInstances('var_phi_n'); markAsUserPhi('var_phi_n'); calculate()"></td>
+                        <td>deg</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Circular Pitches</td></tr>
+                    <tr>
+                        <td>p<sub>t</sub></td>
+                        <td>Circular Pitch (Transverse)</td>
+                        <td><input type="number" id="var_pt" step="0.0001" oninput="syncAllInstances('var_pt'); markAsUser('var_pt'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>p<sub>n</sub></td>
+                        <td>Circular Pitch (Normal)</td>
+                        <td><input type="number" id="var_pn" step="0.0001" oninput="syncAllInstances('var_pn'); markAsUser('var_pn'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>p<sub>x</sub></td>
+                        <td>Axial Pitch</td>
+                        <td><input type="number" id="var_px" step="0.0001" oninput="syncAllInstances('var_px'); markAsUser('var_px'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+
+                    <tr class="var-category"><td colspan="4">Dimensions</td></tr>
+                    <tr>
+                        <td>D</td>
+                        <td>Pitch Diameter</td>
+                        <td><input type="number" id="var_D" step="0.0001" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
+                        <td>in</td>
+                    </tr>
+                    <tr>
+                        <td>N<sub>ax</sub></td>
+                        <td>Number of Axial Pitches</td>
+                        <td><input type="number" id="var_Nax" step="0.01" oninput="syncAllInstances('var_Nax'); markAsUser('var_Nax'); calculate()"></td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script>
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            // Activate button
+            event.currentTarget.classList.add('active');
+
+            // Re-render MathJax for the active tab
+            if (typeof MathJax !== 'undefined') {
+                if (activeTab) {
+                    MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+                }
+            }
+        }
+
+        // Variable Instance Mapping for Bidirectional Sync
+        const varInstanceMap = {
+            'N': ['N', 'var_N', 'N_eq4', 'N_gen'],
+            'F': ['F', 'var_F', 'F_eq6', 'F_gen'],
+            'psi': ['psi', 'var_psi', 'psi_eq1', 'psi_eq2', 'psi_eq3', 'psi_eq5', 'psi_gen', 'psi_gen2', 'psi_gen3', 'psi_gen4'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq1', 'Pd_eq2', 'Pd_eq4', 'Pd_gen', 'Pd_gen2', 'Pd_gen3'],
+            'Pnd': ['Pnd', 'var_Pnd', 'Pnd_eq1', 'Pnd_gen'],
+            'phi_t': ['phi_t', 'var_phi_t', 'phi_t_eq5', 'phi_t_gen'],
+            'phi_n': ['phi_n', 'var_phi_n', 'phi_n_eq5', 'phi_n_gen'],
+            'pt': ['pt', 'var_pt', 'pt_eq2', 'pt_eq3', 'pt_gen', 'pt_gen2', 'pt_gen3'],
+            'pn': ['pn', 'var_pn', 'pn_gen'],
+            'px': ['px', 'var_px', 'px_eq6', 'px_gen', 'px_gen2'],
+            'D': ['D', 'var_D', 'D_gen'],
+            'Nax': ['Nax', 'var_Nax', 'Nax_gen']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            let underscoreIndex = id.indexOf('_eq');
+            if (underscoreIndex !== -1) {
+                return id.substring(0, underscoreIndex);
+            }
+            underscoreIndex = id.indexOf('_gen');
+            if (underscoreIndex !== -1) {
+                return id.substring(0, underscoreIndex);
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVarName(changedId);
+            const instances = varInstanceMap[baseVar];
+            if (!instances) return;
+
+            const changedInput = document.getElementById(changedId);
+            if (!changedInput) return;
+
+            const newValue = changedInput.value;
+
+            instances.forEach(instanceId => {
+                if (instanceId !== changedId) {
+                    const input = document.getElementById(instanceId);
+                    if (input) {
+                        input.value = newValue;
+                    }
+                }
+            });
+        }
+
         // Track which values are user-entered vs computed
         let userValues = new Set(['N', 'F', 'psi']);
 
@@ -565,6 +1014,9 @@
             const value = sourceElement.value;
             mainElement.value = value;
 
+            // Sync all instances including Variables tab
+            syncAllInstances(sourceId);
+
             // Only mark as user input if source was user-entered
             if (userValues.has(sourceId) || !sourceElement.classList.contains('computed')) {
                 markAsUser(mainId);
@@ -586,13 +1038,15 @@
                 if (element) {
                     element.value = value.toFixed(4);
                     element.classList.add('computed');
+                    // Sync to all instances including Variables tab and General Equations tab
+                    syncAllInstances(id);
                 }
             }
         }
 
         // Sync all duplicate fields
         function syncAllFields() {
-            const mainVars = ['N', 'F', 'psi', 'Pd', 'Pnd', 'phi_t', 'phi_n', 'pt', 'pn', 'px', 'D'];
+            const mainVars = ['N', 'F', 'psi', 'Pd', 'Pnd', 'phi_t', 'phi_n', 'pt', 'pn', 'px', 'D', 'Nax'];
 
             mainVars.forEach(varId => {
                 const mainValue = getValue(varId);

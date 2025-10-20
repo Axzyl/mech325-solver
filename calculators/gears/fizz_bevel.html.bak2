@@ -779,23 +779,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_beqg" step="any" oninput="syncAllInstances('Pd_beqg'); markAsUser('Pd_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>P</sub></label>
-                                <input type="number" id="NP_beqg" step="1" oninput="syncAllInstances('NP_beqg'); markAsUser('NP_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg" step="any" oninput="syncAllInstances('d_beqg'); markAsUser('d_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>G</sub></label>
-                                <input type="number" id="NG_beqg" step="1" oninput="syncAllInstances('NG_beqg'); markAsUser('NG_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg" step="any" oninput="syncAllInstances('D_beqg'); markAsUser('D_beqg'); calculate()">
+                                <input type="number" id="Pd_beq" step="any" oninput="syncAllInstances('Pd_beq'); markAsUser('Pd_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Diametral pitch</p>
@@ -806,23 +790,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>m<sub>G</sub></label>
-                                <input type="number" id="mG_beqg" step="any" oninput="syncAllInstances('mG_beqg'); markAsUser('mG_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>G</sub></label>
-                                <input type="number" id="NG_beqg2" step="1" oninput="syncAllInstances('NG_beqg2'); markAsUser('NG_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>P</sub></label>
-                                <input type="number" id="NP_beqg2" step="1" oninput="syncAllInstances('NP_beqg2'); markAsUser('NP_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg2" step="any" oninput="syncAllInstances('D_beqg2'); markAsUser('D_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg2" step="any" oninput="syncAllInstances('d_beqg2'); markAsUser('d_beqg2'); calculate()">
+                                <input type="number" id="mG_beq" step="any" oninput="syncAllInstances('mG_beq'); markAsUser('mG_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear ratio</p>
@@ -836,23 +804,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg" step="any" oninput="syncAllInstances('gamma_eqg'); markAsUser('gamma_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>P</sub></label>
-                                <input type="number" id="NP_beqg3" step="1" oninput="syncAllInstances('NP_beqg3'); markAsUser('NP_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>G</sub></label>
-                                <input type="number" id="NG_beqg3" step="1" oninput="syncAllInstances('NG_beqg3'); markAsUser('NG_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg3" step="any" oninput="syncAllInstances('d_beqg3'); markAsUser('d_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg3" step="any" oninput="syncAllInstances('D_beqg3'); markAsUser('D_beqg3'); calculate()">
+                                <input type="number" id="gamma_eq" step="any" oninput="syncAllInstances('gamma_eq'); markAsUser('gamma_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion cone angle</p>
@@ -863,23 +815,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg" step="any" oninput="syncAllInstances('Gamma_eqg'); markAsUser('Gamma_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>G</sub></label>
-                                <input type="number" id="NG_beqg4" step="1" oninput="syncAllInstances('NG_beqg4'); markAsUser('NG_beqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>N<sub>P</sub></label>
-                                <input type="number" id="NP_beqg4" step="1" oninput="syncAllInstances('NP_beqg4'); markAsUser('NP_beqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg4" step="any" oninput="syncAllInstances('D_beqg4'); markAsUser('D_beqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg4" step="any" oninput="syncAllInstances('d_beqg4'); markAsUser('d_beqg4'); calculate()">
+                                <input type="number" id="Gamma_eq" step="any" oninput="syncAllInstances('Gamma_eq'); markAsUser('Gamma_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear cone angle</p>
@@ -892,28 +828,8 @@
                         <div class="equation-latex">$$A_{oG} = \frac{D}{2 \sin \Gamma}, \quad A_{oP} = \frac{d}{2 \sin \gamma}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>A<sub>oG</sub> (in)</label>
-                                <input type="number" id="AoG_eqg" step="any" oninput="syncAllInstances('AoG_eqg'); markAsUser('AoG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg5" step="any" oninput="syncAllInstances('D_beqg5'); markAsUser('D_beqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg2" step="any" oninput="syncAllInstances('Gamma_eqg2'); markAsUser('Gamma_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>oP</sub> (in)</label>
-                                <input type="number" id="AoP_eqg" step="any" oninput="syncAllInstances('AoP_eqg'); markAsUser('AoP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg5" step="any" oninput="syncAllInstances('d_beqg5'); markAsUser('d_beqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg2" step="any" oninput="syncAllInstances('gamma_eqg2'); markAsUser('gamma_eqg2'); calculate()">
+                                <label>A<sub>o</sub> (in)</label>
+                                <input type="number" id="Ao_eq" step="any" oninput="syncAllInstances('Ao_eq'); markAsUser('Ao_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Outer cone distance</p>
@@ -924,11 +840,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>F<sub>nom</sub> (in)</label>
-                                <input type="number" id="Fnom_eqg" step="any" oninput="syncAllInstances('Fnom_eqg'); markAsUser('Fnom_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>o</sub> (in)</label>
-                                <input type="number" id="Ao_eqg" step="any" oninput="syncAllInstances('Ao_eqg'); markAsUser('Ao_eqg'); calculate()">
+                                <input type="number" id="Fnom_eq" step="any" oninput="syncAllInstances('Fnom_eq'); markAsUser('Fnom_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Nominal face width</p>
@@ -939,15 +851,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>F<sub>max</sub> (in)</label>
-                                <input type="number" id="Fmax_eqg" step="any" oninput="syncAllInstances('Fmax_eqg'); markAsUser('Fmax_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>o</sub> (in)</label>
-                                <input type="number" id="Ao_eqg2" step="any" oninput="syncAllInstances('Ao_eqg2'); markAsUser('Ao_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_beqg2" step="any" oninput="syncAllInstances('Pd_beqg2'); markAsUser('Pd_beqg2'); calculate()">
+                                <input type="number" id="Fmax_eq" step="any" oninput="syncAllInstances('Fmax_eq'); markAsUser('Fmax_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Maximum face width</p>
@@ -958,15 +862,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>A<sub>m</sub> (in)</label>
-                                <input type="number" id="Am_eqg" step="any" oninput="syncAllInstances('Am_eqg'); markAsUser('Am_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>o</sub> (in)</label>
-                                <input type="number" id="Ao_eqg3" step="any" oninput="syncAllInstances('Ao_eqg3'); markAsUser('Ao_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>F (in)</label>
-                                <input type="number" id="F_beqg" step="any" oninput="syncAllInstances('F_beqg'); markAsUser('F_beqg'); calculate()">
+                                <input type="number" id="Am_eq" step="any" oninput="syncAllInstances('Am_eq'); markAsUser('Am_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean cone distance</p>
@@ -980,19 +876,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>p<sub>m</sub> (in)</label>
-                                <input type="number" id="pm_eqg" step="any" oninput="syncAllInstances('pm_eqg'); markAsUser('pm_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>m</sub> (in)</label>
-                                <input type="number" id="Am_eqg2" step="any" oninput="syncAllInstances('Am_eqg2'); markAsUser('Am_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_beqg3" step="any" oninput="syncAllInstances('Pd_beqg3'); markAsUser('Pd_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>o</sub> (in)</label>
-                                <input type="number" id="Ao_eqg4" step="any" oninput="syncAllInstances('Ao_eqg4'); markAsUser('Ao_eqg4'); calculate()">
+                                <input type="number" id="pm_eq" step="any" oninput="syncAllInstances('pm_eq'); markAsUser('pm_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean circular pitch</p>
@@ -1003,19 +887,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>h (in)</label>
-                                <input type="number" id="h_beqg" step="any" oninput="syncAllInstances('h_beqg'); markAsUser('h_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>m</sub> (in)</label>
-                                <input type="number" id="Am_eqg3" step="any" oninput="syncAllInstances('Am_eqg3'); markAsUser('Am_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P<sub>d</sub> (teeth/in)</label>
-                                <input type="number" id="Pd_beqg4" step="any" oninput="syncAllInstances('Pd_beqg4'); markAsUser('Pd_beqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>o</sub> (in)</label>
-                                <input type="number" id="Ao_eqg5" step="any" oninput="syncAllInstances('Ao_eqg5'); markAsUser('Ao_eqg5'); calculate()">
+                                <input type="number" id="h_beq" step="any" oninput="syncAllInstances('h_beq'); markAsUser('h_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean working depth</p>
@@ -1026,11 +898,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>c (in)</label>
-                                <input type="number" id="c_beqg" step="any" oninput="syncAllInstances('c_beqg'); markAsUser('c_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h (in)</label>
-                                <input type="number" id="h_beqg2" step="any" oninput="syncAllInstances('h_beqg2'); markAsUser('h_beqg2'); calculate()">
+                                <input type="number" id="c_beq" step="any" oninput="syncAllInstances('c_beq'); markAsUser('c_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Clearance</p>
@@ -1041,15 +909,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>h<sub>m</sub> (in)</label>
-                                <input type="number" id="hm_eqg" step="any" oninput="syncAllInstances('hm_eqg'); markAsUser('hm_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h (in)</label>
-                                <input type="number" id="h_beqg3" step="any" oninput="syncAllInstances('h_beqg3'); markAsUser('h_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>c (in)</label>
-                                <input type="number" id="c_beqg2" step="any" oninput="syncAllInstances('c_beqg2'); markAsUser('c_beqg2'); calculate()">
+                                <input type="number" id="hm_eq" step="any" oninput="syncAllInstances('hm_eq'); markAsUser('hm_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean whole depth</p>
@@ -1060,11 +920,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>c<sub>1</sub></label>
-                                <input type="number" id="c1_eqg" step="any" oninput="syncAllInstances('c1_eqg'); markAsUser('c1_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>m<sub>G</sub></label>
-                                <input type="number" id="mG_beqg2" step="any" oninput="syncAllInstances('mG_beqg2'); markAsUser('mG_beqg2'); calculate()">
+                                <input type="number" id="c1_eq" step="any" oninput="syncAllInstances('c1_eq'); markAsUser('c1_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean addendum factor</p>
@@ -1078,15 +934,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>a<sub>G</sub> (in)</label>
-                                <input type="number" id="aG_eqg" step="any" oninput="syncAllInstances('aG_eqg'); markAsUser('aG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>c<sub>1</sub></label>
-                                <input type="number" id="c1_eqg2" step="any" oninput="syncAllInstances('c1_eqg2'); markAsUser('c1_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h (in)</label>
-                                <input type="number" id="h_beqg4" step="any" oninput="syncAllInstances('h_beqg4'); markAsUser('h_beqg4'); calculate()">
+                                <input type="number" id="aG_eq" step="any" oninput="syncAllInstances('aG_eq'); markAsUser('aG_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear mean addendum</p>
@@ -1097,15 +945,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>a<sub>P</sub> (in)</label>
-                                <input type="number" id="aP_eqg" step="any" oninput="syncAllInstances('aP_eqg'); markAsUser('aP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h (in)</label>
-                                <input type="number" id="h_beqg5" step="any" oninput="syncAllInstances('h_beqg5'); markAsUser('h_beqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>G</sub> (in)</label>
-                                <input type="number" id="aG_eqg2" step="any" oninput="syncAllInstances('aG_eqg2'); markAsUser('aG_eqg2'); calculate()">
+                                <input type="number" id="aP_eq" step="any" oninput="syncAllInstances('aP_eq'); markAsUser('aP_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion mean addendum</p>
@@ -1116,15 +956,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>b<sub>G</sub> (in)</label>
-                                <input type="number" id="bG_eqg" step="any" oninput="syncAllInstances('bG_eqg'); markAsUser('bG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h<sub>m</sub> (in)</label>
-                                <input type="number" id="hm_eqg2" step="any" oninput="syncAllInstances('hm_eqg2'); markAsUser('hm_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>G</sub> (in)</label>
-                                <input type="number" id="aG_eqg3" step="any" oninput="syncAllInstances('aG_eqg3'); markAsUser('aG_eqg3'); calculate()">
+                                <input type="number" id="bG_eq" step="any" oninput="syncAllInstances('bG_eq'); markAsUser('bG_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear mean dedendum</p>
@@ -1135,15 +967,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>b<sub>P</sub> (in)</label>
-                                <input type="number" id="bP_eqg" step="any" oninput="syncAllInstances('bP_eqg'); markAsUser('bP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>h<sub>m</sub> (in)</label>
-                                <input type="number" id="hm_eqg3" step="any" oninput="syncAllInstances('hm_eqg3'); markAsUser('hm_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>P</sub> (in)</label>
-                                <input type="number" id="aP_eqg2" step="any" oninput="syncAllInstances('aP_eqg2'); markAsUser('aP_eqg2'); calculate()">
+                                <input type="number" id="bP_eq" step="any" oninput="syncAllInstances('bP_eq'); markAsUser('bP_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion mean dedendum</p>
@@ -1154,15 +978,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>δ<sub>G</sub> (°)</label>
-                                <input type="number" id="deltaG_eqg" step="any" oninput="syncAllInstances('deltaG_eqg'); markAsUser('deltaG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>b<sub>G</sub> (in)</label>
-                                <input type="number" id="bG_eqg2" step="any" oninput="syncAllInstances('bG_eqg2'); markAsUser('bG_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>mG</sub> (in)</label>
-                                <input type="number" id="AmG_eqg" step="any" oninput="syncAllInstances('AmG_eqg'); markAsUser('AmG_eqg'); calculate()">
+                                <input type="number" id="deltaG_eq" step="any" oninput="syncAllInstances('deltaG_eq'); markAsUser('deltaG_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear dedendum angle</p>
@@ -1173,15 +989,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>δ<sub>P</sub> (°)</label>
-                                <input type="number" id="deltaP_eqg" step="any" oninput="syncAllInstances('deltaP_eqg'); markAsUser('deltaP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>b<sub>P</sub> (in)</label>
-                                <input type="number" id="bP_eqg2" step="any" oninput="syncAllInstances('bP_eqg2'); markAsUser('bP_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>A<sub>mP</sub> (in)</label>
-                                <input type="number" id="AmP_eqg" step="any" oninput="syncAllInstances('AmP_eqg'); markAsUser('AmP_eqg'); calculate()">
+                                <input type="number" id="deltaP_eq" step="any" oninput="syncAllInstances('deltaP_eq'); markAsUser('deltaP_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion dedendum angle</p>
@@ -1195,19 +1003,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>a<sub>oG</sub> (in)</label>
-                                <input type="number" id="aoG_eqg" step="any" oninput="syncAllInstances('aoG_eqg'); markAsUser('aoG_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>G</sub> (in)</label>
-                                <input type="number" id="aG_eqg4" step="any" oninput="syncAllInstances('aG_eqg4'); markAsUser('aG_eqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>F (in)</label>
-                                <input type="number" id="F_beqg2" step="any" oninput="syncAllInstances('F_beqg2'); markAsUser('F_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>δ<sub>P</sub> (°)</label>
-                                <input type="number" id="deltaP_eqg2" step="any" oninput="syncAllInstances('deltaP_eqg2'); markAsUser('deltaP_eqg2'); calculate()">
+                                <input type="number" id="aoG_eq" step="any" oninput="syncAllInstances('aoG_eq'); markAsUser('aoG_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear outer addendum</p>
@@ -1218,19 +1014,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>a<sub>oP</sub> (in)</label>
-                                <input type="number" id="aoP_eqg" step="any" oninput="syncAllInstances('aoP_eqg'); markAsUser('aoP_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>P</sub> (in)</label>
-                                <input type="number" id="aP_eqg3" step="any" oninput="syncAllInstances('aP_eqg3'); markAsUser('aP_eqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>F (in)</label>
-                                <input type="number" id="F_beqg3" step="any" oninput="syncAllInstances('F_beqg3'); markAsUser('F_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>δ<sub>G</sub> (°)</label>
-                                <input type="number" id="deltaG_eqg2" step="any" oninput="syncAllInstances('deltaG_eqg2'); markAsUser('deltaG_eqg2'); calculate()">
+                                <input type="number" id="aoP_eq" step="any" oninput="syncAllInstances('aoP_eq'); markAsUser('aoP_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion outer addendum</p>
@@ -1241,19 +1025,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>D<sub>o</sub> (in)</label>
-                                <input type="number" id="Do_beqg" step="any" oninput="syncAllInstances('Do_beqg'); markAsUser('Do_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg6" step="any" oninput="syncAllInstances('D_beqg6'); markAsUser('D_beqg6'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>oG</sub> (in)</label>
-                                <input type="number" id="aoG_eqg2" step="any" oninput="syncAllInstances('aoG_eqg2'); markAsUser('aoG_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg3" step="any" oninput="syncAllInstances('Gamma_eqg3'); markAsUser('Gamma_eqg3'); calculate()">
+                                <input type="number" id="Do_beq" step="any" oninput="syncAllInstances('Do_beq'); markAsUser('Do_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Gear outside diameter</p>
@@ -1264,19 +1036,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>d<sub>o</sub> (in)</label>
-                                <input type="number" id="do_eqg" step="any" oninput="syncAllInstances('do_eqg'); markAsUser('do_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg6" step="any" oninput="syncAllInstances('d_beqg6'); markAsUser('d_beqg6'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>a<sub>oP</sub> (in)</label>
-                                <input type="number" id="aoP_eqg2" step="any" oninput="syncAllInstances('aoP_eqg2'); markAsUser('aoP_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg3" step="any" oninput="syncAllInstances('gamma_eqg3'); markAsUser('gamma_eqg3'); calculate()">
+                                <input type="number" id="do_eq" step="any" oninput="syncAllInstances('do_eq'); markAsUser('do_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pinion outside diameter</p>
@@ -1290,23 +1050,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>v<sub>t</sub> (ft/min)</label>
-                                <input type="number" id="vt_beqg" step="any" oninput="syncAllInstances('vt_beqg'); markAsUser('vt_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg7" step="any" oninput="syncAllInstances('D_beqg7'); markAsUser('D_beqg7'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n<sub>G</sub> (rpm)</label>
-                                <input type="number" id="nG_beqg" step="any" oninput="syncAllInstances('nG_beqg'); markAsUser('nG_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg7" step="any" oninput="syncAllInstances('d_beqg7'); markAsUser('d_beqg7'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n<sub>P</sub> (rpm)</label>
-                                <input type="number" id="nP_beqg" step="any" oninput="syncAllInstances('nP_beqg'); markAsUser('nP_beqg'); calculate()">
+                                <input type="number" id="vt_beq" step="any" oninput="syncAllInstances('vt_beq'); markAsUser('vt_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Pitch line speed</p>
@@ -1317,15 +1061,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>T (lbf·in)</label>
-                                <input type="number" id="T_beqg" step="any" oninput="syncAllInstances('T_beqg'); markAsUser('T_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>P (hp)</label>
-                                <input type="number" id="P_beqg" step="any" oninput="syncAllInstances('P_beqg'); markAsUser('P_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>n (rpm)</label>
-                                <input type="number" id="n_beqg" step="any" oninput="syncAllInstances('n_beqg'); markAsUser('n_beqg'); calculate()">
+                                <input type="number" id="T_beq" step="any" oninput="syncAllInstances('T_beq'); markAsUser('T_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Torque</p>
@@ -1336,31 +1072,11 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>r<sub>m</sub> (in)</label>
-                                <input type="number" id="rm_eqg" step="any" oninput="syncAllInstances('rm_eqg'); markAsUser('rm_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>d (in)</label>
-                                <input type="number" id="d_beqg8" step="any" oninput="syncAllInstances('d_beqg8'); markAsUser('d_beqg8'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>F (in)</label>
-                                <input type="number" id="F_beqg4" step="any" oninput="syncAllInstances('F_beqg4'); markAsUser('F_beqg4'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg4" step="any" oninput="syncAllInstances('gamma_eqg4'); markAsUser('gamma_eqg4'); calculate()">
+                                <input type="number" id="rm_eq" step="any" oninput="syncAllInstances('rm_eq'); markAsUser('rm_eq'); calculate()">
                             </div>
                             <div class="var-input">
                                 <label>R<sub>m</sub> (in)</label>
-                                <input type="number" id="Rm_eqg" step="any" oninput="syncAllInstances('Rm_eqg'); markAsUser('Rm_eqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>D (in)</label>
-                                <input type="number" id="D_beqg8" step="any" oninput="syncAllInstances('D_beqg8'); markAsUser('D_beqg8'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg4" step="any" oninput="syncAllInstances('Gamma_eqg4'); markAsUser('Gamma_eqg4'); calculate()">
+                                <input type="number" id="Rm_eq" step="any" oninput="syncAllInstances('Rm_eq'); markAsUser('Rm_eq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Mean radius</p>
@@ -1371,23 +1087,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_beqg" step="any" oninput="syncAllInstances('Wt_beqg'); markAsUser('Wt_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>T<sub>P</sub> (lbf·in)</label>
-                                <input type="number" id="TP_beqg" step="any" oninput="syncAllInstances('TP_beqg'); markAsUser('TP_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>r<sub>m</sub> (in)</label>
-                                <input type="number" id="rm_eqg2" step="any" oninput="syncAllInstances('rm_eqg2'); markAsUser('rm_eqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>T<sub>G</sub> (lbf·in)</label>
-                                <input type="number" id="TG_beqg" step="any" oninput="syncAllInstances('TG_beqg'); markAsUser('TG_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>R<sub>m</sub> (in)</label>
-                                <input type="number" id="Rm_eqg2" step="any" oninput="syncAllInstances('Rm_eqg2'); markAsUser('Rm_eqg2'); calculate()">
+                                <input type="number" id="Wt_beq" step="any" oninput="syncAllInstances('Wt_beq'); markAsUser('Wt_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Transmitted load</p>
@@ -1398,23 +1098,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>W<sub>r</sub> (lbf)</label>
-                                <input type="number" id="Wr_beqg" step="any" oninput="syncAllInstances('Wr_beqg'); markAsUser('Wr_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_beqg2" step="any" oninput="syncAllInstances('Wt_beqg2'); markAsUser('Wt_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>φ (°)</label>
-                                <input type="number" id="phi_beqg" step="any" oninput="syncAllInstances('phi_beqg'); markAsUser('phi_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg5" step="any" oninput="syncAllInstances('gamma_eqg5'); markAsUser('gamma_eqg5'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg5" step="any" oninput="syncAllInstances('Gamma_eqg5'); markAsUser('Gamma_eqg5'); calculate()">
+                                <input type="number" id="Wr_beq" step="any" oninput="syncAllInstances('Wr_beq'); markAsUser('Wr_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Radial load</p>
@@ -1425,23 +1109,7 @@
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>W<sub>x</sub> (lbf)</label>
-                                <input type="number" id="Wx_beqg" step="any" oninput="syncAllInstances('Wx_beqg'); markAsUser('Wx_beqg'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>W<sub>t</sub> (lbf)</label>
-                                <input type="number" id="Wt_beqg3" step="any" oninput="syncAllInstances('Wt_beqg3'); markAsUser('Wt_beqg3'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>φ (°)</label>
-                                <input type="number" id="phi_beqg2" step="any" oninput="syncAllInstances('phi_beqg2'); markAsUser('phi_beqg2'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>γ (°)</label>
-                                <input type="number" id="gamma_eqg6" step="any" oninput="syncAllInstances('gamma_eqg6'); markAsUser('gamma_eqg6'); calculate()">
-                            </div>
-                            <div class="var-input">
-                                <label>Γ (°)</label>
-                                <input type="number" id="Gamma_eqg6" step="any" oninput="syncAllInstances('Gamma_eqg6'); markAsUser('Gamma_eqg6'); calculate()">
+                                <input type="number" id="Wx_beq" step="any" oninput="syncAllInstances('Wx_beq'); markAsUser('Wx_beq'); calculate()">
                             </div>
                         </div>
                         <p style="margin-top:10px; color:#666; font-size:0.9em;">Axial load</p>
@@ -1719,58 +1387,50 @@
 
         // Map of all variable instances across all tabs
         const varInstanceMap = {
-            'NP': ['NP', 'var_NP', 'NP_eq1', 'NP_eq2', 'NP_beqg', 'NP_beqg2', 'NP_beqg3', 'NP_beqg4'],
-            'NG': ['NG', 'var_NG', 'NG_eq1', 'NG_eq2', 'NG_beqg', 'NG_beqg2', 'NG_beqg3', 'NG_beqg4'],
-            'Pd': ['Pd', 'var_Pd', 'Pd_eq3', 'Pd_eq4', 'Pd_beq', 'Pd_beqg', 'Pd_beqg2', 'Pd_beqg3', 'Pd_beqg4'],
-            'd': ['d', 'var_d', 'd_eq1', 'd_eq2', 'd_beqg', 'd_beqg2', 'd_beqg3', 'd_beqg4', 'd_beqg5', 'd_beqg6', 'd_beqg7', 'd_beqg8'],
-            'D': ['D', 'var_D', 'D_eq1', 'D_eq2', 'D_beqg', 'D_beqg2', 'D_beqg3', 'D_beqg4', 'D_beqg5', 'D_beqg6', 'D_beqg7', 'D_beqg8'],
-            'gamma': ['gamma', 'var_gamma', 'gamma_eq', 'gamma_eqg', 'gamma_eqg2', 'gamma_eqg3', 'gamma_eqg4', 'gamma_eqg5', 'gamma_eqg6'],
-            'Gamma': ['Gamma', 'var_Gamma', 'Gamma_eq', 'Gamma_eqg', 'Gamma_eqg2', 'Gamma_eqg3', 'Gamma_eqg4', 'Gamma_eqg5', 'Gamma_eqg6'],
-            'phi': ['phi', 'var_phi', 'phi_beqg', 'phi_beqg2'],
-            'Ao': ['Ao', 'var_Ao', 'Ao_eq3', 'Ao_eq', 'Ao_eqg', 'Ao_eqg2', 'Ao_eqg3', 'Ao_eqg4', 'Ao_eqg5'],
-            'F': ['F', 'var_F', 'F_eq8', 'F_beqg', 'F_beqg2', 'F_beqg3', 'F_beqg4'],
-            'Am': ['Am', 'var_Am', 'Am_eq', 'Am_eqg', 'Am_eqg2', 'Am_eqg3'],
-            'pm': ['pm', 'var_pm', 'pm_eq', 'pm_eqg'],
-            'h': ['h', 'var_h', 'h_beq', 'h_beqg', 'h_beqg2', 'h_beqg3', 'h_beqg4', 'h_beqg5'],
-            'c': ['c', 'var_c', 'c_beq', 'c_beqg', 'c_beqg2'],
-            'hm': ['hm', 'var_hm', 'hm_eq', 'hm_eqg', 'hm_eqg2', 'hm_eqg3'],
-            'c1': ['c1', 'var_c1', 'c1_eq', 'c1_eqg', 'c1_eqg2'],
-            'aG': ['aG', 'var_aG', 'aG_eq', 'aG_eqg', 'aG_eqg2', 'aG_eqg3', 'aG_eqg4'],
-            'aP': ['aP', 'var_aP', 'aP_eq', 'aP_eqg', 'aP_eqg2', 'aP_eqg3'],
-            'bG': ['bG', 'var_bG', 'bG_eq', 'bG_eqg', 'bG_eqg2'],
-            'bP': ['bP', 'var_bP', 'bP_eq', 'bP_eqg', 'bP_eqg2'],
-            'deltaG': ['deltaG', 'var_deltaG', 'deltaG_eq', 'deltaG_eqg', 'deltaG_eqg2'],
-            'deltaP': ['deltaP', 'var_deltaP', 'deltaP_eq', 'deltaP_eqg', 'deltaP_eqg2'],
-            'aoG': ['aoG', 'var_aoG', 'aoG_eq', 'aoG_eqg', 'aoG_eqg2'],
-            'aoP': ['aoP', 'var_aoP', 'aoP_eq', 'aoP_eqg', 'aoP_eqg2'],
-            'Do': ['Do', 'var_Do', 'Do_beq', 'Do_beqg'],
-            'do': ['do', 'var_do', 'do_eq', 'do_eqg'],
-            'P': ['P', 'var_P', 'P_beqg'],
-            'nP': ['nP', 'var_nP', 'nP_beqg'],
-            'nG': ['nG', 'var_nG', 'nG_beqg'],
-            'n': ['n_beqg'],
-            'T': ['T', 'var_T', 'T_beq', 'T_beqg'],
-            'TP': ['TP_beqg'],
-            'TG': ['TG_beqg'],
-            'vt': ['vt', 'var_vt', 'vt_beq', 'vt_beqg'],
-            'Wt': ['Wt', 'var_Wt', 'Wt_beq', 'Wt_beqg', 'Wt_beqg2', 'Wt_beqg3'],
-            'Wr': ['Wr', 'var_Wr', 'Wr_beq', 'Wr_beqg'],
-            'Wx': ['Wx', 'var_Wx', 'Wx_beq', 'Wx_beqg'],
-            'mG': ['mG', 'mG_beq', 'mG_beqg', 'mG_beqg2'],
-            'Fnom': ['Fnom_eq', 'Fnom_eqg'],
-            'Fmax': ['Fmax_eq', 'Fmax_eqg'],
-            'rm': ['rm_eq', 'rm_eqg', 'rm_eqg2'],
-            'Rm': ['Rm_eq', 'Rm_eqg', 'Rm_eqg2'],
-            'AoG': ['AoG_eqg'],
-            'AoP': ['AoP_eqg'],
-            'AmG': ['AmG_eqg'],
-            'AmP': ['AmP_eqg']
+            'NP': ['NP', 'var_NP', 'NP_eq1', 'NP_eq2'],
+            'NG': ['NG', 'var_NG', 'NG_eq1', 'NG_eq2'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq3', 'Pd_eq4', 'Pd_beq'],
+            'd': ['d', 'var_d', 'd_eq1', 'd_eq2'],
+            'D': ['D', 'var_D', 'D_eq1', 'D_eq2'],
+            'gamma': ['gamma', 'var_gamma', 'gamma_eq'],
+            'Gamma': ['Gamma', 'var_Gamma', 'Gamma_eq'],
+            'phi': ['phi', 'var_phi'],
+            'Ao': ['Ao', 'var_Ao', 'Ao_eq3', 'Ao_eq'],
+            'F': ['F', 'var_F', 'F_eq8'],
+            'Am': ['Am', 'var_Am', 'Am_eq'],
+            'pm': ['pm', 'var_pm', 'pm_eq'],
+            'h': ['h', 'var_h', 'h_beq'],
+            'c': ['c', 'var_c', 'c_beq'],
+            'hm': ['hm', 'var_hm', 'hm_eq'],
+            'c1': ['c1', 'var_c1', 'c1_eq'],
+            'aG': ['aG', 'var_aG', 'aG_eq'],
+            'aP': ['aP', 'var_aP', 'aP_eq'],
+            'bG': ['bG', 'var_bG', 'bG_eq'],
+            'bP': ['bP', 'var_bP', 'bP_eq'],
+            'deltaG': ['deltaG', 'var_deltaG', 'deltaG_eq'],
+            'deltaP': ['deltaP', 'var_deltaP', 'deltaP_eq'],
+            'aoG': ['aoG', 'var_aoG', 'aoG_eq'],
+            'aoP': ['aoP', 'var_aoP', 'aoP_eq'],
+            'Do': ['Do', 'var_Do', 'Do_beq'],
+            'do': ['do', 'var_do', 'do_eq'],
+            'P': ['P', 'var_P'],
+            'nP': ['nP', 'var_nP'],
+            'nG': ['nG', 'var_nG'],
+            'T': ['T', 'var_T', 'T_beq'],
+            'vt': ['vt', 'var_vt', 'vt_beq'],
+            'Wt': ['Wt', 'var_Wt', 'Wt_beq'],
+            'Wr': ['Wr', 'var_Wr', 'Wr_beq'],
+            'Wx': ['Wx', 'var_Wx', 'Wx_beq'],
+            'mG': ['mG', 'mG_beq'],
+            'Fnom': ['Fnom_eq'],
+            'Fmax': ['Fmax_eq'],
+            'rm': ['rm_eq'],
+            'Rm': ['Rm_eq']
         };
 
         function getBaseVarName(id) {
             if (id.startsWith('var_')) return id.substring(4);
-            // Match patterns like: phi_beqg, phi_beqg2, phi_eq, phi_eq2, Pd_eqg, etc.
-            const eqMatch = id.match(/^(.+)_(eq|eqg|beq|beqg|geq)\d*$/);
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
             if (eqMatch) return eqMatch[1];
             return id;
         }
