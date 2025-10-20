@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wire Rope Design Calculator (Mott & Shigley)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 200px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+        .method-section {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/belts/Mech_325_Bible_Mech-rope.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Wire Rope Design Calculator</h1>
+            <div class="info-box">
+                ⚙️ Following Mott and Shigley methodologies for wire rope design. Extensive manual lookups required.
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <div class="warning-box">
+                    ⚠️ <strong>Note:</strong> Wire rope design requires extensive manual lookups from tables and graphs in the PDF. Select the appropriate method based on your application.
+                </div>
+
+                <!-- Method 1: Mott -->
+                <div class="method-section">
+                    <h2>Method 1: Mott Wire Rope Design (Working Load)</h2>
+                    <div class="info-box">
+                        Use this method for basic drum/sheave sizing and working load calculations.
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 1: Rope Selection</h3>
+                        <div class="warning-box">
+                            📊 <strong>MANUAL LOOKUP</strong> - Use Table 7-19 for standard rope diameters
+                        </div>
+                        <div class="input-row">
+                            <label>Rope Diameter (d) [in]:</label>
+                            <input type="number" id="d" step="any" oninput="syncAllInstances('d'); markAsUser('d'); calculate()">
+                            <span class="hint">From Table 7-19</span>
+                        </div>
+                        <div class="warning-box">
+                            📊 Use Table 7-20 for rope type classification
+                        </div>
+                        <div class="input-row">
+                            <label>Rope Type:</label>
+                            <select id="rope_type" onchange="syncAllInstances('rope_type'); markAsUser('rope_type'); calculate()">
+                                <option value="">Select...</option>
+                                <option value="6x7">6×7 (7-15 wires/strand)</option>
+                                <option value="6x19">6×19 (16-26 wires/strand)</option>
+                                <option value="6x36">6×36 (27-49 wires/strand)</option>
+                                <option value="6x61">6×61 (50-74 wires/strand)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 2: Drum/Sheave Sizing</h3>
+                        <div class="warning-box">
+                            📊 Look up D/d ratio from Table 7-22
+                        </div>
+                        <div class="input-row">
+                            <label>D/d Ratio:</label>
+                            <input type="number" id="D_d_ratio" step="any" oninput="syncAllInstances('D_d_ratio'); markAsUser('D_d_ratio'); calculate()">
+                            <span class="hint">Suggested or minimum from Table 7-22</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Tread Diameter (D) [in]:</label>
+                            <input type="number" id="D" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
+                            <span class="hint">D = Ratio × d</span>
+                        </div>
+
+                        <h3>Drum Groove Depth</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$h_{drum} = 0.374d$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>h<sub>drum</sub> (in)</label>
+                                    <input type="number" id="h_drum" step="any" oninput="syncAllInstances('h_drum'); markAsUser('h_drum'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>0.374 ×</span>
+                                <div class="var-input">
+                                    <label>d</label>
+                                    <input type="number" id="d_eq1" step="any" oninput="syncAllInstances('d_eq1'); markAsUser('d_eq1'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Drum Diameter</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\text{Drum Diameter} = D + 2h$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>Drum Diameter (in)</label>
+                                    <input type="number" id="drum_diameter" step="any" oninput="syncAllInstances('drum_diameter'); markAsUser('drum_diameter'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_eq2" step="any" oninput="syncAllInstances('D_eq2'); markAsUser('D_eq2'); calculate()">
+                                </div>
+                                <span>+ 2 ×</span>
+                                <div class="var-input">
+                                    <label>h<sub>drum</sub></label>
+                                    <input type="number" id="h_drum_eq1" step="any" oninput="syncAllInstances('h_drum_eq1'); markAsUser('h_drum_eq1'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 3-4: Sheave Design</h3>
+                        <div class="input-row">
+                            <label>Sheave Groove Depth (h<sub>sheave</sub>) [in]:</label>
+                            <input type="number" id="h_sheave" step="any" oninput="syncAllInstances('h_sheave'); markAsUser('h_sheave'); calculate()">
+                            <span class="hint">1.5d ≤ h ≤ 1.75d</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Throat Angle [degrees]:</label>
+                            <input type="number" id="throat_angle" step="any" oninput="syncAllInstances('throat_angle'); markAsUser('throat_angle'); calculate()">
+                            <span class="hint">35° to 45°</span>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\text{Pitch Diameter} = D + 2d$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>Pitch Diameter (in)</label>
+                                    <input type="number" id="pitch_diameter" step="any" oninput="syncAllInstances('pitch_diameter'); markAsUser('pitch_diameter'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_eq3" step="any" oninput="syncAllInstances('D_eq3'); markAsUser('D_eq3'); calculate()">
+                                </div>
+                                <span>+ 2 ×</span>
+                                <div class="var-input">
+                                    <label>d</label>
+                                    <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\text{Rim Diameter} = D + 2h$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>Rim Diameter (in)</label>
+                                    <input type="number" id="rim_diameter" step="any" oninput="syncAllInstances('rim_diameter'); markAsUser('rim_diameter'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_eq4" step="any" oninput="syncAllInstances('D_eq4'); markAsUser('D_eq4'); calculate()">
+                                </div>
+                                <span>+ 2 ×</span>
+                                <div class="var-input">
+                                    <label>h<sub>sheave</sub></label>
+                                    <input type="number" id="h_sheave_eq1" step="any" oninput="syncAllInstances('h_sheave_eq1'); markAsUser('h_sheave_eq1'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 5-6: Working Load</h3>
+                        <div class="input-row">
+                            <label>Wire Rope Grade:</label>
+                            <select id="grade" onchange="syncAllInstances('grade'); markAsUser('grade'); calculate()">
+                                <option value="">Select...</option>
+                                <option value="PS">Plow Steel (PS) - 1570 N/mm²</option>
+                                <option value="IPS">Improved Plow Steel (IPS) - 1770 N/mm²</option>
+                                <option value="XIP">Extra Improved Plow Steel (XIP) - 1960 N/mm²</option>
+                            </select>
+                        </div>
+                        <div class="warning-box">
+                            📊 Look up from Table 7-25 based on diameter and grade
+                        </div>
+                        <div class="input-row">
+                            <label>Minimum Breaking Force [US tons]:</label>
+                            <input type="number" id="min_breaking_force" step="any" oninput="syncAllInstances('min_breaking_force'); markAsUser('min_breaking_force'); calculate()">
+                            <span class="hint">From Table 7-25</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Service Factor (SF):</label>
+                            <input type="number" id="SF_mott" step="any" oninput="syncAllInstances('SF_mott'); markAsUser('SF_mott'); calculate()">
+                            <span class="hint">Minimum 5 for human safety</span>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\text{Max Working Load} = \frac{\text{Min Breaking Force}}{SF}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>Max Working Load (US tons)</label>
+                                    <input type="number" id="max_working_load" step="any" oninput="syncAllInstances('max_working_load'); markAsUser('max_working_load'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>Min Breaking Force</label>
+                                    <input type="number" id="min_breaking_force_eq1" step="any" oninput="syncAllInstances('min_breaking_force_eq1'); markAsUser('min_breaking_force_eq1'); calculate()">
+                                </div>
+                                <span>÷</span>
+                                <div class="var-input">
+                                    <label>SF</label>
+                                    <input type="number" id="SF_mott_eq1" step="any" oninput="syncAllInstances('SF_mott_eq1'); markAsUser('SF_mott_eq1'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Method 2: Shigley -->
+                <div class="method-section">
+                    <h2>Method 2: Shigley Wire Rope Design (Detailed Analysis)</h2>
+                    <div class="info-box">
+                        Use this method when detailed stress analysis and safety factors are required.
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 1: Rope Properties</h3>
+                        <div class="warning-box">
+                            📊 Use Tables 17-24 or 17-27 for rope properties
+                        </div>
+                        <div class="input-row">
+                            <label>Wire Diameter (d<sub>w</sub>) [in]:</label>
+                            <input type="number" id="d_w" step="any" oninput="syncAllInstances('d_w'); markAsUser('d_w'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Modulus of Elasticity (E<sub>r</sub>) [Mpsi]:</label>
+                            <input type="number" id="E_r" step="any" oninput="syncAllInstances('E_r'); markAsUser('E_r'); calculate()">
+                            <span class="hint">~12-14 Mpsi</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Metal Area (A<sub>m</sub>) [in²]:</label>
+                            <input type="number" id="A_m" step="any" oninput="syncAllInstances('A_m'); markAsUser('A_m'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Wire Strength (S<sub>u</sub>) [kpsi]:</label>
+                            <input type="number" id="S_u" step="any" oninput="syncAllInstances('S_u'); markAsUser('S_u'); calculate()">
+                            <span class="hint">IPS: 240-280, PS: 210-240 kpsi</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 2: Loads and Safety</h3>
+                        <div class="input-row">
+                            <label>Largest Working Tension (F<sub>t</sub>) [lbf]:</label>
+                            <input type="number" id="F_t" step="any" oninput="syncAllInstances('F_t'); markAsUser('F_t'); calculate()">
+                        </div>
+                        <div class="warning-box">
+                            📊 Look up strength reduction from D/d ratio graph
+                        </div>
+                        <div class="input-row">
+                            <label>Ultimate Wire Load (F<sub>u</sub>) [lbf]:</label>
+                            <input type="number" id="F_u" step="any" oninput="syncAllInstances('F_u'); markAsUser('F_u'); calculate()">
+                            <span class="hint">After strength loss reduction</span>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$n = \frac{F_u}{F_t}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>n</label>
+                                    <input type="number" id="n_shigley" step="any" oninput="syncAllInstances('n_shigley'); markAsUser('n_shigley'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>F<sub>u</sub> (lbf)</label>
+                                    <input type="number" id="F_u_eq1" step="any" oninput="syncAllInstances('F_u_eq1'); markAsUser('F_u_eq1'); calculate()">
+                                </div>
+                                <span>÷</span>
+                                <div class="var-input">
+                                    <label>F<sub>t</sub> (lbf)</label>
+                                    <input type="number" id="F_t_eq1" step="any" oninput="syncAllInstances('F_t_eq1'); markAsUser('F_t_eq1'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$P = \frac{2F}{dD}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>P (psi)</label>
+                                    <input type="number" id="P" step="any" oninput="syncAllInstances('P'); markAsUser('P'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>2 ×</span>
+                                <div class="var-input">
+                                    <label>F<sub>t</sub> (lbf)</label>
+                                    <input type="number" id="F_t_eq2" step="any" oninput="syncAllInstances('F_t_eq2'); markAsUser('F_t_eq2'); calculate()">
+                                </div>
+                                <span>÷ (</span>
+                                <div class="var-input">
+                                    <label>d (in)</label>
+                                    <input type="number" id="d_eq3" step="any" oninput="syncAllInstances('d_eq3'); markAsUser('d_eq3'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>D (in)</label>
+                                    <input type="number" id="D_eq5" step="any" oninput="syncAllInstances('D_eq5'); markAsUser('D_eq5'); calculate()">
+                                </div>
+                                <span>)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Step 4-5: Fatigue Analysis</h3>
+                        <div class="warning-box">
+                            📊 Use fatigue graph for p/Su ratio lookup
+                        </div>
+                        <div class="input-row">
+                            <label>p/S<sub>u</sub> Ratio (÷1000):</label>
+                            <input type="number" id="p_Su_ratio" step="any" oninput="syncAllInstances('p_Su_ratio'); markAsUser('p_Su_ratio'); calculate()">
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$F_f = \frac{(p/S_u)S_u dD}{2}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>f</sub> (lbf)</label>
+                                    <input type="number" id="F_f" step="any" oninput="syncAllInstances('F_f'); markAsUser('F_f'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>(p/S<sub>u</sub>)</label>
+                                    <input type="number" id="p_Su_ratio_eq1" step="any" oninput="syncAllInstances('p_Su_ratio_eq1'); markAsUser('p_Su_ratio_eq1'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>S<sub>u</sub> (kpsi)</label>
+                                    <input type="number" id="S_u_eq1" step="any" oninput="syncAllInstances('S_u_eq1'); markAsUser('S_u_eq1'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>d (in)</label>
+                                    <input type="number" id="d_eq4" step="any" oninput="syncAllInstances('d_eq4'); markAsUser('d_eq4'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>D (in)</label>
+                                    <input type="number" id="D_eq6" step="any" oninput="syncAllInstances('D_eq6'); markAsUser('D_eq6'); calculate()">
+                                </div>
+                                <span>÷ 2</span>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$F_b = \frac{E_r d_w A_m}{D}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>b</sub> (lbf)</label>
+                                    <input type="number" id="F_b" step="any" oninput="syncAllInstances('F_b'); markAsUser('F_b'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>E<sub>r</sub> (Mpsi)</label>
+                                    <input type="number" id="E_r_eq1" step="any" oninput="syncAllInstances('E_r_eq1'); markAsUser('E_r_eq1'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>d<sub>w</sub> (in)</label>
+                                    <input type="number" id="d_w_eq1" step="any" oninput="syncAllInstances('d_w_eq1'); markAsUser('d_w_eq1'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>A<sub>m</sub> (in²)</label>
+                                    <input type="number" id="A_m_eq1" step="any" oninput="syncAllInstances('A_m_eq1'); markAsUser('A_m_eq1'); calculate()">
+                                </div>
+                                <span>÷</span>
+                                <div class="var-input">
+                                    <label>D (in)</label>
+                                    <input type="number" id="D_eq7" step="any" oninput="syncAllInstances('D_eq7'); markAsUser('D_eq7'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$n_f = \frac{F_f - F_b}{F_t}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>n<sub>f</sub></label>
+                                    <input type="number" id="n_f" step="any" oninput="syncAllInstances('n_f'); markAsUser('n_f'); calculate()">
+                                </div>
+                                <span>= (</span>
+                                <div class="var-input">
+                                    <label>F<sub>f</sub> (lbf)</label>
+                                    <input type="number" id="F_f_eq1" step="any" oninput="syncAllInstances('F_f_eq1'); markAsUser('F_f_eq1'); calculate()">
+                                </div>
+                                <span>−</span>
+                                <div class="var-input">
+                                    <label>F<sub>b</sub> (lbf)</label>
+                                    <input type="number" id="F_b_eq1" step="any" oninput="syncAllInstances('F_b_eq1'); markAsUser('F_b_eq1'); calculate()">
+                                </div>
+                                <span>) ÷</span>
+                                <div class="var-input">
+                                    <label>F<sub>t</sub> (lbf)</label>
+                                    <input type="number" id="F_t_eq3" step="any" oninput="syncAllInstances('F_t_eq3'); markAsUser('F_t_eq3'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$n_s = \frac{F_u - F_b}{F_t}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>n<sub>s</sub></label>
+                                    <input type="number" id="n_s" step="any" oninput="syncAllInstances('n_s'); markAsUser('n_s'); calculate()">
+                                </div>
+                                <span>= (</span>
+                                <div class="var-input">
+                                    <label>F<sub>u</sub> (lbf)</label>
+                                    <input type="number" id="F_u_eq2" step="any" oninput="syncAllInstances('F_u_eq2'); markAsUser('F_u_eq2'); calculate()">
+                                </div>
+                                <span>−</span>
+                                <div class="var-input">
+                                    <label>F<sub>b</sub> (lbf)</label>
+                                    <input type="number" id="F_b_eq2" step="any" oninput="syncAllInstances('F_b_eq2'); markAsUser('F_b_eq2'); calculate()">
+                                </div>
+                                <span>) ÷</span>
+                                <div class="var-input">
+                                    <label>F<sub>t</sub> (lbf)</label>
+                                    <input type="number" id="F_t_eq4" step="any" oninput="syncAllInstances('F_t_eq4'); markAsUser('F_t_eq4'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Method 3: Mine Hoist -->
+                <div class="method-section">
+                    <h2>Method 3: Mine Hoist (Shigley with Acceleration)</h2>
+                    <div class="info-box">
+                        Use this method when acceleration/deceleration loads are present.
+                    </div>
+
+                    <div class="section">
+                        <h3>Input Parameters</h3>
+                        <div class="input-row">
+                            <label>Acceleration (a) [ft/s²]:</label>
+                            <input type="number" id="a" step="any" oninput="syncAllInstances('a'); markAsUser('a'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Load Weight (W) [lbf]:</label>
+                            <input type="number" id="W" step="any" oninput="syncAllInstances('W'); markAsUser('W'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Suspended Length (L) [ft]:</label>
+                            <input type="number" id="L" step="any" oninput="syncAllInstances('L'); markAsUser('L'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Number of Ropes (m):</label>
+                            <input type="number" id="m" step="1" oninput="syncAllInstances('m'); markAsUser('m'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Weight per Foot (w) [lbf/ft]:</label>
+                            <input type="number" id="w" step="any" oninput="syncAllInstances('w'); markAsUser('w'); calculate()">
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Rope Tension Calculation</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$F_t = \left(\frac{W}{m} + wL\right)\left(1 + \frac{a}{32.2}\right)$$</div>
+                            <div class="info-box">g = 32.2 ft/s²</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>t,hoist</sub> (lbf)</label>
+                                    <input type="number" id="F_t_hoist" step="any" oninput="syncAllInstances('F_t_hoist'); markAsUser('F_t_hoist'); calculate()">
+                                </div>
+                                <span>= (</span>
+                                <div class="var-input">
+                                    <label>W (lbf)</label>
+                                    <input type="number" id="W_eq1" step="any" oninput="syncAllInstances('W_eq1'); markAsUser('W_eq1'); calculate()">
+                                </div>
+                                <span>÷</span>
+                                <div class="var-input">
+                                    <label>m</label>
+                                    <input type="number" id="m_eq1" step="1" oninput="syncAllInstances('m_eq1'); markAsUser('m_eq1'); calculate()">
+                                </div>
+                                <span>+</span>
+                                <div class="var-input">
+                                    <label>w (lbf/ft)</label>
+                                    <input type="number" id="w_eq1" step="any" oninput="syncAllInstances('w_eq1'); markAsUser('w_eq1'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>L (ft)</label>
+                                    <input type="number" id="L_eq1" step="any" oninput="syncAllInstances('L_eq1'); markAsUser('L_eq1'); calculate()">
+                                </div>
+                                <span>) × (1 +</span>
+                                <div class="var-input">
+                                    <label>a (ft/s²)</label>
+                                    <input type="number" id="a_eq1" step="any" oninput="syncAllInstances('a_eq1'); markAsUser('a_eq1'); calculate()">
+                                </div>
+                                <span>÷ 32.2)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
+            </div>
+            <!-- End Procedure Tab -->
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="info-box">
+                    📐 Reference equations for wire rope design. All variables are editable.
+                </div>
+
+                <div class="section">
+                    <h2>Mott Method Equations</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$h_{drum} = 0.374d$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Drum Groove Depth</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{Drum Diameter} = D + 2h$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Overall Drum Diameter</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{Pitch Diameter} = D + 2d$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Sheave Pitch Diameter</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{Max Working Load} = \frac{\text{Min Breaking Force}}{SF}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Maximum Working Load (US tons)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Shigley Method Equations</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n = \frac{F_u}{F_t}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Static Safety Factor</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P = \frac{2F}{dD}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Bearing Pressure (psi)</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_f = \frac{(p/S_u)S_u dD}{2}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Fatigue Tension</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_b = \frac{E_r d_w A_m}{D}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Bending Load</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_f = \frac{F_f - F_b}{F_t}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Fatigue Safety Factor</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_s = \frac{F_u - F_b}{F_t}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Static Safety Factor with Bending</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Mine Hoist Equation</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_t = \left(\frac{W}{m} + wL\right)\left(1 + \frac{a}{32.2}\right)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Rope Tension with Acceleration</p>
+                    </div>
+                </div>
+            </div>
+            <!-- End General Equations Tab -->
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="info-box">
+                    📝 Complete list of all variables. Values sync across all tabs.
+                </div>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="var-category">
+                            <td colspan="4">Common Variables</td>
+                        </tr>
+                        <tr>
+                            <td>d</td>
+                            <td>Rope Diameter</td>
+                            <td><input type="number" id="var_d" step="any" oninput="syncAllInstances('var_d'); markAsUser('var_d'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td>Tread/Sheave Diameter</td>
+                            <td><input type="number" id="var_D" step="any" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D/d</td>
+                            <td>Diameter Ratio</td>
+                            <td><input type="number" id="var_D_d_ratio" step="any" oninput="syncAllInstances('var_D_d_ratio'); markAsUser('var_D_d_ratio'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Mott Method - Drum & Sheave</td>
+                        </tr>
+                        <tr>
+                            <td>h<sub>drum</sub></td>
+                            <td>Drum Groove Depth</td>
+                            <td><input type="number" id="var_h_drum" step="any" oninput="syncAllInstances('var_h_drum'); markAsUser('var_h_drum'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>h<sub>sheave</sub></td>
+                            <td>Sheave Groove Depth</td>
+                            <td><input type="number" id="var_h_sheave" step="any" oninput="syncAllInstances('var_h_sheave'); markAsUser('var_h_sheave'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>Min Breaking</td>
+                            <td>Minimum Breaking Force</td>
+                            <td><input type="number" id="var_min_breaking_force" step="any" oninput="syncAllInstances('var_min_breaking_force'); markAsUser('var_min_breaking_force'); calculate()"></td>
+                            <td>US tons</td>
+                        </tr>
+                        <tr>
+                            <td>SF</td>
+                            <td>Service Factor (Mott)</td>
+                            <td><input type="number" id="var_SF_mott" step="any" oninput="syncAllInstances('var_SF_mott'); markAsUser('var_SF_mott'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Max Load</td>
+                            <td>Maximum Working Load</td>
+                            <td><input type="number" id="var_max_working_load" step="any" oninput="syncAllInstances('var_max_working_load'); markAsUser('var_max_working_load'); calculate()"></td>
+                            <td>US tons</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Shigley Method - Properties</td>
+                        </tr>
+                        <tr>
+                            <td>d<sub>w</sub></td>
+                            <td>Wire Diameter</td>
+                            <td><input type="number" id="var_d_w" step="any" oninput="syncAllInstances('var_d_w'); markAsUser('var_d_w'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>E<sub>r</sub></td>
+                            <td>Rope Modulus</td>
+                            <td><input type="number" id="var_E_r" step="any" oninput="syncAllInstances('var_E_r'); markAsUser('var_E_r'); calculate()"></td>
+                            <td>Mpsi</td>
+                        </tr>
+                        <tr>
+                            <td>A<sub>m</sub></td>
+                            <td>Metal Area</td>
+                            <td><input type="number" id="var_A_m" step="any" oninput="syncAllInstances('var_A_m'); markAsUser('var_A_m'); calculate()"></td>
+                            <td>in²</td>
+                        </tr>
+                        <tr>
+                            <td>S<sub>u</sub></td>
+                            <td>Wire Strength</td>
+                            <td><input type="number" id="var_S_u" step="any" oninput="syncAllInstances('var_S_u'); markAsUser('var_S_u'); calculate()"></td>
+                            <td>kpsi</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>t</sub></td>
+                            <td>Working Tension</td>
+                            <td><input type="number" id="var_F_t" step="any" oninput="syncAllInstances('var_F_t'); markAsUser('var_F_t'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>u</sub></td>
+                            <td>Ultimate Wire Load</td>
+                            <td><input type="number" id="var_F_u" step="any" oninput="syncAllInstances('var_F_u'); markAsUser('var_F_u'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>P</td>
+                            <td>Bearing Pressure</td>
+                            <td><input type="number" id="var_P" step="any" oninput="syncAllInstances('var_P'); markAsUser('var_P'); calculate()"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>f</sub></td>
+                            <td>Fatigue Tension</td>
+                            <td><input type="number" id="var_F_f" step="any" oninput="syncAllInstances('var_F_f'); markAsUser('var_F_f'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>b</sub></td>
+                            <td>Bending Load</td>
+                            <td><input type="number" id="var_F_b" step="any" oninput="syncAllInstances('var_F_b'); markAsUser('var_F_b'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>f</sub></td>
+                            <td>Fatigue Safety Factor</td>
+                            <td><input type="number" id="var_n_f" step="any" oninput="syncAllInstances('var_n_f'); markAsUser('var_n_f'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>s</sub></td>
+                            <td>Static Safety Factor</td>
+                            <td><input type="number" id="var_n_s" step="any" oninput="syncAllInstances('var_n_s'); markAsUser('var_n_s'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Mine Hoist Variables</td>
+                        </tr>
+                        <tr>
+                            <td>a</td>
+                            <td>Acceleration</td>
+                            <td><input type="number" id="var_a" step="any" oninput="syncAllInstances('var_a'); markAsUser('var_a'); calculate()"></td>
+                            <td>ft/s²</td>
+                        </tr>
+                        <tr>
+                            <td>W</td>
+                            <td>Load Weight</td>
+                            <td><input type="number" id="var_W" step="any" oninput="syncAllInstances('var_W'); markAsUser('var_W'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>L</td>
+                            <td>Suspended Length</td>
+                            <td><input type="number" id="var_L" step="any" oninput="syncAllInstances('var_L'); markAsUser('var_L'); calculate()"></td>
+                            <td>ft</td>
+                        </tr>
+                        <tr>
+                            <td>m</td>
+                            <td>Number of Ropes</td>
+                            <td><input type="number" id="var_m" step="1" oninput="syncAllInstances('var_m'); markAsUser('var_m'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>w</td>
+                            <td>Weight per Foot</td>
+                            <td><input type="number" id="var_w" step="any" oninput="syncAllInstances('var_w'); markAsUser('var_w'); calculate()"></td>
+                            <td>lbf/ft</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Variables Tab -->
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+        const g = 32.2; // gravitational acceleration
+
+        // Variable instance map
+        const varInstanceMap = {
+            'd': ['d', 'var_d', 'd_eq1', 'd_eq2', 'd_eq3', 'd_eq4'],
+            'D': ['D', 'var_D', 'D_eq2', 'D_eq3', 'D_eq4', 'D_eq5', 'D_eq6', 'D_eq7'],
+            'rope_type': ['rope_type'],
+            'D_d_ratio': ['D_d_ratio', 'var_D_d_ratio'],
+            'h_drum': ['h_drum', 'var_h_drum', 'h_drum_eq1'],
+            'drum_diameter': ['drum_diameter'],
+            'h_sheave': ['h_sheave', 'var_h_sheave', 'h_sheave_eq1'],
+            'throat_angle': ['throat_angle'],
+            'pitch_diameter': ['pitch_diameter'],
+            'rim_diameter': ['rim_diameter'],
+            'grade': ['grade'],
+            'min_breaking_force': ['min_breaking_force', 'var_min_breaking_force', 'min_breaking_force_eq1'],
+            'SF_mott': ['SF_mott', 'var_SF_mott', 'SF_mott_eq1'],
+            'max_working_load': ['max_working_load', 'var_max_working_load'],
+            'd_w': ['d_w', 'var_d_w', 'd_w_eq1'],
+            'E_r': ['E_r', 'var_E_r', 'E_r_eq1'],
+            'A_m': ['A_m', 'var_A_m', 'A_m_eq1'],
+            'S_u': ['S_u', 'var_S_u', 'S_u_eq1'],
+            'F_t': ['F_t', 'var_F_t', 'F_t_eq1', 'F_t_eq2', 'F_t_eq3', 'F_t_eq4'],
+            'F_u': ['F_u', 'var_F_u', 'F_u_eq1', 'F_u_eq2'],
+            'n_shigley': ['n_shigley'],
+            'P': ['P', 'var_P'],
+            'p_Su_ratio': ['p_Su_ratio', 'p_Su_ratio_eq1'],
+            'F_f': ['F_f', 'var_F_f', 'F_f_eq1'],
+            'F_b': ['F_b', 'var_F_b', 'F_b_eq1', 'F_b_eq2'],
+            'n_f': ['n_f', 'var_n_f'],
+            'n_s': ['n_s', 'var_n_s'],
+            'a': ['a', 'var_a', 'a_eq1'],
+            'W': ['W', 'var_W', 'W_eq1'],
+            'L': ['L', 'var_L', 'L_eq1'],
+            'm': ['m', 'var_m', 'm_eq1'],
+            'w': ['w', 'var_w', 'w_eq1'],
+            'F_t_hoist': ['F_t_hoist']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            if (el.tagName === 'SELECT') {
+                return el.value === '' ? null : parseFloat(el.value);
+            }
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value) && !userValues.has(id)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                }
+                syncAllInstances(id);
+            }
+        }
+
+        function calculate() {
+            // Get values
+            const d = getValue('d');
+            const D = getValue('D');
+            const min_breaking_force = getValue('min_breaking_force');
+            const SF_mott = getValue('SF_mott');
+            const F_t = getValue('F_t');
+            const F_u = getValue('F_u');
+            const d_w = getValue('d_w');
+            const E_r = getValue('E_r');
+            const A_m = getValue('A_m');
+            const S_u = getValue('S_u');
+            const p_Su_ratio = getValue('p_Su_ratio');
+            const a = getValue('a');
+            const W = getValue('W');
+            const L = getValue('L');
+            const m = getValue('m');
+            const w = getValue('w');
+
+            // Mott Method - Drum groove depth
+            if (d && !userValues.has('h_drum')) {
+                setValue('h_drum', 0.374 * d);
+            }
+
+            // Mott Method - Drum diameter
+            const h_drum = getValue('h_drum');
+            if (D && h_drum && !userValues.has('drum_diameter')) {
+                setValue('drum_diameter', D + 2 * h_drum);
+            }
+
+            // Mott Method - Pitch diameter
+            if (D && d && !userValues.has('pitch_diameter')) {
+                setValue('pitch_diameter', D + 2 * d);
+            }
+
+            // Mott Method - Rim diameter
+            const h_sheave = getValue('h_sheave');
+            if (D && h_sheave && !userValues.has('rim_diameter')) {
+                setValue('rim_diameter', D + 2 * h_sheave);
+            }
+
+            // Mott Method - Max working load
+            if (min_breaking_force && SF_mott && !userValues.has('max_working_load')) {
+                setValue('max_working_load', min_breaking_force / SF_mott);
+            }
+
+            // Shigley - Safety factor
+            if (F_u && F_t && !userValues.has('n_shigley')) {
+                setValue('n_shigley', F_u / F_t);
+            }
+
+            // Shigley - Bearing pressure
+            if (F_t && d && D && !userValues.has('P')) {
+                setValue('P', (2 * F_t) / (d * D));
+            }
+
+            // Shigley - Fatigue tension
+            if (p_Su_ratio && S_u && d && D && !userValues.has('F_f')) {
+                const F_f = (p_Su_ratio * S_u * d * D) / 2;
+                setValue('F_f', F_f);
+            }
+
+            // Shigley - Bending load
+            if (E_r && d_w && A_m && D && !userValues.has('F_b')) {
+                const F_b = (E_r * 1000000 * d_w * A_m) / D; // Convert Mpsi to psi
+                setValue('F_b', F_b);
+            }
+
+            // Shigley - Fatigue safety factor
+            const F_f = getValue('F_f');
+            const F_b = getValue('F_b');
+            if (F_f && F_b && F_t && !userValues.has('n_f')) {
+                setValue('n_f', (F_f - F_b) / F_t);
+            }
+
+            // Shigley - Static safety factor
+            if (F_u && F_b && F_t && !userValues.has('n_s')) {
+                setValue('n_s', (F_u - F_b) / F_t);
+            }
+
+            // Mine Hoist - Rope tension
+            if (W && m && w && L && a && !userValues.has('F_t_hoist')) {
+                const F_t_hoist = (W / m + w * L) * (1 + a / g);
+                setValue('F_t_hoist', F_t_hoist);
+            }
+
+            saveSession();
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+            }
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            document.querySelectorAll('select').forEach(select => {
+                if (select.value) state[select.id] = select.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('mech_rope_state', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('mech_rope_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+
+                for (let key in state) {
+                    if (key === 'userValues') continue;
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('mech_rope_state');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

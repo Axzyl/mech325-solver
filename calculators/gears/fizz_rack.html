@@ -330,8 +330,53 @@
     <script>
         const userValues = new Set();
 
+        // Map of all variable instances across all tabs
+        const varInstanceMap = {
+            'NP': ['NP', 'NP_eq1'],
+            'PD': ['PD', 'PD_eq1'],
+            'Dp': ['Dp', 'Dp_eq3', 'Dp_eq4', 'Dp_eq6'],
+            'nP': ['nP', 'nP_eq4'],
+            'B': ['B', 'B_eq3'],
+            'Vrack': ['Vrack', 'Vrack_eq5'],
+            'srack': ['srack', 'srack_eq5', 'srack_eq6'],
+            'BC': ['BC'],
+            't': ['t'],
+            'thetaP': ['thetaP']
+        };
+
+        // Get base variable name from any instance ID
+        function getBaseVarName(id) {
+            // Match IDs like 'NP_eq1', 'Dp_eq3', etc.
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        // Sync a value across all instances of a variable
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+
+            // Update all instances of this variable
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
         function markAsUser(varId) {
             userValues.add(varId);
+            syncAllInstances(varId);
         }
 
         function syncInput(mainId, sourceId) {

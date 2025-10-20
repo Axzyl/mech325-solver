@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain Drive Design Calculator (Mott)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 150px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 200px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/belts/Mech_325_Bible_Mech-chains.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Chain Drive Design Calculator</h1>
+            <div class="info-box">
+                ⚙️ Following Mott methodology for chain drive design. 8-step process from nominal power to final strand selection.
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Input Parameters -->
+                <div class="section">
+                    <h2>Step 1: Input Parameters</h2>
+                    <div class="input-row">
+                        <label>Nominal Horsepower (H<sub>nom</sub>) [hp]:</label>
+                        <input type="number" id="Hnom" step="any" oninput="syncAllInstances('Hnom'); markAsUser('Hnom'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Input Speed (n<sub>1</sub>) [rpm]:</label>
+                        <input type="number" id="n1" step="any" oninput="syncAllInstances('n1'); markAsUser('n1'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Output Speed (n<sub>2</sub>) [rpm]:</label>
+                        <input type="number" id="n2" step="any" oninput="syncAllInstances('n2'); markAsUser('n2'); calculate()">
+                        <span class="hint">If range, use midpoint</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Velocity Ratio (VR):</label>
+                        <input type="number" id="VR" step="any" oninput="syncAllInstances('VR'); markAsUser('VR'); calculate()">
+                        <span class="hint">VR = n<sub>driving</sub>/n<sub>driven</sub></span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Service Factor & Design Power -->
+                <div class="section">
+                    <h2>Step 2: Service Factor & Design Horsepower</h2>
+                    <div class="info-box">
+                        📊 Select service factor from Table 7-17 based on load type and driver type
+                    </div>
+                    <div class="input-row">
+                        <label>Service Factor (SF):</label>
+                        <select id="SF" onchange="syncAllInstances('SF'); markAsUser('SF'); calculate()">
+                            <option value="">Select...</option>
+                            <optgroup label="Smooth Load">
+                                <option value="1.0">1.0 - Hydraulic drive</option>
+                                <option value="1.0">1.0 - Electric motor or turbine</option>
+                                <option value="1.2">1.2 - Internal combustion engine</option>
+                            </optgroup>
+                            <optgroup label="Moderate Shock">
+                                <option value="1.2">1.2 - Hydraulic drive</option>
+                                <option value="1.3">1.3 - Electric motor or turbine</option>
+                                <option value="1.4">1.4 - Internal combustion engine</option>
+                            </optgroup>
+                            <optgroup label="Heavy Shock">
+                                <option value="1.4">1.4 - Hydraulic drive</option>
+                                <option value="1.5">1.5 - Electric motor or turbine</option>
+                                <option value="1.7">1.7 - Internal combustion engine</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <h3>Design Horsepower</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times SF$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>d</sub> (hp)</label>
+                                <input type="number" id="Hd" step="any" oninput="syncAllInstances('Hd'); markAsUser('Hd'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>nom</sub></label>
+                                <input type="number" id="Hnom_eq1" step="any" oninput="syncAllInstances('Hnom_eq1'); markAsUser('Hnom_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>SF</label>
+                                <input type="number" id="SF_eq1" step="any" oninput="syncAllInstances('SF_eq1'); markAsUser('SF_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Chain Selection -->
+                <div class="section">
+                    <h2>Step 3: Chain Selection from Appendix B</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Appendix B tables with H<sub>d</sub> and n<sub>1</sub> to choose:
+                        <ul>
+                            <li>Chain type (No. 40, 60, or 80)</li>
+                            <li>Number of driving sprocket teeth (N<sub>d</sub>) ≥ 17</li>
+                            <li>Chain pitch (p) and rated power (H<sub>r</sub>)</li>
+                        </ul>
+                        <strong>Tip:</strong> No. 60 chain is most reliable. No. 40 often doesn't work, No. 80 is overkill.
+                    </div>
+                    <div class="input-row">
+                        <label>Chain Type:</label>
+                        <select id="chain_type" onchange="syncAllInstances('chain_type'); markAsUser('chain_type'); updatePitchHint(); calculate()">
+                            <option value="">Select...</option>
+                            <option value="40">No. 40 (p = 0.5 in)</option>
+                            <option value="60">No. 60 (p = 0.75 in) - Recommended</option>
+                            <option value="80">No. 80 (p = 1.0 in)</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Driving Sprocket Teeth (N<sub>d</sub>) [teeth]:</label>
+                        <input type="number" id="Nd" step="1" oninput="syncAllInstances('Nd'); markAsUser('Nd'); calculate()">
+                        <span class="hint">From Appendix B, ≥17 recommended</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Chain Pitch (p) [in]:</label>
+                        <input type="number" id="p" step="any" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
+                        <span class="hint" id="pitch-hint">0.5 for No.40, 0.75 for No.60, 1.0 for No.80</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Rated Power (H<sub>r</sub>) [hp]:</label>
+                        <input type="number" id="Hr" step="any" oninput="syncAllInstances('Hr'); markAsUser('Hr'); calculate()">
+                        <span class="hint">From Appendix B for chosen chain</span>
+                    </div>
+                </div>
+
+                <!-- Step 4: Driven Sprocket Teeth -->
+                <div class="section">
+                    <h2>Step 4: Driven Sprocket Teeth</h2>
+                    <h3>Calculate N<sub>D</sub></h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_D = N_d \times VR$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>D</sub> (teeth)</label>
+                                <input type="number" id="ND" step="1" oninput="syncAllInstances('ND'); markAsUser('ND'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>N<sub>d</sub></label>
+                                <input type="number" id="Nd_eq2" step="1" oninput="syncAllInstances('Nd_eq2'); markAsUser('Nd_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR_eq2" step="any" oninput="syncAllInstances('VR_eq2'); markAsUser('VR_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        ⚠️ N<sub>D</sub> will be rounded to nearest integer. VR and n<sub>2</sub> will be recalculated.
+                    </div>
+
+                    <h3>Recalculated Values</h3>
+                    <div class="input-row">
+                        <label>Actual VR:</label>
+                        <input type="number" id="VR_actual" step="any" oninput="syncAllInstances('VR_actual'); markAsUser('VR_actual'); calculate()">
+                        <span class="hint">VR<sub>actual</sub> = N<sub>D</sub>/N<sub>d</sub></span>
+                    </div>
+                    <div class="input-row">
+                        <label>Actual Output Speed (n<sub>2,actual</sub>) [rpm]:</label>
+                        <input type="number" id="n2_actual" step="any" oninput="syncAllInstances('n2_actual'); markAsUser('n2_actual'); calculate()">
+                        <span class="hint">n<sub>2</sub> = n<sub>1</sub>/VR<sub>actual</sub></span>
+                    </div>
+                </div>
+
+                <!-- Step 5: Pitch Diameters -->
+                <div class="section">
+                    <h2>Step 5: Pitch Diameters</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$PD_d = \frac{p}{\sin(180°/N_d)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>PD<sub>d</sub> (in)</label>
+                                <input type="number" id="PDd" step="any" oninput="syncAllInstances('PDd'); markAsUser('PDd'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_eq5" step="any" oninput="syncAllInstances('p_eq5'); markAsUser('p_eq5'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>sin(180°/N<sub>d</sub>)</label>
+                                <input type="number" id="Nd_eq5" step="1" oninput="syncAllInstances('Nd_eq5'); markAsUser('Nd_eq5'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$PD_D = \frac{p}{\sin(180°/N_D)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>PD<sub>D</sub> (in)</label>
+                                <input type="number" id="PDD" step="any" oninput="syncAllInstances('PDD'); markAsUser('PDD'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_eq6" step="any" oninput="syncAllInstances('p_eq6'); markAsUser('p_eq6'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>sin(180°/N<sub>D</sub>)</label>
+                                <input type="number" id="ND_eq6" step="1" oninput="syncAllInstances('ND_eq6'); markAsUser('ND_eq6'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Center Distance & Chain Length -->
+                <div class="section">
+                    <h2>Step 6: Center Distance & Chain Length (Iterative)</h2>
+                    <div class="info-box">
+                        🔄 This is an iterative calculation:
+                        <ol>
+                            <li>Enter trial CD (30-50 pitches, typically 40)</li>
+                            <li>Calculate L<sub>c</sub>, round to nearest even integer</li>
+                            <li>Recalculate CD from rounded L<sub>c</sub></li>
+                        </ol>
+                    </div>
+
+                    <h3>Trial Center Distance</h3>
+                    <div class="input-row">
+                        <label>CD<sub>trial</sub> [pitches]:</label>
+                        <input type="number" id="CD_trial" step="any" oninput="syncAllInstances('CD_trial'); markAsUser('CD_trial'); calculate()">
+                        <span class="hint">Typically 30-50, use 40</span>
+                    </div>
+
+                    <h3>Chain Length (will be rounded to even integer)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_c = 2CD + \frac{N_2 + N_1}{2} + \frac{(N_2 - N_1)^2}{4\pi^2 CD}$$</div>
+                        <div class="input-row">
+                            <label>L<sub>c</sub> [pitches]:</label>
+                            <input type="number" id="Lc" step="1" oninput="syncAllInstances('Lc'); markAsUser('Lc'); calculate()">
+                            <span class="hint">Rounded to even integer</span>
+                        </div>
+                        <div class="input-row">
+                            <label>L<sub>c</sub> [inches]:</label>
+                            <input type="number" id="Lc_in" step="any" oninput="syncAllInstances('Lc_in'); markAsUser('Lc_in'); calculate()">
+                        </div>
+                    </div>
+
+                    <h3>Final Center Distance (recalculated from L<sub>c</sub>)</h3>
+                    <div class="input-row">
+                        <label>CD [pitches]:</label>
+                        <input type="number" id="CD" step="any" oninput="syncAllInstances('CD'); markAsUser('CD'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>CD [inches]:</label>
+                        <input type="number" id="CD_in" step="any" oninput="syncAllInstances('CD_in'); markAsUser('CD_in'); calculate()">
+                    </div>
+                </div>
+
+                <!-- Step 7: Wrap Angles -->
+                <div class="section">
+                    <h2>Step 7: Wrap Angles</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_d = 180 - 2\sin^{-1}\left(\frac{PD_D - PD_d}{2CD_{in}}\right)$$</div>
+                        <div class="input-row">
+                            <label>Driving Wrap Angle (φ<sub>d</sub>) [degrees]:</label>
+                            <input type="number" id="phi_d" step="any" oninput="syncAllInstances('phi_d'); markAsUser('phi_d'); calculate()">
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_D = 180 + 2\sin^{-1}\left(\frac{PD_D - PD_d}{2CD_{in}}\right)$$</div>
+                        <div class="input-row">
+                            <label>Driven Wrap Angle (φ<sub>D</sub>) [degrees]:</label>
+                            <input type="number" id="phi_D" step="any" oninput="syncAllInstances('phi_D'); markAsUser('phi_D'); calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 8: Strand Check -->
+                <div class="section">
+                    <h2>Step 8: Multiple Strand Check</h2>
+                    <div class="info-box">
+                        🔗 Check if multiple strands are needed: H<sub>d</sub>/(H<sub>r</sub> × Strand Factor) < 1
+                    </div>
+                    <div class="input-row">
+                        <label>Number of Strands:</label>
+                        <select id="strand_selection" onchange="syncAllInstances('strand_selection'); markAsUser('strand_selection'); calculate()">
+                            <option value="">Select...</option>
+                            <option value="1">1 strand (Factor = 1.0)</option>
+                            <option value="2">2 strands (Factor = 1.7)</option>
+                            <option value="3">3 strands (Factor = 2.5)</option>
+                            <option value="4">4 strands (Factor = 3.3)</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Strand Factor:</label>
+                        <input type="number" id="strand_factor" step="any" oninput="syncAllInstances('strand_factor'); markAsUser('strand_factor'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Check Ratio:</label>
+                        <input type="number" id="strand_check" step="any" oninput="syncAllInstances('strand_check'); markAsUser('strand_check'); calculate()">
+                        <span class="hint" id="strand-status">Must be < 1</span>
+                    </div>
+                </div>
+
+                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
+            </div>
+            <!-- End Procedure Tab -->
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="info-box">
+                    📐 Reference equations for chain drive design. All variables are editable.
+                </div>
+
+                <div class="section">
+                    <h2>Power Calculations</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times SF$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>d</sub></label>
+                                <input type="number" id="Hd_geq1" step="any" oninput="syncAllInstances('Hd_geq1'); markAsUser('Hd_geq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>H<sub>nom</sub></label>
+                                <input type="number" id="Hnom_geq1" step="any" oninput="syncAllInstances('Hnom_geq1'); markAsUser('Hnom_geq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>SF</label>
+                                <input type="number" id="SF_geq1" step="any" oninput="syncAllInstances('SF_geq1'); markAsUser('SF_geq1'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Design Horsepower</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Sprocket Calculations</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_D = N_d \times VR$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>D</sub></label>
+                                <input type="number" id="ND_geq2" step="1" oninput="syncAllInstances('ND_geq2'); markAsUser('ND_geq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>d</sub></label>
+                                <input type="number" id="Nd_geq2" step="1" oninput="syncAllInstances('Nd_geq2'); markAsUser('Nd_geq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR_geq2" step="any" oninput="syncAllInstances('VR_geq2'); markAsUser('VR_geq2'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driven Sprocket Teeth (round to integer)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR_{actual} = \frac{N_D}{N_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR<sub>actual</sub></label>
+                                <input type="number" id="VR_actual_geq3" step="any" oninput="syncAllInstances('VR_actual_geq3'); markAsUser('VR_actual_geq3'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>D</sub></label>
+                                <input type="number" id="ND_geq3" step="1" oninput="syncAllInstances('ND_geq3'); markAsUser('ND_geq3'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>d</sub></label>
+                                <input type="number" id="Nd_geq3" step="1" oninput="syncAllInstances('Nd_geq3'); markAsUser('Nd_geq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Actual Velocity Ratio</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_{2,actual} = \frac{n_1}{VR_{actual}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n<sub>2,actual</sub></label>
+                                <input type="number" id="n2_actual_geq4" step="any" oninput="syncAllInstances('n2_actual_geq4'); markAsUser('n2_actual_geq4'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>n<sub>1</sub></label>
+                                <input type="number" id="n1_geq4" step="any" oninput="syncAllInstances('n1_geq4'); markAsUser('n1_geq4'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>VR<sub>actual</sub></label>
+                                <input type="number" id="VR_actual_geq4" step="any" oninput="syncAllInstances('VR_actual_geq4'); markAsUser('VR_actual_geq4'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Actual Output Speed</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Pitch Diameters</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$PD_d = \frac{p}{\sin(180°/N_d)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>PD<sub>d</sub></label>
+                                <input type="number" id="PDd_geq5" step="any" oninput="syncAllInstances('PDd_geq5'); markAsUser('PDd_geq5'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_geq5" step="any" oninput="syncAllInstances('p_geq5'); markAsUser('p_geq5'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>d</sub></label>
+                                <input type="number" id="Nd_geq5" step="1" oninput="syncAllInstances('Nd_geq5'); markAsUser('Nd_geq5'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driving Pitch Diameter</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$PD_D = \frac{p}{\sin(180°/N_D)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>PD<sub>D</sub></label>
+                                <input type="number" id="PDD_geq6" step="any" oninput="syncAllInstances('PDD_geq6'); markAsUser('PDD_geq6'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_geq6" step="any" oninput="syncAllInstances('p_geq6'); markAsUser('p_geq6'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>D</sub></label>
+                                <input type="number" id="ND_geq6" step="1" oninput="syncAllInstances('ND_geq6'); markAsUser('ND_geq6'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driven Pitch Diameter</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Center Distance & Chain Length</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_c = 2CD + \frac{N_2 + N_1}{2} + \frac{(N_2 - N_1)^2}{4\pi^2 CD}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Chain Length in pitches (round to even integer)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$CD = \frac{1}{4}\left[L_c - \frac{N_2+N_1}{2} + \sqrt{\left(L_c - \frac{N_2+N_1}{2}\right)^2 - \frac{8(N_2-N_1)^2}{4\pi^2}}\right]$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Center Distance in pitches (recalculated from rounded L<sub>c</sub>)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Wrap Angles</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_d = 180 - 2\sin^{-1}\left(\frac{PD_D - PD_d}{2CD_{in}}\right)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driving Wrap Angle (degrees)</p>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_D = 180 + 2\sin^{-1}\left(\frac{PD_D - PD_d}{2CD_{in}}\right)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driven Wrap Angle (degrees)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Strand Check</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\frac{H_d}{H_r \times \text{Strand Factor}} < 1$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Must be less than 1 for safe operation</p>
+                    </div>
+                </div>
+            </div>
+            <!-- End General Equations Tab -->
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="info-box">
+                    📝 Complete list of all variables. Values sync across all tabs.
+                </div>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="var-category">
+                            <td colspan="4">Input Parameters</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>nom</sub></td>
+                            <td>Nominal Horsepower</td>
+                            <td><input type="number" id="var_Hnom" step="any" oninput="syncAllInstances('var_Hnom'); markAsUser('var_Hnom'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>1</sub></td>
+                            <td>Input Speed</td>
+                            <td><input type="number" id="var_n1" step="any" oninput="syncAllInstances('var_n1'); markAsUser('var_n1'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>2</sub></td>
+                            <td>Output Speed (nominal)</td>
+                            <td><input type="number" id="var_n2" step="any" oninput="syncAllInstances('var_n2'); markAsUser('var_n2'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>VR</td>
+                            <td>Velocity Ratio</td>
+                            <td><input type="number" id="var_VR" step="any" oninput="syncAllInstances('var_VR'); markAsUser('var_VR'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>SF</td>
+                            <td>Service Factor</td>
+                            <td><input type="number" id="var_SF" step="any" oninput="syncAllInstances('var_SF'); markAsUser('var_SF'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Chain Selection (Manual Lookup)</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>d</sub></td>
+                            <td>Driving Sprocket Teeth</td>
+                            <td><input type="number" id="var_Nd" step="1" oninput="syncAllInstances('var_Nd'); markAsUser('var_Nd'); calculate()"></td>
+                            <td>teeth</td>
+                        </tr>
+                        <tr>
+                            <td>p</td>
+                            <td>Chain Pitch</td>
+                            <td><input type="number" id="var_p" step="any" oninput="syncAllInstances('var_p'); markAsUser('var_p'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>r</sub></td>
+                            <td>Rated Power</td>
+                            <td><input type="number" id="var_Hr" step="any" oninput="syncAllInstances('var_Hr'); markAsUser('var_Hr'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Calculated Values</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>d</sub></td>
+                            <td>Design Horsepower</td>
+                            <td><input type="number" id="var_Hd" step="any" oninput="syncAllInstances('var_Hd'); markAsUser('var_Hd'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>D</sub></td>
+                            <td>Driven Sprocket Teeth</td>
+                            <td><input type="number" id="var_ND" step="1" oninput="syncAllInstances('var_ND'); markAsUser('var_ND'); calculate()"></td>
+                            <td>teeth</td>
+                        </tr>
+                        <tr>
+                            <td>VR<sub>actual</sub></td>
+                            <td>Actual Velocity Ratio</td>
+                            <td><input type="number" id="var_VR_actual" step="any" oninput="syncAllInstances('var_VR_actual'); markAsUser('var_VR_actual'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>n<sub>2,actual</sub></td>
+                            <td>Actual Output Speed</td>
+                            <td><input type="number" id="var_n2_actual" step="any" oninput="syncAllInstances('var_n2_actual'); markAsUser('var_n2_actual'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>PD<sub>d</sub></td>
+                            <td>Driving Pitch Diameter</td>
+                            <td><input type="number" id="var_PDd" step="any" oninput="syncAllInstances('var_PDd'); markAsUser('var_PDd'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>PD<sub>D</sub></td>
+                            <td>Driven Pitch Diameter</td>
+                            <td><input type="number" id="var_PDD" step="any" oninput="syncAllInstances('var_PDD'); markAsUser('var_PDD'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>L<sub>c</sub></td>
+                            <td>Chain Length</td>
+                            <td><input type="number" id="var_Lc" step="1" oninput="syncAllInstances('var_Lc'); markAsUser('var_Lc'); calculate()"></td>
+                            <td>pitches</td>
+                        </tr>
+                        <tr>
+                            <td>CD</td>
+                            <td>Center Distance</td>
+                            <td><input type="number" id="var_CD" step="any" oninput="syncAllInstances('var_CD'); markAsUser('var_CD'); calculate()"></td>
+                            <td>pitches</td>
+                        </tr>
+                        <tr>
+                            <td>φ<sub>d</sub></td>
+                            <td>Driving Wrap Angle</td>
+                            <td><input type="number" id="var_phi_d" step="any" oninput="syncAllInstances('var_phi_d'); markAsUser('var_phi_d'); calculate()"></td>
+                            <td>degrees</td>
+                        </tr>
+                        <tr>
+                            <td>φ<sub>D</sub></td>
+                            <td>Driven Wrap Angle</td>
+                            <td><input type="number" id="var_phi_D" step="any" oninput="syncAllInstances('var_phi_D'); markAsUser('var_phi_D'); calculate()"></td>
+                            <td>degrees</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Variables Tab -->
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        // Map of all variable instances across all tabs
+        const varInstanceMap = {
+            'Hnom': ['Hnom', 'var_Hnom', 'Hnom_eq1', 'Hnom_geq1'],
+            'n1': ['n1', 'var_n1', 'n1_geq4'],
+            'n2': ['n2', 'var_n2'],
+            'VR': ['VR', 'var_VR', 'VR_eq2', 'VR_geq2'],
+            'SF': ['SF', 'var_SF', 'SF_eq1', 'SF_geq1'],
+            'Hd': ['Hd', 'var_Hd', 'Hd_geq1'],
+            'chain_type': ['chain_type'],
+            'Nd': ['Nd', 'var_Nd', 'Nd_eq2', 'Nd_eq5', 'Nd_geq2', 'Nd_geq3', 'Nd_geq5'],
+            'p': ['p', 'var_p', 'p_eq5', 'p_eq6', 'p_geq5', 'p_geq6'],
+            'Hr': ['Hr', 'var_Hr'],
+            'ND': ['ND', 'var_ND', 'ND_eq6', 'ND_geq2', 'ND_geq3', 'ND_geq6'],
+            'VR_actual': ['VR_actual', 'var_VR_actual', 'VR_actual_geq3', 'VR_actual_geq4'],
+            'n2_actual': ['n2_actual', 'var_n2_actual', 'n2_actual_geq4'],
+            'PDd': ['PDd', 'var_PDd', 'PDd_geq5'],
+            'PDD': ['PDD', 'var_PDD', 'PDD_geq6'],
+            'CD_trial': ['CD_trial'],
+            'Lc': ['Lc', 'var_Lc'],
+            'Lc_in': ['Lc_in'],
+            'CD': ['CD', 'var_CD'],
+            'CD_in': ['CD_in'],
+            'phi_d': ['phi_d', 'var_phi_d'],
+            'phi_D': ['phi_D', 'var_phi_D'],
+            'strand_selection': ['strand_selection'],
+            'strand_factor': ['strand_factor'],
+            'strand_check': ['strand_check']
+        };
+
+        // Get base variable name from any instance ID
+        function getBaseVarName(id) {
+            // Check if id starts with 'var_'
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'Hnom_eq1', 'ND_geq2', etc.
+            const eqMatch = id.match(/^(.+)_(eq|geq)\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        // Sync a value across all instances of a variable
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+
+            // Update all instances of this variable
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            if (el.tagName === 'SELECT') {
+                return el.value === '' ? null : parseFloat(el.value);
+            }
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value) && !userValues.has(id)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                }
+                syncAllInstances(id);
+            }
+        }
+
+        function updatePitchHint() {
+            const chainType = document.getElementById('chain_type').value;
+            const hint = document.getElementById('pitch-hint');
+            if (chainType === '40') {
+                hint.textContent = 'p = 0.5 in for No. 40';
+            } else if (chainType === '60') {
+                hint.textContent = 'p = 0.75 in for No. 60';
+            } else if (chainType === '80') {
+                hint.textContent = 'p = 1.0 in for No. 80';
+            }
+        }
+
+        function calculate() {
+            // Get all inputs
+            const Hnom = getValue('Hnom');
+            const SF = getValue('SF');
+            const Nd = getValue('Nd');
+            const p = getValue('p');
+            const VR = getValue('VR');
+            const n1 = getValue('n1');
+            const Hr = getValue('Hr');
+            const CD_trial = getValue('CD_trial');
+            const strand_selection = getValue('strand_selection');
+
+            // Step 2: Design Horsepower
+            if (Hnom && SF && !userValues.has('Hd')) {
+                setValue('Hd', Hnom * SF);
+            }
+
+            // Step 4: Driven Sprocket Teeth
+            if (Nd && VR && !userValues.has('ND')) {
+                const ND_raw = Nd * VR;
+                const ND_rounded = Math.round(ND_raw);
+                setValue('ND', ND_rounded);
+            }
+
+            const ND = getValue('ND');
+
+            // Step 4b: Recalculate VR and n2
+            if (ND && Nd) {
+                const VR_actual = ND / Nd;
+                setValue('VR_actual', VR_actual);
+
+                if (n1 && VR_actual) {
+                    const n2_actual = n1 / VR_actual;
+                    setValue('n2_actual', n2_actual);
+                }
+            }
+
+            // Step 5: Pitch Diameters
+            if (p && Nd && !userValues.has('PDd')) {
+                const PDd = p / Math.sin((180 / Nd) * Math.PI / 180);
+                setValue('PDd', PDd);
+            }
+
+            if (p && ND && !userValues.has('PDD')) {
+                const PDD = p / Math.sin((180 / ND) * Math.PI / 180);
+                setValue('PDD', PDD);
+            }
+
+            // Step 6: Chain Length and Center Distance (Iterative)
+            if (CD_trial && ND && Nd) {
+                const N1 = Nd;
+                const N2 = ND;
+
+                // Calculate Lc from trial CD
+                const term1 = 2 * CD_trial;
+                const term2 = (N2 + N1) / 2;
+                const term3 = Math.pow(N2 - N1, 2) / (4 * Math.pow(Math.PI, 2) * CD_trial);
+                const Lc_raw = term1 + term2 + term3;
+
+                // Round to nearest even integer
+                const Lc_rounded = Math.round(Lc_raw / 2) * 2;
+                setValue('Lc', Lc_rounded);
+
+                if (p) {
+                    setValue('Lc_in', Lc_rounded * p);
+                }
+
+                // Recalculate CD from rounded Lc
+                const a = Lc_rounded - (N2 + N1) / 2;
+                const b = Math.pow(a, 2) - (8 * Math.pow(N2 - N1, 2)) / (4 * Math.pow(Math.PI, 2));
+
+                if (b >= 0) {
+                    const CD_final = (1 / 4) * (a + Math.sqrt(b));
+                    setValue('CD', CD_final);
+
+                    if (p) {
+                        setValue('CD_in', CD_final * p);
+                    }
+                }
+            }
+
+            // Step 7: Wrap Angles
+            const PDd = getValue('PDd');
+            const PDD = getValue('PDD');
+            const CD_in = getValue('CD_in');
+
+            if (PDd && PDD && CD_in && PDD !== PDd) {
+                const diff = PDD - PDd;
+                const ratio = diff / (2 * CD_in);
+
+                if (Math.abs(ratio) <= 1) {
+                    const angle_rad = Math.asin(ratio);
+                    const angle_deg = angle_rad * 180 / Math.PI;
+
+                    setValue('phi_d', 180 - 2 * angle_deg);
+                    setValue('phi_D', 180 + 2 * angle_deg);
+                }
+            }
+
+            // Step 8: Strand Factor and Check
+            if (strand_selection) {
+                let factor;
+                if (strand_selection === 1) factor = 1.0;
+                else if (strand_selection === 2) factor = 1.7;
+                else if (strand_selection === 3) factor = 2.5;
+                else if (strand_selection === 4) factor = 3.3;
+
+                if (factor) {
+                    setValue('strand_factor', factor);
+
+                    const Hd = getValue('Hd');
+                    if (Hd && Hr && factor) {
+                        const check = Hd / (Hr * factor);
+                        setValue('strand_check', check);
+
+                        const status = document.getElementById('strand-status');
+                        if (check < 1) {
+                            status.textContent = '✓ Safe (< 1)';
+                            status.style.color = 'green';
+                        } else {
+                            status.textContent = '✗ Unsafe (≥ 1) - More strands needed';
+                            status.style.color = 'red';
+                        }
+                    }
+                }
+            }
+
+            saveSession();
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Re-render MathJax
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+            }
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            document.querySelectorAll('select').forEach(select => {
+                if (select.value) state[select.id] = select.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('mech_chains_state', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('mech_chains_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+
+                for (let key in state) {
+                    if (key === 'userValues') continue;
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('mech_chains_state');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                const status = document.getElementById('strand-status');
+                status.textContent = 'Must be < 1';
+                status.style.color = '#666';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

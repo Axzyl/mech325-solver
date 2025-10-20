@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-Belt Design Calculator (Mott)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 200px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/belts/Mech_325_Bible_Mech-v_belts.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>V-Belt Design Calculator</h1>
+            <div class="info-box">
+                ⚙️ Following Mott methodology for V-belt drive design. 7-step process with iterative refinement.
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Initial Setup -->
+                <div class="section">
+                    <h2>Step 1: Initial Setup</h2>
+                    <div class="input-row">
+                        <label>Nominal Power (H<sub>nom</sub>) [hp]:</label>
+                        <input type="number" id="Hnom" step="any" oninput="syncAllInstances('Hnom'); markAsUser('Hnom'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Input Speed (n) [rpm]:</label>
+                        <input type="number" id="n" step="any" oninput="syncAllInstances('n'); markAsUser('n'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Velocity Ratio (VR):</label>
+                        <input type="number" id="VR" step="any" oninput="syncAllInstances('VR'); markAsUser('VR'); calculate()">
+                    </div>
+                </div>
+
+                <!-- Step 2: Service Factor & Design Power -->
+                <div class="section">
+                    <h2>Step 2: Service Factor & Design Power</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP</strong> - Select K<sub>s</sub> from Table 7-1 based on machine type, driver, and operating hours
+                    </div>
+                    <div class="input-row">
+                        <label>Service Factor (K<sub>s</sub>):</label>
+                        <input type="number" id="Ks" step="any" oninput="syncAllInstances('Ks'); markAsUser('Ks'); calculate()">
+                        <span class="hint">Range: 1.0 to 2.0</span>
+                    </div>
+
+                    <h3>Design Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times K_s$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>d</sub> (hp)</label>
+                                <input type="number" id="Hd" step="any" oninput="syncAllInstances('Hd'); markAsUser('Hd'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>nom</sub></label>
+                                <input type="number" id="Hnom_eq1" step="any" oninput="syncAllInstances('Hnom_eq1'); markAsUser('Hnom_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>K<sub>s</sub></label>
+                                <input type="number" id="Ks_eq1" step="any" oninput="syncAllInstances('Ks_eq1'); markAsUser('Ks_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 Use Belt Type Chart to select belt type
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Type:</label>
+                        <select id="belt_type" onchange="syncAllInstances('belt_type'); markAsUser('belt_type'); calculate()">
+                            <option value="">Select...</option>
+                            <option value="3V">3V (or 3VX)</option>
+                            <option value="5V">5V (or 5VX)</option>
+                            <option value="8V">8V (or 8VX)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 3: Sheave Diameters -->
+                <div class="section">
+                    <h2>Step 3: Sheave Diameters</h2>
+                    <div class="info-box">
+                        Assumed belt speed: V = 4000 fpm (for initial calculation)
+                    </div>
+
+                    <h3>Calculated Driving Diameter</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$d_{calc} = \frac{12V}{\pi n}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>d<sub>calc</sub> (in)</label>
+                                <input type="number" id="d_calc" step="any" oninput="syncAllInstances('d_calc'); markAsUser('d_calc'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>V (fpm)</label>
+                                <input type="number" id="V_eq1" step="any" value="4000" oninput="syncAllInstances('V_eq1'); markAsUser('V_eq1'); calculate()">
+                            </div>
+                            <span>÷</span>
+                            <div class="var-input">
+                                <label>n (rpm)</label>
+                                <input type="number" id="n_eq1" step="any" oninput="syncAllInstances('n_eq1'); markAsUser('n_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 Select standard driving diameter from Tables 7-15/16/17
+                    </div>
+                    <div class="input-row">
+                        <label>Driving Sheave Diameter (d) [in]:</label>
+                        <input type="number" id="d" step="any" oninput="syncAllInstances('d'); markAsUser('d'); calculate()">
+                    </div>
+
+                    <h3>Calculated Driven Diameter</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D_{calc} = VR \times d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>calc</sub> (in)</label>
+                                <input type="number" id="D_calc" step="any" oninput="syncAllInstances('D_calc'); markAsUser('D_calc'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR_eq1" step="any" oninput="syncAllInstances('VR_eq1'); markAsUser('VR_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq1" step="any" oninput="syncAllInstances('d_eq1'); markAsUser('d_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 Select standard driven diameter from Tables 7-15/16/17
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Sheave Diameter (D) [in]:</label>
+                        <input type="number" id="D" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
+                    </div>
+
+                    <h3>Final Parameters</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR_{final} = \frac{D}{d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR<sub>final</sub></label>
+                                <input type="number" id="VR_final" step="any" oninput="syncAllInstances('VR_final'); markAsUser('VR_final'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq1" step="any" oninput="syncAllInstances('D_eq1'); markAsUser('D_eq1'); calculate()">
+                            </div>
+                            <span>÷</span>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_{out} = \frac{n}{VR_{final}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n<sub>out</sub> (rpm)</label>
+                                <input type="number" id="n_out" step="any" oninput="syncAllInstances('n_out'); markAsUser('n_out'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n (rpm)</label>
+                                <input type="number" id="n_eq2" step="any" oninput="syncAllInstances('n_eq2'); markAsUser('n_eq2'); calculate()">
+                            </div>
+                            <span>÷</span>
+                            <div class="var-input">
+                                <label>VR<sub>final</sub></label>
+                                <input type="number" id="VR_final_eq1" step="any" oninput="syncAllInstances('VR_final_eq1'); markAsUser('VR_final_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V_{final} = \frac{\pi n d}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>V<sub>final</sub> (fpm)</label>
+                                <input type="number" id="V_final" step="any" oninput="syncAllInstances('V_final'); markAsUser('V_final'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n (rpm)</label>
+                                <input type="number" id="n_eq3" step="any" oninput="syncAllInstances('n_eq3'); markAsUser('n_eq3'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq3" step="any" oninput="syncAllInstances('d_eq3'); markAsUser('d_eq3'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="speed-tolerance-warning" class="error-box">
+                        ⚠️ Belt speed deviates more than ±200 fpm from 4000. Retry with different d/D.
+                    </div>
+                    <div id="speed-tolerance-ok" class="success-box">
+                        ✓ Belt speed within ±200 fpm of 4000
+                    </div>
+                </div>
+
+                <!-- Step 4: Power Ratings -->
+                <div class="section">
+                    <h2>Step 4: Power Ratings</h2>
+
+                    <div class="warning-box">
+                        📊 For 3V/8V belts: Look up P<sub>1</sub> and P<sub>2</sub> from Figures 7-14 or 7-16
+                    </div>
+                    <div class="input-row">
+                        <label>P<sub>1</sub> (at VR=1) [hp]:</label>
+                        <input type="number" id="P1" step="any" oninput="syncAllInstances('P1'); markAsUser('P1'); calculate()">
+                        <span class="hint">3V/8V only</span>
+                    </div>
+                    <div class="input-row">
+                        <label>P<sub>2</sub> (at VR=3.38) [hp]:</label>
+                        <input type="number" id="P2" step="any" oninput="syncAllInstances('P2'); markAsUser('P2'); calculate()">
+                        <span class="hint">3V/8V only</span>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 For 5V belts: Look up H<sub>s</sub> from Figure 7-15 and H<sub>added</sub> from Figure 7-17
+                    </div>
+                    <div class="input-row">
+                        <label>H<sub>s</sub> (base power) [hp]:</label>
+                        <input type="number" id="Hs" step="any" oninput="syncAllInstances('Hs'); markAsUser('Hs'); calculate()">
+                        <span class="hint">5V only</span>
+                    </div>
+                    <div class="input-row">
+                        <label>H<sub>added</sub> (VR-based) [hp]:</label>
+                        <input type="number" id="Hadded" step="any" oninput="syncAllInstances('Hadded'); markAsUser('Hadded'); calculate()">
+                        <span class="hint">5V only</span>
+                    </div>
+
+                    <h3>Rated Power per Belt</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_r = \begin{cases}
+                        P_2 + \frac{VR - 3.38}{3.38 - 1}(P_2 - P_1) & \text{(3V/8V)} \\
+                        H_s + H_{added} & \text{(5V)}
+                        \end{cases}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>r</sub> (hp)</label>
+                                <input type="number" id="Hr" step="any" oninput="syncAllInstances('Hr'); markAsUser('Hr'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P<sub>1</sub> (hp)</label>
+                                <input type="number" id="P1_eq1" step="any" oninput="syncAllInstances('P1_eq1'); markAsUser('P1_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>P<sub>2</sub> (hp)</label>
+                                <input type="number" id="P2_eq1" step="any" oninput="syncAllInstances('P2_eq1'); markAsUser('P2_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>H<sub>s</sub> (hp)</label>
+                                <input type="number" id="Hs_eq1" step="any" oninput="syncAllInstances('Hs_eq1'); markAsUser('Hs_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>H<sub>added</sub> (hp)</label>
+                                <input type="number" id="Hadded_eq1" step="any" oninput="syncAllInstances('Hadded_eq1'); markAsUser('Hadded_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Belt Length -->
+                <div class="section">
+                    <h2>Step 5: Belt Length & Center Distance</h2>
+                    <div class="input-row">
+                        <label>Trial Center Distance (CD<sub>trial</sub>) [in]:</label>
+                        <input type="number" id="CD_trial" step="any" oninput="syncAllInstances('CD_trial'); markAsUser('CD_trial'); calculate()">
+                        <span class="hint">D < CD < 3(D+d)</span>
+                    </div>
+
+                    <h3>Calculated Belt Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_p = 2CD + 1.57(D+d) + \frac{(D-d)^2}{4CD}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>p,calc</sub> (in)</label>
+                                <input type="number" id="Lp_calc" step="any" oninput="syncAllInstances('Lp_calc'); markAsUser('Lp_calc'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>CD<sub>trial</sub> (in)</label>
+                                <input type="number" id="CD_trial_eq1" step="any" oninput="syncAllInstances('CD_trial_eq1'); markAsUser('CD_trial_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq2" step="any" oninput="syncAllInstances('D_eq2'); markAsUser('D_eq2'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq4" step="any" oninput="syncAllInstances('d_eq4'); markAsUser('d_eq4'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 Select standard belt length from Table 7-2 (closest to L<sub>p,calc</sub>)
+                    </div>
+                    <div class="input-row">
+                        <label>Standard Belt Length (L<sub>p</sub>) [in]:</label>
+                        <input type="number" id="Lp" step="any" oninput="syncAllInstances('Lp'); markAsUser('Lp'); calculate()">
+                    </div>
+
+                    <h3>Final Center Distance</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$B = 4L_p - 6.28(D+d)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>B (in)</label>
+                                <input type="number" id="B" step="any" oninput="syncAllInstances('B'); markAsUser('B'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>L<sub>p</sub> (in)</label>
+                                <input type="number" id="Lp_eq1" step="any" oninput="syncAllInstances('Lp_eq1'); markAsUser('Lp_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq3" step="any" oninput="syncAllInstances('D_eq3'); markAsUser('D_eq3'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq5" step="any" oninput="syncAllInstances('d_eq5'); markAsUser('d_eq5'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$CD = \frac{B + \sqrt{B^2 - 32(D-d)^2}}{16}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>CD (in)</label>
+                                <input type="number" id="CD" step="any" oninput="syncAllInstances('CD'); markAsUser('CD'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>B (in)</label>
+                                <input type="number" id="B_eq1" step="any" oninput="syncAllInstances('B_eq1'); markAsUser('B_eq1'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq4" step="any" oninput="syncAllInstances('D_eq4'); markAsUser('D_eq4'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq6" step="any" oninput="syncAllInstances('d_eq6'); markAsUser('d_eq6'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Correction Factors -->
+                <div class="section">
+                    <h2>Step 6: Correction Factors</h2>
+
+                    <h3>Wrap Angles</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_d = \pi - 2\sin^{-1}\left(\frac{D-d}{2CD}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>θ<sub>d</sub> (rad)</label>
+                                <input type="number" id="theta_d_rad" step="any" oninput="syncAllInstances('theta_d_rad'); markAsUser('theta_d_rad'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>θ<sub>d</sub> (deg)</label>
+                                <input type="number" id="theta_d_deg" step="any" oninput="syncAllInstances('theta_d_deg'); markAsUser('theta_d_deg'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D (in)</label>
+                                <input type="number" id="D_eq5" step="any" oninput="syncAllInstances('D_eq5'); markAsUser('D_eq5'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>d (in)</label>
+                                <input type="number" id="d_eq7" step="any" oninput="syncAllInstances('d_eq7'); markAsUser('d_eq7'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>CD (in)</label>
+                                <input type="number" id="CD_eq1" step="any" oninput="syncAllInstances('CD_eq1'); markAsUser('CD_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        📊 Look up correction factors from graphs or use interpolation
+                    </div>
+                    <div class="input-row">
+                        <label>Wrap Angle Correction (C<sub>θ</sub>):</label>
+                        <input type="number" id="C_theta" step="any" oninput="syncAllInstances('C_theta'); markAsUser('C_theta'); calculate()">
+                        <span class="hint">From graph</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Length Correction (C<sub>L</sub>):</label>
+                        <input type="number" id="C_L" step="any" oninput="syncAllInstances('C_L'); markAsUser('C_L'); calculate()">
+                        <span class="hint">From graph</span>
+                    </div>
+
+                    <h3>Corrected Rated Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_c = H_r \times C_\theta \times C_L$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>c</sub> (hp)</label>
+                                <input type="number" id="Hc" step="any" oninput="syncAllInstances('Hc'); markAsUser('Hc'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>r</sub> (hp)</label>
+                                <input type="number" id="Hr_eq1" step="any" oninput="syncAllInstances('Hr_eq1'); markAsUser('Hr_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>θ</sub></label>
+                                <input type="number" id="C_theta_eq1" step="any" oninput="syncAllInstances('C_theta_eq1'); markAsUser('C_theta_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>L</sub></label>
+                                <input type="number" id="C_L_eq1" step="any" oninput="syncAllInstances('C_L_eq1'); markAsUser('C_L_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Number of Belts -->
+                <div class="section">
+                    <h2>Step 7: Number of Belts</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_{belts} = \left\lceil\frac{H_d}{H_c}\right\rceil$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>belts,calc</sub></label>
+                                <input type="number" id="N_belts_calc" step="any" oninput="syncAllInstances('N_belts_calc'); markAsUser('N_belts_calc'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>N<sub>belts</sub> (final)</label>
+                                <input type="number" id="N_belts" step="1" oninput="syncAllInstances('N_belts'); markAsUser('N_belts'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>d</sub> (hp)</label>
+                                <input type="number" id="Hd_eq1" step="any" oninput="syncAllInstances('Hd_eq1'); markAsUser('Hd_eq1'); calculate()">
+                            </div>
+                            <span>÷</span>
+                            <div class="var-input">
+                                <label>H<sub>c</sub> (hp)</label>
+                                <input type="number" id="Hc_eq1" step="any" oninput="syncAllInstances('Hc_eq1'); markAsUser('Hc_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
+            </div>
+            <!-- End Procedure Tab -->
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="info-box">
+                    📐 Reference equations for V-belt design. All variables are editable.
+                </div>
+
+                <div class="section">
+                    <h2>Basic Calculations</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times K_s$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Design Power</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$d = \frac{12V}{\pi n}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Calculated Driving Diameter (V=4000 fpm)</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D = VR \times d$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Calculated Driven Diameter</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR_{final} = \frac{D}{d}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Final Velocity Ratio</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V_{final} = \frac{\pi n d}{12}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Final Belt Speed (fpm)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Power Ratings</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_r = P_2 + \frac{VR - 3.38}{3.38 - 1}(P_2 - P_1)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Rated Power (3V/8V belts)</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_r = H_s + H_{added}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Rated Power (5V belts)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Belt Length & Center Distance</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_p = 2CD + 1.57(D+d) + \frac{(D-d)^2}{4CD}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Calculated Belt Length</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$B = 4L_p - 6.28(D+d)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Intermediate Variable</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$CD = \frac{B + \sqrt{B^2 - 32(D-d)^2}}{16}$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Final Center Distance</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Wrap Angle & Corrections</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_d = \pi - 2\sin^{-1}\left(\frac{D-d}{2CD}\right)$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Driving Wrap Angle (rad)</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_c = H_r \times C_\theta \times C_L$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Corrected Rated Power</p>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_{belts} = \left\lceil\frac{H_d}{H_c}\right\rceil$$</div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Minimum Belts Required (round up)</p>
+                    </div>
+                </div>
+            </div>
+            <!-- End General Equations Tab -->
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="info-box">
+                    📝 Complete list of all variables. Values sync across all tabs.
+                </div>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="var-category">
+                            <td colspan="4">Input Parameters</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>nom</sub></td>
+                            <td>Nominal Power</td>
+                            <td><input type="number" id="var_Hnom" step="any" oninput="syncAllInstances('var_Hnom'); markAsUser('var_Hnom'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>n</td>
+                            <td>Input Speed</td>
+                            <td><input type="number" id="var_n" step="any" oninput="syncAllInstances('var_n'); markAsUser('var_n'); calculate()"></td>
+                            <td>rpm</td>
+                        </tr>
+                        <tr>
+                            <td>VR</td>
+                            <td>Velocity Ratio</td>
+                            <td><input type="number" id="var_VR" step="any" oninput="syncAllInstances('var_VR'); markAsUser('var_VR'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>K<sub>s</sub></td>
+                            <td>Service Factor</td>
+                            <td><input type="number" id="var_Ks" step="any" oninput="syncAllInstances('var_Ks'); markAsUser('var_Ks'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr class="var-category">
+                            <td colspan="4">Calculated Values</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>d</sub></td>
+                            <td>Design Power</td>
+                            <td><input type="number" id="var_Hd" step="any" oninput="syncAllInstances('var_Hd'); markAsUser('var_Hd'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>d</td>
+                            <td>Driving Sheave Diameter</td>
+                            <td><input type="number" id="var_d" step="any" oninput="syncAllInstances('var_d'); markAsUser('var_d'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td>Driven Sheave Diameter</td>
+                            <td><input type="number" id="var_D" step="any" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>VR<sub>final</sub></td>
+                            <td>Final Velocity Ratio</td>
+                            <td><input type="number" id="var_VR_final" step="any" oninput="syncAllInstances('var_VR_final'); markAsUser('var_VR_final'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>V<sub>final</sub></td>
+                            <td>Final Belt Speed</td>
+                            <td><input type="number" id="var_V_final" step="any" oninput="syncAllInstances('var_V_final'); markAsUser('var_V_final'); calculate()"></td>
+                            <td>fpm</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>r</sub></td>
+                            <td>Rated Power per Belt</td>
+                            <td><input type="number" id="var_Hr" step="any" oninput="syncAllInstances('var_Hr'); markAsUser('var_Hr'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>L<sub>p</sub></td>
+                            <td>Belt Length</td>
+                            <td><input type="number" id="var_Lp" step="any" oninput="syncAllInstances('var_Lp'); markAsUser('var_Lp'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>CD</td>
+                            <td>Center Distance</td>
+                            <td><input type="number" id="var_CD" step="any" oninput="syncAllInstances('var_CD'); markAsUser('var_CD'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>θ<sub>d</sub></td>
+                            <td>Driving Wrap Angle</td>
+                            <td><input type="number" id="var_theta_d_deg" step="any" oninput="syncAllInstances('var_theta_d_deg'); markAsUser('var_theta_d_deg'); calculate()"></td>
+                            <td>deg</td>
+                        </tr>
+                        <tr>
+                            <td>H<sub>c</sub></td>
+                            <td>Corrected Rated Power</td>
+                            <td><input type="number" id="var_Hc" step="any" oninput="syncAllInstances('var_Hc'); markAsUser('var_Hc'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                        <tr>
+                            <td>N<sub>belts</sub></td>
+                            <td>Minimum Belts Required</td>
+                            <td><input type="number" id="var_N_belts" step="1" oninput="syncAllInstances('var_N_belts'); markAsUser('var_N_belts'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- End Variables Tab -->
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        // Variable instance map
+        const varInstanceMap = {
+            'Hnom': ['Hnom', 'var_Hnom', 'Hnom_eq1'],
+            'n': ['n', 'var_n', 'n_eq1', 'n_eq2', 'n_eq3'],
+            'VR': ['VR', 'var_VR', 'VR_eq1'],
+            'Ks': ['Ks', 'var_Ks', 'Ks_eq1'],
+            'Hd': ['Hd', 'var_Hd', 'Hd_eq1'],
+            'belt_type': ['belt_type'],
+            'V_eq1': ['V_eq1'],
+            'd_calc': ['d_calc'],
+            'd': ['d', 'var_d', 'd_eq1', 'd_eq2', 'd_eq3', 'd_eq4', 'd_eq5', 'd_eq6', 'd_eq7'],
+            'D_calc': ['D_calc'],
+            'D': ['D', 'var_D', 'D_eq1', 'D_eq2', 'D_eq3', 'D_eq4', 'D_eq5'],
+            'VR_final': ['VR_final', 'var_VR_final', 'VR_final_eq1'],
+            'n_out': ['n_out'],
+            'V_final': ['V_final', 'var_V_final'],
+            'P1': ['P1', 'P1_eq1'],
+            'P2': ['P2', 'P2_eq1'],
+            'Hs': ['Hs', 'Hs_eq1'],
+            'Hadded': ['Hadded', 'Hadded_eq1'],
+            'Hr': ['Hr', 'var_Hr', 'Hr_eq1'],
+            'CD_trial': ['CD_trial', 'CD_trial_eq1'],
+            'Lp_calc': ['Lp_calc'],
+            'Lp': ['Lp', 'var_Lp', 'Lp_eq1'],
+            'B': ['B', 'B_eq1'],
+            'CD': ['CD', 'var_CD', 'CD_eq1'],
+            'theta_d_rad': ['theta_d_rad'],
+            'theta_d_deg': ['theta_d_deg', 'var_theta_d_deg'],
+            'C_theta': ['C_theta', 'C_theta_eq1'],
+            'C_L': ['C_L', 'C_L_eq1'],
+            'Hc': ['Hc', 'var_Hc', 'Hc_eq1'],
+            'N_belts_calc': ['N_belts_calc'],
+            'N_belts': ['N_belts', 'var_N_belts']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            const eqMatch = id.match(/^(.+)_eq\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(sourceId) {
+            const baseVar = getBaseVarName(sourceId);
+            const sourceEl = document.getElementById(sourceId);
+
+            if (!sourceEl || !varInstanceMap[baseVar]) return;
+
+            const value = sourceEl.value;
+
+            varInstanceMap[baseVar].forEach(instanceId => {
+                if (instanceId !== sourceId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
+        function markAsUser(varId) {
+            userValues.add(varId);
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            if (el.tagName === 'SELECT') {
+                return el.value === '' ? null : el.value;
+            }
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value) {
+            if (value !== null && !isNaN(value) && isFinite(value) && !userValues.has(id)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value.toFixed(4);
+                }
+                syncAllInstances(id);
+            }
+        }
+
+        function calculate() {
+            // Get values
+            const Hnom = getValue('Hnom');
+            const Ks = getValue('Ks');
+            const n = getValue('n');
+            const VR = getValue('VR');
+            const d = getValue('d');
+            const D = getValue('D');
+            const P1 = getValue('P1');
+            const P2 = getValue('P2');
+            const Hs = getValue('Hs');
+            const Hadded = getValue('Hadded');
+            const belt_type = getValue('belt_type');
+            const CD_trial = getValue('CD_trial');
+            const Lp = getValue('Lp');
+            const C_theta = getValue('C_theta');
+            const C_L = getValue('C_L');
+
+            // Design Power
+            if (Hnom && Ks && !userValues.has('Hd')) {
+                setValue('Hd', Hnom * Ks);
+            }
+
+            // Calculated driving diameter (V=4000 assumed)
+            if (n && !userValues.has('d_calc')) {
+                const d_calc = (12 * 4000) / (Math.PI * n);
+                setValue('d_calc', d_calc);
+            }
+
+            // Calculated driven diameter
+            if (VR && d && !userValues.has('D_calc')) {
+                setValue('D_calc', VR * d);
+            }
+
+            // Final velocity ratio
+            if (D && d && !userValues.has('VR_final')) {
+                setValue('VR_final', D / d);
+            }
+
+            // Final output speed
+            const VR_final = getValue('VR_final');
+            if (n && VR_final && !userValues.has('n_out')) {
+                setValue('n_out', n / VR_final);
+            }
+
+            // Final belt speed
+            if (n && d && !userValues.has('V_final')) {
+                const V_final = (Math.PI * n * d) / 12;
+                setValue('V_final', V_final);
+            }
+
+            // Belt speed tolerance check
+            const V_final = getValue('V_final');
+            const speedWarning = document.getElementById('speed-tolerance-warning');
+            const speedOk = document.getElementById('speed-tolerance-ok');
+            if (V_final !== null) {
+                if (Math.abs(V_final - 4000) > 200) {
+                    speedWarning.style.display = 'block';
+                    speedOk.style.display = 'none';
+                } else {
+                    speedWarning.style.display = 'none';
+                    speedOk.style.display = 'block';
+                }
+            }
+
+            // Rated power (3V/8V)
+            if (belt_type === '3V' || belt_type === '8V') {
+                if (P1 && P2 && VR_final && !userValues.has('Hr')) {
+                    const VR_capped = Math.min(VR_final, 3.38);
+                    const Hr = P2 + ((VR_capped - 3.38) / (3.38 - 1)) * (P2 - P1);
+                    setValue('Hr', Hr);
+                }
+            }
+
+            // Rated power (5V)
+            if (belt_type === '5V') {
+                if (Hs && Hadded && !userValues.has('Hr')) {
+                    setValue('Hr', Hs + Hadded);
+                }
+            }
+
+            // Calculated belt length
+            if (CD_trial && D && d && !userValues.has('Lp_calc')) {
+                const Lp_calc = 2 * CD_trial + 1.57 * (D + d) + Math.pow(D - d, 2) / (4 * CD_trial);
+                setValue('Lp_calc', Lp_calc);
+            }
+
+            // Intermediate variable B
+            if (Lp && D && d && !userValues.has('B')) {
+                const B = 4 * Lp - 6.28 * (D + d);
+                setValue('B', B);
+            }
+
+            // Final center distance
+            const B = getValue('B');
+            if (B && D && d && !userValues.has('CD')) {
+                const discriminant = B * B - 32 * Math.pow(D - d, 2);
+                if (discriminant >= 0) {
+                    const CD = (B + Math.sqrt(discriminant)) / 16;
+                    setValue('CD', CD);
+                }
+            }
+
+            // Wrap angle
+            const CD = getValue('CD');
+            if (D && d && CD && !userValues.has('theta_d_rad')) {
+                const arg = (D - d) / (2 * CD);
+                if (Math.abs(arg) <= 1) {
+                    const theta_d_rad = Math.PI - 2 * Math.asin(arg);
+                    setValue('theta_d_rad', theta_d_rad);
+                    setValue('theta_d_deg', theta_d_rad * 180 / Math.PI);
+                }
+            }
+
+            // Corrected rated power
+            const Hr = getValue('Hr');
+            if (Hr && C_theta && C_L && !userValues.has('Hc')) {
+                setValue('Hc', Hr * C_theta * C_L);
+            }
+
+            // Number of belts
+            const Hd = getValue('Hd');
+            const Hc = getValue('Hc');
+            if (Hd && Hc && !userValues.has('N_belts_calc')) {
+                const N_belts_calc = Hd / Hc;
+                setValue('N_belts_calc', N_belts_calc);
+                setValue('N_belts', Math.ceil(N_belts_calc));
+            }
+
+            saveSession();
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+            }
+        }
+
+        function saveSession() {
+            const state = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) state[input.id] = input.value;
+            });
+            document.querySelectorAll('select').forEach(select => {
+                if (select.value) state[select.id] = select.value;
+            });
+            state.userValues = Array.from(userValues);
+            localStorage.setItem('mech_v_belts_state', JSON.stringify(state));
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('mech_v_belts_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                userValues.clear();
+                if (state.userValues) state.userValues.forEach(v => userValues.add(v));
+
+                for (let key in state) {
+                    if (key === 'userValues') continue;
+                    const el = document.getElementById(key);
+                    if (el && state[key]) {
+                        el.value = state[key];
+                    }
+                }
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                localStorage.removeItem('mech_v_belts_state');
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                document.getElementById('speed-tolerance-warning').style.display = 'none';
+                document.getElementById('speed-tolerance-ok').style.display = 'none';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

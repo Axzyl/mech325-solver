@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flat Belt Design Calculator (Fizz Guide)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 150px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 200px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .save-btn, .load-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover, .load-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/belts/Mech_325_Bible_Fizz-flat_belts.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Flat Belt Design Calculator (Fizz Guide)</h1>
+            <div class="info-box">
+                ⚙️ Following Fizz Guide 10-step methodology for flat belt drive design. Includes geometry, tensions, friction verification, and belt sag.
+            </div>
+
+            <!-- Session Controls -->
+            <div class="controls">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="load-btn" onclick="loadSession()">📂 Load Session</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Design Requirements -->
+                <div class="section">
+                    <h2>Step 1: Design Requirements</h2>
+                    <div class="input-row">
+                        <label>Nominal Power (H<sub>nom</sub>) [hp]:</label>
+                        <input type="number" id="Hnom" step="any" oninput="syncAllInstances('Hnom'); markAsUser('Hnom'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Service Factor (K<sub>s</sub>):</label>
+                        <input type="number" id="Ks" step="any" oninput="syncAllInstances('Ks'); markAsUser('Ks'); calculate()">
+                        <span class="hint">From tables based on application</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Design Safety Factor (n<sub>d</sub>):</label>
+                        <input type="number" id="nd" step="any" oninput="syncAllInstances('nd'); markAsUser('nd'); calculate()">
+                        <span class="hint">Typical 1.0-1.2</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Driver Pulley Speed (n<sub>1</sub>) [rpm]:</label>
+                        <input type="number" id="n1" step="any" oninput="syncAllInstances('n1'); markAsUser('n1'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Pulley Speed (n<sub>2</sub>) [rpm]:</label>
+                        <input type="number" id="n2" step="any" oninput="syncAllInstances('n2'); markAsUser('n2'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Driver Pulley Diameter (d<sub>1</sub>) [in]:</label>
+                        <input type="number" id="d1" step="any" oninput="syncAllInstances('d1'); markAsUser('d1'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Pulley Diameter (d<sub>2</sub>) [in]:</label>
+                        <input type="number" id="d2" step="any" oninput="syncAllInstances('d2'); markAsUser('d2'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Center Distance (C) [in]:</label>
+                        <input type="number" id="C" step="any" oninput="syncAllInstances('C'); markAsUser('C'); calculate()">
+                    </div>
+
+                    <h3>Design Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times K_s \times n_d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>d</sub> (hp)</label>
+                                <input type="number" id="Hd" step="any" oninput="syncAllInstances('Hd'); markAsUser('Hd'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>nom</sub></label>
+                                <input type="number" id="Hnom_eq1" step="any" oninput="syncAllInstances('Hnom_eq1'); markAsUser('Hnom_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>K<sub>s</sub></label>
+                                <input type="number" id="Ks_eq1" step="any" oninput="syncAllInstances('Ks_eq1'); markAsUser('Ks_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="nd_eq1" step="any" oninput="syncAllInstances('nd_eq1'); markAsUser('nd_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Belt Material Selection -->
+                <div class="section">
+                    <h2>Step 2: Belt Material Selection</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Table 17-2 to get belt material properties:
+                        <ul>
+                            <li>Belt thickness (t)</li>
+                            <li>Specific weight (γ)</li>
+                            <li>Allowable tension per unit width (F<sub>a</sub>)</li>
+                            <li>Maximum coefficient of friction (f)</li>
+                            <li>Minimum pulley diameter (d<sub>min</sub>)</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Material:</label>
+                        <select id="material" onchange="syncAllInstances('material'); markAsUser('material'); calculate()">
+                            <option value="">Select...</option>
+                            <option value="leather">Leather</option>
+                            <option value="polyamide_f0">Polyamide F-0</option>
+                            <option value="polyamide_f1">Polyamide F-1</option>
+                            <option value="polyamide_f2">Polyamide F-2</option>
+                            <option value="polyamide_a2">Polyamide A-2</option>
+                            <option value="polyamide_a3">Polyamide A-3</option>
+                            <option value="polyamide_a4">Polyamide A-4</option>
+                            <option value="polyamide_a5">Polyamide A-5</option>
+                            <option value="urethane">Urethane</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Thickness (t) [in]:</label>
+                        <input type="number" id="t" step="any" oninput="syncAllInstances('t'); markAsUser('t'); calculate()">
+                        <span class="hint">From Table 17-2</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Specific Weight (γ) [lb/in³]:</label>
+                        <input type="number" id="gamma" step="any" oninput="syncAllInstances('gamma'); markAsUser('gamma'); calculate()">
+                        <span class="hint">From Table 17-2</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Allowable Tension (F<sub>a</sub>) [lbf/in]:</label>
+                        <input type="number" id="Fa" step="any" oninput="syncAllInstances('Fa'); markAsUser('Fa'); calculate()">
+                        <span class="hint">At 600 ft/min, from Table 17-2</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Max Coefficient of Friction (f):</label>
+                        <input type="number" id="f" step="any" oninput="syncAllInstances('f'); markAsUser('f'); calculate()">
+                        <span class="hint">From Table 17-2</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Min Pulley Diameter (d<sub>min</sub>) [in]:</label>
+                        <input type="number" id="dmin" step="any" oninput="syncAllInstances('dmin'); markAsUser('dmin'); calculate()">
+                        <span class="hint">From Table 17-2</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Geometry and Velocity -->
+                <div class="section">
+                    <h2>Step 3: Geometry and Velocity</h2>
+                    <h3>Belt Speed</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V = \frac{\pi d_1 n_1}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>V (ft/min)</label>
+                                <input type="number" id="V" step="any" oninput="syncAllInstances('V'); markAsUser('V'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d<sub>1</sub></label>
+                                <input type="number" id="d1_eq1" step="any" oninput="syncAllInstances('d1_eq1'); markAsUser('d1_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>1</sub></label>
+                                <input type="number" id="n1_eq1" step="any" oninput="syncAllInstances('n1_eq1'); markAsUser('n1_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Velocity Ratio</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR = \frac{d_2}{d_1} = \frac{n_1}{n_2}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR" step="any" oninput="syncAllInstances('VR'); markAsUser('VR'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Wrap Angle Calculation -->
+                <div class="section">
+                    <h2>Step 4: Wrap Angle Calculation</h2>
+                    <h3>Helper Angle</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_{helper} = \sin^{-1}\left(\frac{d_2 - d_1}{2C}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>φ<sub>helper</sub> (deg)</label>
+                                <input type="number" id="phi_helper" step="any" oninput="syncAllInstances('phi_helper'); markAsUser('phi_helper'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Wrap Angles</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_1 = 180° - 2\phi_{helper}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>θ<sub>1</sub> (deg)</label>
+                                <input type="number" id="theta1" step="any" oninput="syncAllInstances('theta1'); markAsUser('theta1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_2 = 180° + 2\phi_{helper}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>θ<sub>2</sub> (deg)</label>
+                                <input type="number" id="theta2" step="any" oninput="syncAllInstances('theta2'); markAsUser('theta2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Design Wrap Angle (radians)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi = \frac{\theta \times \pi}{180}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>φ (rad)</label>
+                                <input type="number" id="phi" step="any" oninput="syncAllInstances('phi'); markAsUser('phi'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        ℹ️ Using smaller wrap angle (min of θ<sub>1</sub> and θ<sub>2</sub>) for conservative design
+                    </div>
+                </div>
+
+                <!-- Step 5: Belt Weight -->
+                <div class="section">
+                    <h2>Step 5: Belt Weight Calculation</h2>
+                    <div class="input-row">
+                        <label>Belt Width (b) [in]:</label>
+                        <input type="number" id="b" step="any" oninput="syncAllInstances('b'); markAsUser('b'); calculate()">
+                        <span class="hint">Initial guess or solved</span>
+                    </div>
+
+                    <h3>Weight per Foot</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$w = 12 \gamma b t$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>w (lb/ft)</label>
+                                <input type="number" id="w" step="any" oninput="syncAllInstances('w'); markAsUser('w'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>γ</label>
+                                <input type="number" id="gamma_eq1" step="any" oninput="syncAllInstances('gamma_eq1'); markAsUser('gamma_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>b</label>
+                                <input type="number" id="b_eq1" step="any" oninput="syncAllInstances('b_eq1'); markAsUser('b_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>t</label>
+                                <input type="number" id="t_eq1" step="any" oninput="syncAllInstances('t_eq1'); markAsUser('t_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Centrifugal Tension -->
+                <div class="section">
+                    <h2>Step 6: Centrifugal Tension</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_c = \frac{w}{32.17} \left(\frac{V}{60}\right)^2$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>c</sub> (lbf)</label>
+                                <input type="number" id="Fc" step="any" oninput="syncAllInstances('Fc'); markAsUser('Fc'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Correction Factors -->
+                <div class="section">
+                    <h2>Step 7: Correction Factors</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong>:
+                        <ul>
+                            <li>C<sub>P</sub>: Pulley correction factor from Table 17-4 (based on small pulley diameter and material)</li>
+                            <li>C<sub>V</sub>: Velocity correction factor from graph (for leather) or 1.0 for polyamide/urethane</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Pulley Correction Factor (C<sub>P</sub>):</label>
+                        <input type="number" id="CP" step="any" oninput="syncAllInstances('CP'); markAsUser('CP'); calculate()">
+                        <span class="hint">From Table 17-4</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Velocity Correction Factor (C<sub>V</sub>):</label>
+                        <input type="number" id="CV" step="any" oninput="syncAllInstances('CV'); markAsUser('CV'); calculate()">
+                        <span class="hint">From graph or 1.0</span>
+                    </div>
+
+                    <h3>Allowable Tension</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{1a} = b \times F_a \times C_P \times C_V$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>1a</sub> (lbf)</label>
+                                <input type="number" id="F1a" step="any" oninput="syncAllInstances('F1a'); markAsUser('F1a'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>b</label>
+                                <input type="number" id="b_eq2" step="any" oninput="syncAllInstances('b_eq2'); markAsUser('b_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F<sub>a</sub></label>
+                                <input type="number" id="Fa_eq1" step="any" oninput="syncAllInstances('Fa_eq1'); markAsUser('Fa_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>P</sub></label>
+                                <input type="number" id="CP_eq1" step="any" oninput="syncAllInstances('CP_eq1'); markAsUser('CP_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>V</sub></label>
+                                <input type="number" id="CV_eq1" step="any" oninput="syncAllInstances('CV_eq1'); markAsUser('CV_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 8: Tension Analysis -->
+                <div class="section">
+                    <h2>Step 8: Tension Analysis</h2>
+                    <h3>Transmitted Torque</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T = \frac{63025 H_d}{n_1}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T (lbf·in)</label>
+                                <input type="number" id="T" step="any" oninput="syncAllInstances('T'); markAsUser('T'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>d</sub></label>
+                                <input type="number" id="Hd_eq2" step="any" oninput="syncAllInstances('Hd_eq2'); markAsUser('Hd_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>n<sub>1</sub></label>
+                                <input type="number" id="n1_eq2" step="any" oninput="syncAllInstances('n1_eq2'); markAsUser('n1_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Operating Tensions</h3>
+                    <div class="input-row">
+                        <label>Taut-side Tension (F<sub>1</sub>) [lbf]:</label>
+                        <input type="number" id="F1" step="any" oninput="syncAllInstances('F1'); markAsUser('F1'); calculate()">
+                        <span class="hint">Can set F1 = F1a for design limit</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Slack-side Tension (F<sub>2</sub>) [lbf]:</label>
+                        <input type="number" id="F2" step="any" oninput="syncAllInstances('F2'); markAsUser('F2'); calculate()">
+                    </div>
+
+                    <h3>Initial Tension</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_i = \frac{(F_1 + F_2)}{2} - F_c$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>i</sub> (lbf)</label>
+                                <input type="number" id="Fi" step="any" oninput="syncAllInstances('Fi'); markAsUser('Fi'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>F<sub>1</sub></label>
+                                <input type="number" id="F1_eq1" step="any" oninput="syncAllInstances('F1_eq1'); markAsUser('F1_eq1'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>F<sub>2</sub></label>
+                                <input type="number" id="F2_eq1" step="any" oninput="syncAllInstances('F2_eq1'); markAsUser('F2_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        ℹ️ These equations may require iterative solution. Typically set F<sub>1</sub> = F<sub>1a</sub>, then solve for F<sub>2</sub>.
+                    </div>
+                </div>
+
+                <!-- Step 9: Friction Verification -->
+                <div class="section">
+                    <h2>Step 9: Friction Verification</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$f' = \frac{1}{\phi} \ln\left(\frac{F_{1a} - F_c}{F_2 - F_c}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>f'</label>
+                                <input type="number" id="f_prime" step="any" oninput="syncAllInstances('f_prime'); markAsUser('f_prime'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="warning-box">
+                        ✅ <strong>Validation:</strong> f' must be < f. If not, adjust belt width or center distance.
+                    </div>
+                </div>
+
+                <!-- Step 10: Belt Sag and Final Verification -->
+                <div class="section">
+                    <h2>Step 10: Belt Sag and Final Verification</h2>
+                    <h3>Belt Sag</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{dip} = \frac{C^2 w}{96 F_i}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>dip (in)</label>
+                                <input type="number" id="dip" step="any" oninput="syncAllInstances('dip'); markAsUser('dip'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq1" step="any" oninput="syncAllInstances('C_eq1'); markAsUser('C_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>w</label>
+                                <input type="number" id="w_eq1" step="any" oninput="syncAllInstances('w_eq1'); markAsUser('w_eq1'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>F<sub>i</sub></label>
+                                <input type="number" id="Fi_eq1" step="any" oninput="syncAllInstances('Fi_eq1'); markAsUser('Fi_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Transmitted Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_{transmitted} = \frac{(F_1 - F_2) V}{33000}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>transmitted</sub> (hp)</label>
+                                <input type="number" id="H_transmitted" step="any" oninput="syncAllInstances('H_transmitted'); markAsUser('H_transmitted'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        ✅ <strong>Final Checks:</strong>
+                        <ul>
+                            <li>H<sub>transmitted</sub> ≥ H<sub>d</sub></li>
+                            <li>F<sub>1</sub> ≤ F<sub>1a</sub></li>
+                            <li>f' < f</li>
+                            <li>Belt dip < 2-3% of C (reasonable sag)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="section">
+                    <h2>Power and Torque</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_d = H_{nom} \times K_s \times n_d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>d</sub></label>
+                                <input type="number" id="Hd_genEq1" step="any" oninput="syncAllInstances('Hd_genEq1'); markAsUser('Hd_genEq1'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>nom</sub></label>
+                                <input type="number" id="Hnom_genEq1" step="any" oninput="syncAllInstances('Hnom_genEq1'); markAsUser('Hnom_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>K<sub>s</sub></label>
+                                <input type="number" id="Ks_genEq1" step="any" oninput="syncAllInstances('Ks_genEq1'); markAsUser('Ks_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="nd_genEq1" step="any" oninput="syncAllInstances('nd_genEq1'); markAsUser('nd_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T = \frac{63025 H_d}{n_1}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T</label>
+                                <input type="number" id="T_genEq1" step="any" oninput="syncAllInstances('T_genEq1'); markAsUser('T_genEq1'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>H<sub>d</sub></label>
+                                <input type="number" id="Hd_genEq2" step="any" oninput="syncAllInstances('Hd_genEq2'); markAsUser('Hd_genEq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>n<sub>1</sub></label>
+                                <input type="number" id="n1_genEq1" step="any" oninput="syncAllInstances('n1_genEq1'); markAsUser('n1_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H = \frac{(F_1 - F_2) V}{33000}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H</label>
+                                <input type="number" id="H_transmitted_genEq1" step="any" oninput="syncAllInstances('H_transmitted_genEq1'); markAsUser('H_transmitted_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Kinematics</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V = \frac{\pi d_1 n_1}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_genEq1" step="any" oninput="syncAllInstances('V_genEq1'); markAsUser('V_genEq1'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d<sub>1</sub></label>
+                                <input type="number" id="d1_genEq1" step="any" oninput="syncAllInstances('d1_genEq1'); markAsUser('d1_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>1</sub></label>
+                                <input type="number" id="n1_genEq2" step="any" oninput="syncAllInstances('n1_genEq2'); markAsUser('n1_genEq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR = \frac{d_2}{d_1} = \frac{n_1}{n_2}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR_genEq1" step="any" oninput="syncAllInstances('VR_genEq1'); markAsUser('VR_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Geometry</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi_{helper} = \sin^{-1}\left(\frac{d_2 - d_1}{2C}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>φ<sub>helper</sub></label>
+                                <input type="number" id="phi_helper_genEq1" step="any" oninput="syncAllInstances('phi_helper_genEq1'); markAsUser('phi_helper_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_1 = 180° - 2\phi_{helper}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>θ<sub>1</sub></label>
+                                <input type="number" id="theta1_genEq1" step="any" oninput="syncAllInstances('theta1_genEq1'); markAsUser('theta1_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\theta_2 = 180° + 2\phi_{helper}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>θ<sub>2</sub></label>
+                                <input type="number" id="theta2_genEq1" step="any" oninput="syncAllInstances('theta2_genEq1'); markAsUser('theta2_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\phi = \frac{\theta \pi}{180}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>φ (rad)</label>
+                                <input type="number" id="phi_genEq1" step="any" oninput="syncAllInstances('phi_genEq1'); markAsUser('phi_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Belt Weight & Centrifugal Force</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$w = 12 \gamma b t$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>w</label>
+                                <input type="number" id="w_genEq1" step="any" oninput="syncAllInstances('w_genEq1'); markAsUser('w_genEq1'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>γ</label>
+                                <input type="number" id="gamma_genEq1" step="any" oninput="syncAllInstances('gamma_genEq1'); markAsUser('gamma_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>b</label>
+                                <input type="number" id="b_genEq1" step="any" oninput="syncAllInstances('b_genEq1'); markAsUser('b_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>t</label>
+                                <input type="number" id="t_genEq1" step="any" oninput="syncAllInstances('t_genEq1'); markAsUser('t_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_c = \frac{w}{32.17}\left(\frac{V}{60}\right)^2$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>c</sub></label>
+                                <input type="number" id="Fc_genEq1" step="any" oninput="syncAllInstances('Fc_genEq1'); markAsUser('Fc_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Tensions</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{1a} = b F_a C_P C_V$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>1a</sub></label>
+                                <input type="number" id="F1a_genEq1" step="any" oninput="syncAllInstances('F1a_genEq1'); markAsUser('F1a_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_i = \frac{F_1 + F_2}{2} - F_c$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>i</sub></label>
+                                <input type="number" id="Fi_genEq1" step="any" oninput="syncAllInstances('Fi_genEq1'); markAsUser('Fi_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Friction & Belt Sag</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$f' = \frac{1}{\phi}\ln\left(\frac{F_{1a} - F_c}{F_2 - F_c}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>f'</label>
+                                <input type="number" id="f_prime_genEq1" step="any" oninput="syncAllInstances('f_prime_genEq1'); markAsUser('f_prime_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{dip} = \frac{C^2 w}{96 F_i}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>dip</label>
+                                <input type="number" id="dip_genEq1" step="any" oninput="syncAllInstances('dip_genEq1'); markAsUser('dip_genEq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>All Variables</h2>
+                    <table class="variables-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Value</th>
+                                <th>Unit</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="var-category">
+                                <td colspan="5">User Inputs</td>
+                            </tr>
+                            <tr>
+                                <td>H<sub>nom</sub></td>
+                                <td>Nominal Power</td>
+                                <td><input type="number" id="var_Hnom" step="any" oninput="syncAllInstances('var_Hnom'); markAsUser('var_Hnom'); calculate()"></td>
+                                <td>hp</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>K<sub>s</sub></td>
+                                <td>Service Factor</td>
+                                <td><input type="number" id="var_Ks" step="any" oninput="syncAllInstances('var_Ks'); markAsUser('var_Ks'); calculate()"></td>
+                                <td>-</td>
+                                <td>User Input/Table</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>d</sub></td>
+                                <td>Design Safety Factor</td>
+                                <td><input type="number" id="var_nd" step="any" oninput="syncAllInstances('var_nd'); markAsUser('var_nd'); calculate()"></td>
+                                <td>-</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>1</sub></td>
+                                <td>Driver Pulley Speed</td>
+                                <td><input type="number" id="var_n1" step="any" oninput="syncAllInstances('var_n1'); markAsUser('var_n1'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>2</sub></td>
+                                <td>Driven Pulley Speed</td>
+                                <td><input type="number" id="var_n2" step="any" oninput="syncAllInstances('var_n2'); markAsUser('var_n2'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>d<sub>1</sub></td>
+                                <td>Driver Pulley Diameter</td>
+                                <td><input type="number" id="var_d1" step="any" oninput="syncAllInstances('var_d1'); markAsUser('var_d1'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>d<sub>2</sub></td>
+                                <td>Driven Pulley Diameter</td>
+                                <td><input type="number" id="var_d2" step="any" oninput="syncAllInstances('var_d2'); markAsUser('var_d2'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>Center Distance</td>
+                                <td><input type="number" id="var_C" step="any" oninput="syncAllInstances('var_C'); markAsUser('var_C'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>b</td>
+                                <td>Belt Width</td>
+                                <td><input type="number" id="var_b" step="any" oninput="syncAllInstances('var_b'); markAsUser('var_b'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr class="var-category">
+                                <td colspan="5">Table Lookups</td>
+                            </tr>
+                            <tr>
+                                <td>t</td>
+                                <td>Belt Thickness</td>
+                                <td><input type="number" id="var_t" step="any" oninput="syncAllInstances('var_t'); markAsUser('var_t'); calculate()"></td>
+                                <td>in</td>
+                                <td>Table 17-2</td>
+                            </tr>
+                            <tr>
+                                <td>γ</td>
+                                <td>Specific Weight</td>
+                                <td><input type="number" id="var_gamma" step="any" oninput="syncAllInstances('var_gamma'); markAsUser('var_gamma'); calculate()"></td>
+                                <td>lb/in³</td>
+                                <td>Table 17-2</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>a</sub></td>
+                                <td>Allowable Tension</td>
+                                <td><input type="number" id="var_Fa" step="any" oninput="syncAllInstances('var_Fa'); markAsUser('var_Fa'); calculate()"></td>
+                                <td>lbf/in</td>
+                                <td>Table 17-2</td>
+                            </tr>
+                            <tr>
+                                <td>f</td>
+                                <td>Max Coefficient of Friction</td>
+                                <td><input type="number" id="var_f" step="any" oninput="syncAllInstances('var_f'); markAsUser('var_f'); calculate()"></td>
+                                <td>-</td>
+                                <td>Table 17-2</td>
+                            </tr>
+                            <tr>
+                                <td>C<sub>P</sub></td>
+                                <td>Pulley Correction Factor</td>
+                                <td><input type="number" id="var_CP" step="any" oninput="syncAllInstances('var_CP'); markAsUser('var_CP'); calculate()"></td>
+                                <td>-</td>
+                                <td>Table 17-4</td>
+                            </tr>
+                            <tr>
+                                <td>C<sub>V</sub></td>
+                                <td>Velocity Correction Factor</td>
+                                <td><input type="number" id="var_CV" step="any" oninput="syncAllInstances('var_CV'); markAsUser('var_CV'); calculate()"></td>
+                                <td>-</td>
+                                <td>Graph</td>
+                            </tr>
+                            <tr class="var-category">
+                                <td colspan="5">Calculated</td>
+                            </tr>
+                            <tr>
+                                <td>H<sub>d</sub></td>
+                                <td>Design Power</td>
+                                <td><input type="number" id="var_Hd" step="any" oninput="syncAllInstances('var_Hd'); markAsUser('var_Hd'); calculate()"></td>
+                                <td>hp</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>V</td>
+                                <td>Belt Speed</td>
+                                <td><input type="number" id="var_V" step="any" oninput="syncAllInstances('var_V'); markAsUser('var_V'); calculate()"></td>
+                                <td>ft/min</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>VR</td>
+                                <td>Velocity Ratio</td>
+                                <td><input type="number" id="var_VR" step="any" oninput="syncAllInstances('var_VR'); markAsUser('var_VR'); calculate()"></td>
+                                <td>-</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>w</td>
+                                <td>Belt Weight per Foot</td>
+                                <td><input type="number" id="var_w" step="any" oninput="syncAllInstances('var_w'); markAsUser('var_w'); calculate()"></td>
+                                <td>lb/ft</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>c</sub></td>
+                                <td>Centrifugal Tension</td>
+                                <td><input type="number" id="var_Fc" step="any" oninput="syncAllInstances('var_Fc'); markAsUser('var_Fc'); calculate()"></td>
+                                <td>lbf</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>1a</sub></td>
+                                <td>Allowable Taut-side Tension</td>
+                                <td><input type="number" id="var_F1a" step="any" oninput="syncAllInstances('var_F1a'); markAsUser('var_F1a'); calculate()"></td>
+                                <td>lbf</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>T</td>
+                                <td>Transmitted Torque</td>
+                                <td><input type="number" id="var_T" step="any" oninput="syncAllInstances('var_T'); markAsUser('var_T'); calculate()"></td>
+                                <td>lbf·in</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>1</sub></td>
+                                <td>Taut-side Tension</td>
+                                <td><input type="number" id="var_F1" step="any" oninput="syncAllInstances('var_F1'); markAsUser('var_F1'); calculate()"></td>
+                                <td>lbf</td>
+                                <td>User/Equation</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>2</sub></td>
+                                <td>Slack-side Tension</td>
+                                <td><input type="number" id="var_F2" step="any" oninput="syncAllInstances('var_F2'); markAsUser('var_F2'); calculate()"></td>
+                                <td>lbf</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>i</sub></td>
+                                <td>Initial Tension</td>
+                                <td><input type="number" id="var_Fi" step="any" oninput="syncAllInstances('var_Fi'); markAsUser('var_Fi'); calculate()"></td>
+                                <td>lbf</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>f'</td>
+                                <td>Required Friction</td>
+                                <td><input type="number" id="var_f_prime" step="any" oninput="syncAllInstances('var_f_prime'); markAsUser('var_f_prime'); calculate()"></td>
+                                <td>-</td>
+                                <td>Equation</td>
+                            </tr>
+                            <tr>
+                                <td>dip</td>
+                                <td>Belt Sag</td>
+                                <td><input type="number" id="var_dip" step="any" oninput="syncAllInstances('var_dip'); markAsUser('var_dip'); calculate()"></td>
+                                <td>in</td>
+                                <td>Equation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetCalculator()">🔄 Reset All Values</button>
+        </div>
+    </div>
+
+    <script>
+        // Variable Instance Map
+        const varInstanceMap = {
+            Hnom: ['Hnom', 'Hnom_eq1', 'Hnom_genEq1', 'var_Hnom'],
+            Ks: ['Ks', 'Ks_eq1', 'Ks_genEq1', 'var_Ks'],
+            nd: ['nd', 'nd_eq1', 'nd_genEq1', 'var_nd'],
+            n1: ['n1', 'n1_eq1', 'n1_eq2', 'n1_genEq1', 'n1_genEq2', 'var_n1'],
+            n2: ['n2', 'var_n2'],
+            d1: ['d1', 'd1_eq1', 'd1_genEq1', 'var_d1'],
+            d2: ['d2', 'var_d2'],
+            C: ['C', 'C_eq1', 'var_C'],
+            b: ['b', 'b_eq1', 'b_eq2', 'b_genEq1', 'var_b'],
+            t: ['t', 't_eq1', 't_genEq1', 'var_t'],
+            gamma: ['gamma', 'gamma_eq1', 'gamma_genEq1', 'var_gamma'],
+            Fa: ['Fa', 'Fa_eq1', 'var_Fa'],
+            f: ['f', 'var_f'],
+            dmin: ['dmin'],
+            CP: ['CP', 'CP_eq1', 'var_CP'],
+            CV: ['CV', 'CV_eq1', 'var_CV'],
+            Hd: ['Hd', 'Hd_eq2', 'Hd_genEq1', 'Hd_genEq2', 'var_Hd'],
+            V: ['V', 'V_genEq1', 'var_V'],
+            VR: ['VR', 'VR_genEq1', 'var_VR'],
+            phi_helper: ['phi_helper', 'phi_helper_genEq1'],
+            theta1: ['theta1', 'theta1_genEq1'],
+            theta2: ['theta2', 'theta2_genEq1'],
+            phi: ['phi', 'phi_genEq1'],
+            w: ['w', 'w_eq1', 'w_genEq1', 'var_w'],
+            Fc: ['Fc', 'Fc_genEq1', 'var_Fc'],
+            F1a: ['F1a', 'F1a_genEq1', 'var_F1a'],
+            T: ['T', 'T_genEq1', 'var_T'],
+            F1: ['F1', 'F1_eq1', 'var_F1'],
+            F2: ['F2', 'F2_eq1', 'var_F2'],
+            Fi: ['Fi', 'Fi_eq1', 'Fi_genEq1', 'var_Fi'],
+            f_prime: ['f_prime', 'f_prime_genEq1', 'var_f_prime'],
+            dip: ['dip', 'dip_genEq1', 'var_dip'],
+            H_transmitted: ['H_transmitted', 'H_transmitted_genEq1']
+        };
+
+        let userModified = new Set();
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const value = document.getElementById(changedId).value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        function getBaseVariable(id) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(id)) {
+                    return baseVar;
+                }
+            }
+            return null;
+        }
+
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userModified.add(baseVar);
+            }
+        }
+
+        function getValue(id) {
+            const elem = document.getElementById(id);
+            return elem ? parseFloat(elem.value) || 0 : 0;
+        }
+
+        function setValue(id, value) {
+            const elem = document.getElementById(id);
+            if (elem && !isNaN(value) && isFinite(value)) {
+                elem.value = value.toFixed(6);
+                syncAllInstances(id);
+            }
+        }
+
+        function calculate() {
+            // Hd = Hnom * Ks * nd
+            if (!userModified.has('Hd') && getValue('Hnom') && getValue('Ks') && getValue('nd')) {
+                setValue('Hd', getValue('Hnom') * getValue('Ks') * getValue('nd'));
+            }
+
+            // V = π * d1 * n1 / 12
+            if (!userModified.has('V') && getValue('d1') && getValue('n1')) {
+                setValue('V', (Math.PI * getValue('d1') * getValue('n1')) / 12);
+            }
+
+            // VR = d2/d1 or n1/n2
+            if (!userModified.has('VR')) {
+                if (getValue('d2') && getValue('d1')) {
+                    setValue('VR', getValue('d2') / getValue('d1'));
+                } else if (getValue('n1') && getValue('n2')) {
+                    setValue('VR', getValue('n1') / getValue('n2'));
+                }
+            }
+
+            // phi_helper = arcsin((d2-d1)/(2*C))
+            if (!userModified.has('phi_helper') && getValue('d2') && getValue('d1') && getValue('C')) {
+                const arg = (getValue('d2') - getValue('d1')) / (2 * getValue('C'));
+                if (Math.abs(arg) <= 1) {
+                    setValue('phi_helper', Math.asin(arg) * (180 / Math.PI));
+                }
+            }
+
+            // theta1 = 180 - 2*phi_helper
+            if (!userModified.has('theta1') && getValue('phi_helper')) {
+                setValue('theta1', 180 - 2 * getValue('phi_helper'));
+            }
+
+            // theta2 = 180 + 2*phi_helper
+            if (!userModified.has('theta2') && getValue('phi_helper')) {
+                setValue('theta2', 180 + 2 * getValue('phi_helper'));
+            }
+
+            // phi = theta * π / 180 (use smaller angle)
+            if (!userModified.has('phi') && getValue('theta1') && getValue('theta2')) {
+                const theta = Math.min(getValue('theta1'), getValue('theta2'));
+                setValue('phi', (theta * Math.PI) / 180);
+            }
+
+            // w = 12 * gamma * b * t
+            if (!userModified.has('w') && getValue('gamma') && getValue('b') && getValue('t')) {
+                setValue('w', 12 * getValue('gamma') * getValue('b') * getValue('t'));
+            }
+
+            // Fc = (w/32.17) * (V/60)²
+            if (!userModified.has('Fc') && getValue('w') && getValue('V')) {
+                setValue('Fc', (getValue('w') / 32.17) * Math.pow(getValue('V') / 60, 2));
+            }
+
+            // F1a = b * Fa * CP * CV
+            if (!userModified.has('F1a') && getValue('b') && getValue('Fa') && getValue('CP') && getValue('CV')) {
+                setValue('F1a', getValue('b') * getValue('Fa') * getValue('CP') * getValue('CV'));
+            }
+
+            // T = 63025 * Hd / n1
+            if (!userModified.has('T') && getValue('Hd') && getValue('n1')) {
+                setValue('T', (63025 * getValue('Hd')) / getValue('n1'));
+            }
+
+            // Fi = (F1 + F2)/2 - Fc
+            if (!userModified.has('Fi') && getValue('F1') && getValue('F2') && getValue('Fc')) {
+                setValue('Fi', ((getValue('F1') + getValue('F2')) / 2) - getValue('Fc'));
+            }
+
+            // f' = (1/phi) * ln((F1a - Fc)/(F2 - Fc))
+            if (!userModified.has('f_prime') && getValue('phi') && getValue('F1a') && getValue('F2') && getValue('Fc')) {
+                const num = getValue('F1a') - getValue('Fc');
+                const den = getValue('F2') - getValue('Fc');
+                if (num > 0 && den > 0) {
+                    setValue('f_prime', (1 / getValue('phi')) * Math.log(num / den));
+                }
+            }
+
+            // dip = (C² * w) / (96 * Fi)
+            if (!userModified.has('dip') && getValue('C') && getValue('w') && getValue('Fi')) {
+                setValue('dip', (Math.pow(getValue('C'), 2) * getValue('w')) / (96 * getValue('Fi')));
+            }
+
+            // H_transmitted = (F1 - F2) * V / 33000
+            if (!userModified.has('H_transmitted') && getValue('F1') && getValue('F2') && getValue('V')) {
+                setValue('H_transmitted', ((getValue('F1') - getValue('F2')) * getValue('V')) / 33000);
+            }
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function saveSession() {
+            const data = {};
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                const firstInstance = instances[0];
+                const elem = document.getElementById(firstInstance);
+                if (elem) {
+                    data[baseVar] = elem.value;
+                }
+            }
+            localStorage.setItem('fizzFlatBeltSession', JSON.stringify(data));
+            alert('Session saved! ✓');
+        }
+
+        function loadSession() {
+            const data = JSON.parse(localStorage.getItem('fizzFlatBeltSession'));
+            if (data) {
+                for (const [baseVar, value] of Object.entries(data)) {
+                    if (varInstanceMap[baseVar]) {
+                        varInstanceMap[baseVar].forEach(id => {
+                            const elem = document.getElementById(id);
+                            if (elem) elem.value = value;
+                        });
+                    }
+                }
+                calculate();
+                alert('Session loaded! ✓');
+            } else {
+                alert('No saved session found.');
+            }
+        }
+
+        function resetCalculator() {
+            if (confirm('Reset all values? This cannot be undone.')) {
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                userModified.clear();
+                alert('Calculator reset! ✓');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const savedData = localStorage.getItem('fizzFlatBeltSession');
+            if (savedData) {
+                loadSession();
+            }
+        });
+    </script>
+</body>
+</html>

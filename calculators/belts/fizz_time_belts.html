@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timing Belt Design Calculator (Fizz Guide)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 90vh;
+            border: none;
+            border-radius: 8px;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 150px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 200px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .var-category {
+            background: #e3f2fd;
+            font-weight: 600;
+            color: #1976d2;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .save-btn, .load-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover, .load-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <embed src="../../documents/belts/Mech_325_Bible_Fizz-time_belts.pdf" type="application/pdf">
+        </div>
+        <div class="calculator-column">
+            <h1>Timing Belt Design Calculator (Fizz Guide)</h1>
+            <div class="info-box">
+                ⚙️ Following Mott's methodology for GT-style timing belt (synchronous belt) design. Includes service factor, belt pitch selection, sprocket combinations, belt specifications, and speed validation.
+            </div>
+
+            <!-- Session Controls -->
+            <div class="controls">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="load-btn" onclick="loadSession()">📂 Load Session</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Design Power Calculation -->
+                <div class="section">
+                    <h2>Step 1: Design Power Calculation</h2>
+                    <div class="info-box">
+                        📊 Select service factor from Table 7-8 based on driven machine type and motor type
+                    </div>
+                    <div class="input-row">
+                        <label>Rated Power (P<sub>rated</sub>) [hp]:</label>
+                        <input type="number" id="Prated" step="any" oninput="syncAllInstances('Prated'); markAsUser('Prated'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Service Factor (SF):</label>
+                        <input type="number" id="SF" step="any" oninput="syncAllInstances('SF'); markAsUser('SF'); calculate()">
+                        <span class="hint">From Table 7-8</span>
+                    </div>
+
+                    <h3>Design Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P_{des} = P_{rated} \times SF$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P<sub>des</sub> (hp)</label>
+                                <input type="number" id="Pdes" step="any" oninput="syncAllInstances('Pdes'); markAsUser('Pdes'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P<sub>rated</sub></label>
+                                <input type="number" id="Prated_eq1" step="any" oninput="syncAllInstances('Prated_eq1'); markAsUser('Prated_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>SF</label>
+                                <input type="number" id="SF_eq1" step="any" oninput="syncAllInstances('SF_eq1'); markAsUser('SF_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Belt Pitch Selection -->
+                <div class="section">
+                    <h2>Step 2: Belt Pitch Selection</h2>
+                    <div class="warning-box">
+                        📈 <strong>MANUAL LOOKUP REQUIRED</strong> - Use GT style belt pitch selection graph (page 20):
+                        <ul>
+                            <li>X-axis: Design horsepower (P<sub>des</sub>)</li>
+                            <li>Y-axis: RPM of faster shaft</li>
+                            <li>Find intersection region: 3mm, 5mm, 8mm, 14mm, or 20mm</li>
+                            <li>Note: "You're probably going to get an 8mm pitch" - most tables use 8mm</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>RPM of Faster Shaft [rpm]:</label>
+                        <input type="number" id="RPM_faster_shaft" step="any" oninput="syncAllInstances('RPM_faster_shaft'); markAsUser('RPM_faster_shaft'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Pitch [mm]:</label>
+                        <select id="pitch" onchange="syncAllInstances('pitch'); markAsUser('pitch'); calculate()">
+                            <option value="">Select...</option>
+                            <option value="3">3mm</option>
+                            <option value="5">5mm</option>
+                            <option value="8">8mm (Most common)</option>
+                            <option value="14">14mm</option>
+                            <option value="20">20mm</option>
+                        </select>
+                        <span class="hint">From graph</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Velocity Ratio -->
+                <div class="section">
+                    <h2>Step 3: Velocity Ratio</h2>
+                    <div class="input-row">
+                        <label>Driving Sprocket Speed (n<sub>driving</sub>) [rpm]:</label>
+                        <input type="number" id="ndriving" step="any" oninput="syncAllInstances('ndriving'); markAsUser('ndriving'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Sprocket Speed (n<sub>driven</sub>) [rpm]:</label>
+                        <input type="number" id="ndriven" step="any" oninput="syncAllInstances('ndriven'); markAsUser('ndriven'); calculate()">
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR = \frac{n_{driving}}{n_{driven}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR" step="any" oninput="syncAllInstances('VR'); markAsUser('VR'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n<sub>driving</sub></label>
+                                <input type="number" id="ndriving_eq3" step="any" oninput="syncAllInstances('ndriving_eq3'); markAsUser('ndriving_eq3'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>n<sub>driven</sub></label>
+                                <input type="number" id="ndriven_eq3" step="any" oninput="syncAllInstances('ndriven_eq3'); markAsUser('ndriven_eq3'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        Note: VR also equals N<sub>driven</sub> / N<sub>driver</sub>
+                    </div>
+                </div>
+
+                <!-- Step 4: Sprocket Selection -->
+                <div class="section">
+                    <h2>Step 4: Sprocket Selection</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Table 7-4 (Sprockets with 8 mm Belt Pitch):
+                        <ul>
+                            <li>List candidate driver sprocket teeth (N<sub>driver</sub>)</li>
+                            <li>List candidate driven sprocket teeth (N<sub>driven</sub>)</li>
+                            <li>Check that VR = N<sub>driven</sub> / N<sub>driver</sub> matches desired VR</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Driver Sprocket Teeth Candidates:</label>
+                        <input type="text" id="Ndriver_candidates" oninput="syncAllInstances('Ndriver_candidates'); markAsUser('Ndriver_candidates')">
+                        <span class="hint">e.g., "20, 24, 28"</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Sprocket Teeth Candidates:</label>
+                        <input type="text" id="Ndriven_candidates" oninput="syncAllInstances('Ndriven_candidates'); markAsUser('Ndriven_candidates')">
+                        <span class="hint">e.g., "40, 48, 56"</span>
+                    </div>
+                </div>
+
+                <!-- Step 5: Sprocket Elimination -->
+                <div class="section">
+                    <h2>Step 5: Sprocket Elimination - Shaft and Space Constraints</h2>
+
+                    <h3>Sub-step 5a: Bushing and Bore Check</h3>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong>:
+                        <ol>
+                            <li>From Table 7-7: Find bushing size for each driver sprocket option</li>
+                            <li>From Table 7-5: Find max bore for that bushing size</li>
+                            <li>Eliminate sprockets where max_bore ≤ motor_shaft_diameter</li>
+                        </ol>
+                    </div>
+                    <div class="input-row">
+                        <label>Motor Shaft Diameter [in]:</label>
+                        <input type="number" id="motor_shaft_diameter" step="any" oninput="syncAllInstances('motor_shaft_diameter'); markAsUser('motor_shaft_diameter'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Bushing Size (from Table 7-7):</label>
+                        <input type="text" id="bushing_size" oninput="syncAllInstances('bushing_size'); markAsUser('bushing_size')">
+                    </div>
+                    <div class="input-row">
+                        <label>Max Bore (from Table 7-5) [in]:</label>
+                        <input type="number" id="max_bore" step="any" oninput="syncAllInstances('max_bore'); markAsUser('max_bore'); calculate()">
+                    </div>
+                    <div class="info-box">
+                        ✅ Validation: max_bore must be > motor_shaft_diameter
+                    </div>
+
+                    <h3>Sub-step 5b: Diameter Limit Check</h3>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-4:
+                        <ul>
+                            <li>Look up flange diameter for each sprocket option</li>
+                            <li>Eliminate if exceeds space constraints</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Flange Diameter Limit [in]:</label>
+                        <input type="number" id="flange_diameter_limit" step="any" oninput="syncAllInstances('flange_diameter_limit'); markAsUser('flange_diameter_limit'); calculate()">
+                        <span class="hint">Optional constraint</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Driver Flange Diameter (Table 7-4) [in]:</label>
+                        <input type="number" id="flange_diameter_driver" step="any" oninput="syncAllInstances('flange_diameter_driver'); markAsUser('flange_diameter_driver'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Flange Diameter (Table 7-4) [in]:</label>
+                        <input type="number" id="flange_diameter_driven" step="any" oninput="syncAllInstances('flange_diameter_driven'); markAsUser('flange_diameter_driven'); calculate()">
+                    </div>
+
+                    <h3>Sub-step 5c: Final Selection</h3>
+                    <div class="input-row">
+                        <label>Final Driver Sprocket Teeth (N<sub>driver</sub>):</label>
+                        <input type="number" id="Ndriver_final" step="1" oninput="syncAllInstances('Ndriver_final'); markAsUser('Ndriver_final'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Final Driven Sprocket Teeth (N<sub>driven</sub>):</label>
+                        <input type="number" id="Ndriven_final" step="1" oninput="syncAllInstances('Ndriven_final'); markAsUser('Ndriven_final'); calculate()">
+                    </div>
+                </div>
+
+                <!-- Step 6: Pitch Diameter Determination -->
+                <div class="section">
+                    <h2>Step 6: Pitch Diameter Determination</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-4:
+                        <ul>
+                            <li>Find row matching N<sub>driver</sub></li>
+                            <li>Read PD<sub>1</sub> from column matching belt width</li>
+                            <li>Find row matching N<sub>driven</sub></li>
+                            <li>Read PD<sub>2</sub> from column matching belt width</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Driver Pitch Diameter (PD<sub>1</sub>) [in]:</label>
+                        <input type="number" id="PD1" step="any" oninput="syncAllInstances('PD1'); markAsUser('PD1'); calculate()">
+                        <span class="hint">From Table 7-4</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Driven Pitch Diameter (PD<sub>2</sub>) [in]:</label>
+                        <input type="number" id="PD2" step="any" oninput="syncAllInstances('PD2'); markAsUser('PD2'); calculate()">
+                        <span class="hint">From Table 7-4</span>
+                    </div>
+                </div>
+
+                <!-- Step 7: Belt Length Selection -->
+                <div class="section">
+                    <h2>Step 7: Belt Length Selection</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-7 (8-mm Pitch GT Drive Selection Table):
+                        <ul>
+                            <li>Find row matching your driver and driven tooth combination</li>
+                            <li>Look at center distances (CD) for various belt lengths</li>
+                            <li>Select belt with CD in your acceptable range [CD<sub>min</sub>, CD<sub>max</sub>]</li>
+                            <li>Belt designation format: e.g., "800-8MGT", "1040-8MGT"</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Minimum Center Distance (CD<sub>min</sub>) [in]:</label>
+                        <input type="number" id="CD_min" step="any" oninput="syncAllInstances('CD_min'); markAsUser('CD_min'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Maximum Center Distance (CD<sub>max</sub>) [in]:</label>
+                        <input type="number" id="CD_max" step="any" oninput="syncAllInstances('CD_max'); markAsUser('CD_max'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Designation:</label>
+                        <input type="text" id="belt_designation" oninput="syncAllInstances('belt_designation'); markAsUser('belt_designation')">
+                        <span class="hint">e.g., "800-8MGT"</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Actual Center Distance (CD<sub>actual</sub>) [in]:</label>
+                        <input type="number" id="CD_actual" step="any" oninput="syncAllInstances('CD_actual'); markAsUser('CD_actual'); calculate()">
+                        <span class="hint">From Table 7-7</span>
+                    </div>
+                </div>
+
+                <!-- Step 8: Belt Width and Rated Power -->
+                <div class="section">
+                    <h2>Step 8: Belt Width and Rated Power</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-9 or 7-10:
+                        <ul>
+                            <li>Select belt width: 30mm or 50mm</li>
+                            <li>Use Table 7-9 for 30mm, Table 7-10 for 50mm</li>
+                            <li>Row: RPM of faster shaft</li>
+                            <li>Column: Number of teeth on small sprocket and pitch diameter</li>
+                            <li>Read base rated horsepower</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Belt Width [mm]:</label>
+                        <select id="belt_width" onchange="syncAllInstances('belt_width'); markAsUser('belt_width'); calculate()">
+                            <option value="">Select...</option>
+                            <option value="20">20mm</option>
+                            <option value="30">30mm</option>
+                            <option value="50">50mm</option>
+                            <option value="85">85mm</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Rated Power from Table (P<sub>rated,table</sub>) [hp]:</label>
+                        <input type="number" id="Prated_table" step="any" oninput="syncAllInstances('Prated_table'); markAsUser('Prated_table'); calculate()">
+                        <span class="hint">From Table 7-9 or 7-10</span>
+                    </div>
+                </div>
+
+                <!-- Step 9: Belt Length Correction Factor -->
+                <div class="section">
+                    <h2>Step 9: Belt Length Correction Factor</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-11:
+                        <ul>
+                            <li>Find your belt designation (e.g., "800-8MGT")</li>
+                            <li>Read the length correction factor C<sub>L</sub></li>
+                            <li>Typical values range from 0.70 to 1.20</li>
+                        </ul>
+                    </div>
+                    <div class="input-row">
+                        <label>Length Correction Factor (C<sub>L</sub>):</label>
+                        <input type="number" id="CL" step="any" oninput="syncAllInstances('CL'); markAsUser('CL'); calculate()">
+                        <span class="hint">From Table 7-11</span>
+                    </div>
+                </div>
+
+                <!-- Step 10: Adjusted Rated Power -->
+                <div class="section">
+                    <h2>Step 10: Adjusted Rated Power</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P_{adj} = P_{rated,table} \times C_L$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P<sub>adj</sub> (hp)</label>
+                                <input type="number" id="Padj" step="any" oninput="syncAllInstances('Padj'); markAsUser('Padj'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P<sub>rated,table</sub></label>
+                                <input type="number" id="Prated_table_eq10" step="any" oninput="syncAllInstances('Prated_table_eq10'); markAsUser('Prated_table_eq10'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>L</sub></label>
+                                <input type="number" id="CL_eq10" step="any" oninput="syncAllInstances('CL_eq10'); markAsUser('CL_eq10'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        Note: P<sub>adj</sub> may differ from P<sub>des</sub> - verify P<sub>adj</sub> ≥ P<sub>des</sub> for adequate capacity
+                    </div>
+                </div>
+
+                <!-- Step 11: Belt Speed Verification -->
+                <div class="section">
+                    <h2>Step 11: Belt Speed Verification</h2>
+                    <div class="input-row">
+                        <label>Angular Velocity of Driver (ω<sub>1</sub>) [rpm]:</label>
+                        <input type="number" id="omega1" step="any" oninput="syncAllInstances('omega1'); markAsUser('omega1'); calculate()">
+                        <span class="hint">Same as n<sub>driving</sub></span>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$v_{belt} = \frac{\pi \cdot PD_1 \cdot \omega_1}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>v<sub>belt</sub> (ft/min)</label>
+                                <input type="number" id="vbelt" step="any" oninput="syncAllInstances('vbelt'); markAsUser('vbelt'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>PD<sub>1</sub></label>
+                                <input type="number" id="PD1_eq11" step="any" oninput="syncAllInstances('PD1_eq11'); markAsUser('PD1_eq11'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>ω<sub>1</sub></label>
+                                <input type="number" id="omega1_eq11" step="any" oninput="syncAllInstances('omega1_eq11'); markAsUser('omega1_eq11'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="warning-box">
+                        ✅ <strong>Validation:</strong> v<sub>belt</sub> must be ≤ 6500 ft/min. If exceeded, select larger sprockets or different configuration.
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="section">
+                    <h2>Design Power & Kinematics</h2>
+
+                    <h3>EQ1: Design Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P_{des} = P_{rated} \times SF$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P<sub>des</sub> (hp)</label>
+                                <input type="number" id="Pdes_genEq1" step="any" oninput="syncAllInstances('Pdes_genEq1'); markAsUser('Pdes_genEq1'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P<sub>rated</sub></label>
+                                <input type="number" id="Prated_genEq1" step="any" oninput="syncAllInstances('Prated_genEq1'); markAsUser('Prated_genEq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>SF</label>
+                                <input type="number" id="SF_genEq1" step="any" oninput="syncAllInstances('SF_genEq1'); markAsUser('SF_genEq1'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Calculate design power with service factor</p>
+                    </div>
+
+                    <h3>EQ2: Velocity Ratio</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$VR = \frac{n_{driving}}{n_{driven}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>VR</label>
+                                <input type="number" id="VR_genEq2" step="any" oninput="syncAllInstances('VR_genEq2'); markAsUser('VR_genEq2'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n<sub>driving</sub></label>
+                                <input type="number" id="ndriving_genEq2" step="any" oninput="syncAllInstances('ndriving_genEq2'); markAsUser('ndriving_genEq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>n<sub>driven</sub></label>
+                                <input type="number" id="ndriven_genEq2" step="any" oninput="syncAllInstances('ndriven_genEq2'); markAsUser('ndriven_genEq2'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Speed ratio between driver and driven sprockets</p>
+                    </div>
+
+                    <h3>EQ3: Belt Speed</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$v_{belt} = \frac{\pi \cdot PD_1 \cdot \omega_1}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>v<sub>belt</sub> (ft/min)</label>
+                                <input type="number" id="vbelt_genEq3" step="any" oninput="syncAllInstances('vbelt_genEq3'); markAsUser('vbelt_genEq3'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>PD<sub>1</sub></label>
+                                <input type="number" id="PD1_genEq3" step="any" oninput="syncAllInstances('PD1_genEq3'); markAsUser('PD1_genEq3'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>ω<sub>1</sub></label>
+                                <input type="number" id="omega1_genEq3" step="any" oninput="syncAllInstances('omega1_genEq3'); markAsUser('omega1_genEq3'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Belt linear speed (must be ≤ 6500 ft/min)</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Power Calculations</h2>
+
+                    <h3>EQ4: Adjusted Rated Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P_{adj} = P_{rated,table} \times C_L$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P<sub>adj</sub> (hp)</label>
+                                <input type="number" id="Padj_genEq4" step="any" oninput="syncAllInstances('Padj_genEq4'); markAsUser('Padj_genEq4'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P<sub>rated,table</sub></label>
+                                <input type="number" id="Prated_table_genEq4" step="any" oninput="syncAllInstances('Prated_table_genEq4'); markAsUser('Prated_table_genEq4'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>L</sub></label>
+                                <input type="number" id="CL_genEq4" step="any" oninput="syncAllInstances('CL_genEq4'); markAsUser('CL_genEq4'); calculate()">
+                            </div>
+                        </div>
+                        <p style="margin-top:10px; color:#666; font-size:0.9em;">Rated power adjusted for belt length</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Validation Criteria</h2>
+                    <div class="info-box">
+                        <ul>
+                            <li>max_bore > motor_shaft_diameter</li>
+                            <li>flange_diameter ≤ limit (if specified)</li>
+                            <li>v<sub>belt</sub> ≤ 6500 ft/min</li>
+                            <li>P<sub>adj</sub> ≥ P<sub>des</sub> (recommended)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>All Variables</h2>
+                    <table class="variables-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Value</th>
+                                <th>Unit</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="var-category">
+                                <td colspan="5">User Inputs</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>rated</sub></td>
+                                <td>Rated Power</td>
+                                <td><input type="number" id="var_Prated" step="any" oninput="syncAllInstances('var_Prated'); markAsUser('var_Prated'); calculate()"></td>
+                                <td>hp</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>RPM</td>
+                                <td>RPM of Faster Shaft</td>
+                                <td><input type="number" id="var_RPM_faster_shaft" step="any" oninput="syncAllInstances('var_RPM_faster_shaft'); markAsUser('var_RPM_faster_shaft'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>driving</sub></td>
+                                <td>Driving Sprocket Speed</td>
+                                <td><input type="number" id="var_ndriving" step="any" oninput="syncAllInstances('var_ndriving'); markAsUser('var_ndriving'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>driven</sub></td>
+                                <td>Driven Sprocket Speed</td>
+                                <td><input type="number" id="var_ndriven" step="any" oninput="syncAllInstances('var_ndriven'); markAsUser('var_ndriven'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>shaft_dia</td>
+                                <td>Motor Shaft Diameter</td>
+                                <td><input type="number" id="var_motor_shaft_diameter" step="any" oninput="syncAllInstances('var_motor_shaft_diameter'); markAsUser('var_motor_shaft_diameter'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>CD<sub>min</sub></td>
+                                <td>Minimum Center Distance</td>
+                                <td><input type="number" id="var_CD_min" step="any" oninput="syncAllInstances('var_CD_min'); markAsUser('var_CD_min'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>CD<sub>max</sub></td>
+                                <td>Maximum Center Distance</td>
+                                <td><input type="number" id="var_CD_max" step="any" oninput="syncAllInstances('var_CD_max'); markAsUser('var_CD_max'); calculate()"></td>
+                                <td>in</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr>
+                                <td>ω<sub>1</sub></td>
+                                <td>Angular Velocity of Driver</td>
+                                <td><input type="number" id="var_omega1" step="any" oninput="syncAllInstances('var_omega1'); markAsUser('var_omega1'); calculate()"></td>
+                                <td>rpm</td>
+                                <td>User Input</td>
+                            </tr>
+                            <tr class="var-category">
+                                <td colspan="5">Manual Lookups (Tables/Graphs)</td>
+                            </tr>
+                            <tr>
+                                <td>SF</td>
+                                <td>Service Factor</td>
+                                <td><input type="number" id="var_SF" step="any" oninput="syncAllInstances('var_SF'); markAsUser('var_SF'); calculate()"></td>
+                                <td>-</td>
+                                <td>Table 7-8</td>
+                            </tr>
+                            <tr>
+                                <td>pitch</td>
+                                <td>Belt Pitch</td>
+                                <td><input type="number" id="var_pitch" step="any" oninput="syncAllInstances('var_pitch'); markAsUser('var_pitch'); calculate()"></td>
+                                <td>mm</td>
+                                <td>Graph</td>
+                            </tr>
+                            <tr>
+                                <td>bushing</td>
+                                <td>Bushing Size</td>
+                                <td><input type="text" id="var_bushing_size" oninput="syncAllInstances('var_bushing_size'); markAsUser('var_bushing_size')"></td>
+                                <td>-</td>
+                                <td>Table 7-7</td>
+                            </tr>
+                            <tr>
+                                <td>max_bore</td>
+                                <td>Maximum Bore</td>
+                                <td><input type="number" id="var_max_bore" step="any" oninput="syncAllInstances('var_max_bore'); markAsUser('var_max_bore'); calculate()"></td>
+                                <td>in</td>
+                                <td>Table 7-5</td>
+                            </tr>
+                            <tr>
+                                <td>PD<sub>1</sub></td>
+                                <td>Driver Pitch Diameter</td>
+                                <td><input type="number" id="var_PD1" step="any" oninput="syncAllInstances('var_PD1'); markAsUser('var_PD1'); calculate()"></td>
+                                <td>in</td>
+                                <td>Table 7-4</td>
+                            </tr>
+                            <tr>
+                                <td>PD<sub>2</sub></td>
+                                <td>Driven Pitch Diameter</td>
+                                <td><input type="number" id="var_PD2" step="any" oninput="syncAllInstances('var_PD2'); markAsUser('var_PD2'); calculate()"></td>
+                                <td>in</td>
+                                <td>Table 7-4</td>
+                            </tr>
+                            <tr>
+                                <td>belt_des</td>
+                                <td>Belt Designation</td>
+                                <td><input type="text" id="var_belt_designation" oninput="syncAllInstances('var_belt_designation'); markAsUser('var_belt_designation')"></td>
+                                <td>-</td>
+                                <td>Table 7-7</td>
+                            </tr>
+                            <tr>
+                                <td>CD<sub>actual</sub></td>
+                                <td>Actual Center Distance</td>
+                                <td><input type="number" id="var_CD_actual" step="any" oninput="syncAllInstances('var_CD_actual'); markAsUser('var_CD_actual'); calculate()"></td>
+                                <td>in</td>
+                                <td>Table 7-7</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>rated,table</sub></td>
+                                <td>Rated Power from Table</td>
+                                <td><input type="number" id="var_Prated_table" step="any" oninput="syncAllInstances('var_Prated_table'); markAsUser('var_Prated_table'); calculate()"></td>
+                                <td>hp</td>
+                                <td>Tables 7-9/7-10</td>
+                            </tr>
+                            <tr>
+                                <td>C<sub>L</sub></td>
+                                <td>Length Correction Factor</td>
+                                <td><input type="number" id="var_CL" step="any" oninput="syncAllInstances('var_CL'); markAsUser('var_CL'); calculate()"></td>
+                                <td>-</td>
+                                <td>Table 7-11</td>
+                            </tr>
+                            <tr class="var-category">
+                                <td colspan="5">Auto-Calculated</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>des</sub></td>
+                                <td>Design Power</td>
+                                <td><input type="number" id="var_Pdes" step="any" oninput="syncAllInstances('var_Pdes'); markAsUser('var_Pdes'); calculate()"></td>
+                                <td>hp</td>
+                                <td>EQ1</td>
+                            </tr>
+                            <tr>
+                                <td>VR</td>
+                                <td>Velocity Ratio</td>
+                                <td><input type="number" id="var_VR" step="any" oninput="syncAllInstances('var_VR'); markAsUser('var_VR'); calculate()"></td>
+                                <td>-</td>
+                                <td>EQ2</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>adj</sub></td>
+                                <td>Adjusted Rated Power</td>
+                                <td><input type="number" id="var_Padj" step="any" oninput="syncAllInstances('var_Padj'); markAsUser('var_Padj'); calculate()"></td>
+                                <td>hp</td>
+                                <td>EQ4</td>
+                            </tr>
+                            <tr>
+                                <td>v<sub>belt</sub></td>
+                                <td>Belt Speed</td>
+                                <td><input type="number" id="var_vbelt" step="any" oninput="syncAllInstances('var_vbelt'); markAsUser('var_vbelt'); calculate()"></td>
+                                <td>ft/min</td>
+                                <td>EQ3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetCalculator()">🔄 Reset All Values</button>
+        </div>
+    </div>
+
+    <script>
+        // Variable Instance Map - tracks all input IDs for each variable
+        const varInstanceMap = {
+            Prated: ['Prated', 'Prated_eq1', 'Prated_genEq1', 'var_Prated'],
+            SF: ['SF', 'SF_eq1', 'SF_genEq1', 'var_SF'],
+            Pdes: ['Pdes', 'Pdes_genEq1', 'var_Pdes'],
+            RPM_faster_shaft: ['RPM_faster_shaft', 'var_RPM_faster_shaft'],
+            pitch: ['pitch', 'var_pitch'],
+            ndriving: ['ndriving', 'ndriving_eq3', 'ndriving_genEq2', 'var_ndriving'],
+            ndriven: ['ndriven', 'ndriven_eq3', 'ndriven_genEq2', 'var_ndriven'],
+            VR: ['VR', 'VR_genEq2', 'var_VR'],
+            Ndriver_candidates: ['Ndriver_candidates'],
+            Ndriven_candidates: ['Ndriven_candidates'],
+            motor_shaft_diameter: ['motor_shaft_diameter', 'var_motor_shaft_diameter'],
+            bushing_size: ['bushing_size', 'var_bushing_size'],
+            max_bore: ['max_bore', 'var_max_bore'],
+            flange_diameter_limit: ['flange_diameter_limit'],
+            flange_diameter_driver: ['flange_diameter_driver'],
+            flange_diameter_driven: ['flange_diameter_driven'],
+            Ndriver_final: ['Ndriver_final'],
+            Ndriven_final: ['Ndriven_final'],
+            PD1: ['PD1', 'PD1_eq11', 'PD1_genEq3', 'var_PD1'],
+            PD2: ['PD2', 'var_PD2'],
+            CD_min: ['CD_min', 'var_CD_min'],
+            CD_max: ['CD_max', 'var_CD_max'],
+            belt_designation: ['belt_designation', 'var_belt_designation'],
+            CD_actual: ['CD_actual', 'var_CD_actual'],
+            belt_width: ['belt_width'],
+            Prated_table: ['Prated_table', 'Prated_table_eq10', 'Prated_table_genEq4', 'var_Prated_table'],
+            CL: ['CL', 'CL_eq10', 'CL_genEq4', 'var_CL'],
+            Padj: ['Padj', 'Padj_genEq4', 'var_Padj'],
+            omega1: ['omega1', 'omega1_eq11', 'omega1_genEq3', 'var_omega1'],
+            vbelt: ['vbelt', 'vbelt_genEq3', 'var_vbelt']
+        };
+
+        // User-modified variables tracking
+        let userModified = new Set();
+
+        // Sync all instances of a variable
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const element = document.getElementById(changedId);
+            const value = element.value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        // Get base variable name from any instance ID
+        function getBaseVariable(id) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(id)) {
+                    return baseVar;
+                }
+            }
+            return null;
+        }
+
+        // Mark variable as user-modified
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userModified.add(baseVar);
+            }
+        }
+
+        // Get value safely
+        function getValue(id) {
+            const elem = document.getElementById(id);
+            if (!elem) return null;
+
+            // Handle select elements
+            if (elem.tagName === 'SELECT') {
+                return elem.value === '' ? null : parseFloat(elem.value);
+            }
+
+            // Handle number inputs
+            const val = parseFloat(elem.value);
+            return isNaN(val) ? null : val;
+        }
+
+        // Set value safely
+        function setValue(id, value) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar && userModified.has(baseVar)) {
+                return; // Don't overwrite user-modified values
+            }
+
+            const elem = document.getElementById(id);
+            if (elem && value !== null && !isNaN(value) && isFinite(value)) {
+                elem.value = value.toFixed(6);
+                syncAllInstances(id);
+            }
+        }
+
+        // Main calculation function
+        function calculate() {
+            // EQ1: Pdes = Prated × SF
+            const Prated = getValue('Prated');
+            const SF = getValue('SF');
+            if (Prated !== null && SF !== null) {
+                setValue('Pdes', Prated * SF);
+            }
+
+            // EQ2: VR = ndriving / ndriven
+            const ndriving = getValue('ndriving');
+            const ndriven = getValue('ndriven');
+            if (ndriving !== null && ndriven !== null && ndriven !== 0) {
+                setValue('VR', ndriving / ndriven);
+            }
+
+            // EQ3: Padj = Prated_table × CL
+            const Prated_table = getValue('Prated_table');
+            const CL = getValue('CL');
+            if (Prated_table !== null && CL !== null) {
+                setValue('Padj', Prated_table * CL);
+            }
+
+            // EQ4: vbelt = π × PD1 × omega1 / 12
+            const PD1 = getValue('PD1');
+            const omega1 = getValue('omega1');
+            if (PD1 !== null && omega1 !== null) {
+                const vbelt = (Math.PI * PD1 * omega1) / 12;
+                setValue('vbelt', vbelt);
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Re-render MathJax
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        }
+
+        // Session Management
+        function saveSession() {
+            const data = {};
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                const firstInstance = instances[0];
+                const elem = document.getElementById(firstInstance);
+                if (elem && elem.value !== '') {
+                    data[baseVar] = elem.value;
+                }
+            }
+            localStorage.setItem('fizzTimeBeltSession', JSON.stringify(data));
+            alert('Session saved! ✓');
+        }
+
+        function loadSession() {
+            const savedData = localStorage.getItem('fizzTimeBeltSession');
+            if (!savedData) {
+                alert('No saved session found.');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(savedData);
+                for (const [baseVar, value] of Object.entries(data)) {
+                    if (varInstanceMap[baseVar]) {
+                        varInstanceMap[baseVar].forEach(id => {
+                            const elem = document.getElementById(id);
+                            if (elem) {
+                                elem.value = value;
+                            }
+                        });
+                    }
+                }
+                calculate();
+                alert('Session loaded! ✓');
+            } catch (e) {
+                console.error('Error loading session:', e);
+                alert('Error loading session.');
+            }
+        }
+
+        function resetCalculator() {
+            if (confirm('Reset all values? This cannot be undone.')) {
+                document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                userModified.clear();
+                localStorage.removeItem('fizzTimeBeltSession');
+                alert('Calculator reset! ✓');
+            }
+        }
+
+        // Auto-load session on page load
+        window.addEventListener('load', () => {
+            const savedData = localStorage.getItem('fizzTimeBeltSession');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    for (const [baseVar, value] of Object.entries(data)) {
+                        if (varInstanceMap[baseVar]) {
+                            varInstanceMap[baseVar].forEach(id => {
+                                const elem = document.getElementById(id);
+                                if (elem) elem.value = value;
+                            });
+                        }
+                    }
+                    calculate();
+                } catch (e) {
+                    console.error('Error auto-loading session:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
