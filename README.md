@@ -10,4 +10,5 @@ Future Plans:
 - Adding support for Belts
 - Unit conversion guide
 - Power Fluids and all other units coming up later
+- Interactivity with tables and graphs
 - Maybe an offline LLM, but generative AI is not allowed in the exams so idk how helpful it will be
