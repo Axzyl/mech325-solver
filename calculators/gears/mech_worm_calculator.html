@@ -30,11 +30,45 @@
             overflow-y: auto;
             max-height: 95vh;
         }
-        .pdf-column embed {
+        .pdf-container {
+            position: relative;
             width: 100%;
-            height: 90vh;
-            border: none;
-            border-radius: 8px;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
         }
         .calculator-column {
             flex: 1;
@@ -144,6 +178,13 @@
             display: flex;
             gap: 10px;
             margin: 25px 0;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         button {
             flex: 1;
@@ -155,12 +196,32 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
         .reset-btn {
             background: #dc3545;
             color: white;
         }
         .reset-btn:hover {
             background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
         }
         .summary-section {
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
@@ -223,6 +284,17 @@
             margin: 15px 0;
             border-radius: 5px;
         }
+        .warning-box a,
+        .info-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .warning-box a:hover,
+        .info-box a:hover {
+            color: #004499;
+        }
         .input-row {
             display: flex;
             align-items: center;
@@ -280,10 +352,24 @@
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/gears/worm.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/gears/worm.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Worm Gear Calculator</h1>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
 
             <!-- Tab Navigation -->
             <div class="tabs">
@@ -2386,7 +2472,99 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully! ✓');
+        }
+
+        // PDF Crosshairs Feature
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             MathJax.typesetPromise();
         });

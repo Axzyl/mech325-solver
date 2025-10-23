@@ -30,11 +30,12 @@
             overflow-y: auto;
             max-height: 95vh;
         }
-        .pdf-column embed {
+        .pdf-column embed,
+        .pdf-column iframe {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -254,15 +255,144 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+
+        /* PDF Navigation Link Styling */
+        .info-box a,
+        .warning-box a,
+        .note a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .info-box a:hover,
+        .warning-box a:hover,
+        .note a:hover {
+            color: #004499;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/gears/fizz_bevel.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/gears/fizz_bevel.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Bevel Gear Design Calculator</h1>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
 
             <!-- Tab Navigation -->
             <div class="tabs">
@@ -285,7 +415,7 @@
                     <label>K<sub>O</sub> - Shock Factor:</label>
                     <input type="number" id="KO" step="any" oninput="syncAllInstances('KO'); markAsUser('KO'); calculate()">
                 </div>
-                <div class="note">Look up K<sub>O</sub> from Table 8-1 in PDF</div>
+                <div class="note">📊 Look up K<sub>O</sub> from <a href="#" onclick="goToPage(1); return false;">Table 8-1</a> in PDF</div>
                 <div class="input-row">
                     <label>n<sub>P</sub> - Pinion Speed (rpm):</label>
                     <input type="number" id="nP" step="any" oninput="syncAllInstances('nP'); markAsUser('nP'); calculate()">
@@ -302,7 +432,7 @@
                     <label>P<sub>d</sub> - Diametral Pitch:</label>
                     <input type="number" id="Pd" step="any" oninput="syncAllInstances('Pd'); markAsUser('Pd'); calculate()">
                 </div>
-                <div class="note">Choose standard P<sub>d</sub> from Table 8-2 in PDF</div>
+                <div class="note">📊 Choose standard P<sub>d</sub> from <a href="#" onclick="goToPage(2); return false;">Table 8-2</a> in PDF</div>
                 <div class="input-row">
                     <label>F - Face Width (in):</label>
                     <input type="number" id="F" step="any" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
@@ -442,12 +572,12 @@
                     <label>Q<sub>v</sub> - Quality Number:</label>
                     <input type="number" id="Qv" step="1" oninput="syncAllInstances('Qv'); markAsUser('Qv'); calculate()">
                 </div>
-                <div class="note">Choose Q<sub>v</sub> from Table 8-3 based on velocity</div>
+                <div class="note">📊 Choose Q<sub>v</sub> from <a href="#" onclick="goToPage(3); return false;">Table 8-3</a> based on velocity</div>
                 <div class="input-row">
                     <label>K<sub>v</sub> - Dynamic Factor:</label>
                     <input type="number" id="Kv" step="any" oninput="syncAllInstances('Kv'); markAsUser('Kv'); calculate()">
                 </div>
-                <div class="note">Calculate from K<sub>v</sub> = [(A + √V<sub>t</sub>)/A]<sup>B</sup> using Table 8-4</div>
+                <div class="note">📊 Calculate from K<sub>v</sub> = [(A + √V<sub>t</sub>)/A]<sup>B</sup> using <a href="#" onclick="goToPage(4); return false;">Table 8-4</a></div>
             </div>
 
             <div class="section">
@@ -488,7 +618,7 @@
                     <label>K<sub>mb</sub> - Base Load Distribution:</label>
                     <input type="number" id="Kmb" step="any" oninput="syncAllInstances('Kmb'); markAsUser('Kmb'); calculate()">
                 </div>
-                <div class="note">Look up from Figure 8-16 based on F</div>
+                <div class="note">📊 Look up from <a href="#" onclick="goToPage(16); return false;">Figure 8-16</a> based on F</div>
                 <div class="input-row">
                     <label>C<sub>s</sub> - Mounting Factor:</label>
                     <input type="number" id="Cs" step="any" value="1.0" oninput="syncAllInstances('Cs'); markAsUser('Cs'); calculate()">
@@ -550,20 +680,20 @@
             <div class="section">
                 <h2>Step 22-23: Bending Stress</h2>
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{tP} = \frac{W_t P_d}{F J_P} K_O K_m K_s K_B K_v$$</div>
+                    <div class="equation-latex">$$s_{tP} = \frac{W_t P_d}{F J_P} K_O K_m K_s K_B K_v$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>tP</sub> (psi) =</label>
+                            <label>s<sub>tP</sub> (psi) =</label>
                             <input type="number" id="stP" step="any" oninput="syncAllInstances('stP'); markAsUser('stP'); calculate()">
                         </div>
                     </div>
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{tG} = \frac{W_t P_d}{F J_G} K_O K_m K_s K_B K_v$$</div>
+                    <div class="equation-latex">$$s_{tG} = \frac{W_t P_d}{F J_G} K_O K_m K_s K_B K_v$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>tG</sub> (psi) =</label>
+                            <label>s<sub>tG</sub> (psi) =</label>
                             <input type="number" id="stG" step="any" oninput="syncAllInstances('stG'); markAsUser('stG'); calculate()">
                         </div>
                     </div>
@@ -576,13 +706,13 @@
                     <label>C<sub>p</sub> - Elastic Coefficient:</label>
                     <input type="number" id="Cp" step="any" oninput="syncAllInstances('Cp'); markAsUser('Cp'); calculate()">
                 </div>
-                <div class="note">Typically 2300 for steel (Table 8-8)</div>
+                <div class="note">📊 Typically 2300 for steel (<a href="#" onclick="goToPage(8); return false;">Table 8-8</a>)</div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_c = C_p \sqrt{\frac{W_t K_O K_m K_s K_v}{F D_P I}}$$</div>
+                    <div class="equation-latex">$$s_c = C_p \sqrt{\frac{W_t K_O K_s K_v C_s C_{xc}}{F D_P I}}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>c</sub> (psi) =</label>
+                            <label>s<sub>c</sub> (psi) =</label>
                             <input type="number" id="sc" step="any" oninput="syncAllInstances('sc'); markAsUser('sc'); calculate()">
                         </div>
                     </div>
@@ -592,15 +722,15 @@
             <div class="section">
                 <h2>Step 26: Allowable Stresses</h2>
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{acP} = \frac{\sigma_{tP}}{K_L}$$</div>
+                    <div class="equation-latex">$$s_{acP} = \frac{s_{tP}}{K_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>acP</sub> (psi) =</label>
+                            <label>s<sub>acP</sub> (psi) =</label>
                             <input type="number" id="sacP" step="any" oninput="syncAllInstances('sacP'); markAsUser('sacP'); calculate()">
                         </div>
                         <span>=</span>
                         <div class="var-input">
-                            <label>σ<sub>tP</sub></label>
+                            <label>s<sub>tP</sub></label>
                             <input type="number" id="stP_eq26" step="any" oninput="syncInput('stP', 'stP_eq26')">
                         </div>
                         <span>/</span>
@@ -612,15 +742,15 @@
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{acG} = \frac{\sigma_{tG}}{K_L}$$</div>
+                    <div class="equation-latex">$$s_{acG} = \frac{s_{tG}}{K_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>acG</sub> (psi) =</label>
+                            <label>s<sub>acG</sub> (psi) =</label>
                             <input type="number" id="sacG" step="any" oninput="syncAllInstances('sacG'); markAsUser('sacG'); calculate()">
                         </div>
                         <span>=</span>
                         <div class="var-input">
-                            <label>σ<sub>tG</sub></label>
+                            <label>s<sub>tG</sub></label>
                             <input type="number" id="stG_eq26" step="any" oninput="syncInput('stG', 'stG_eq26')">
                         </div>
                         <span>/</span>
@@ -632,15 +762,15 @@
                 </div>
 
                 <div class="equation-block">
-                    <div class="equation-latex">$$\sigma_{ac} = \frac{\sigma_c}{C_L}$$</div>
+                    <div class="equation-latex">$$s_{ac} = \frac{s_c}{C_L}$$</div>
                     <div class="equation-inputs">
                         <div class="var-input">
-                            <label>σ<sub>ac</sub> (psi) =</label>
+                            <label>s<sub>ac</sub> (psi) =</label>
                             <input type="number" id="sac" step="any" oninput="syncAllInstances('sac'); markAsUser('sac'); calculate()">
                         </div>
                         <span>=</span>
                         <div class="var-input">
-                            <label>σ<sub>c</sub></label>
+                            <label>s<sub>c</sub></label>
                             <input type="number" id="sc_eq26" step="any" oninput="syncInput('sc', 'sc_eq26')">
                         </div>
                         <span>/</span>
@@ -760,11 +890,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="note">Select material from Table 8-6 that meets or exceeds these values</div>
-            </div>
-
-            <div style="margin-top: 20px;">
-                <button onclick="resetAll()">Reset All Values</button>
+                <div class="note">📊 Select material from <a href="#" onclick="goToPage(6); return false;">Table 8-6</a> that meets or exceeds these values</div>
             </div>
 
             </div>
@@ -1979,8 +2105,8 @@
             const stG = getValue('stG');
 
             // Step 24-25: Contact stress
-            if (Wt && KO && Km && Ks && Kv && F && DP && I && Cp && !userValues.has('sc')) {
-                setValue('sc', Cp * Math.sqrt((Wt * KO * Km * Ks * Kv) / (F * DP * I)));
+            if (Wt && KO && Ks && Kv && F && DP && I && Cp && Cs && Cxc && !userValues.has('sc')) {
+                setValue('sc', Cp * Math.sqrt((Wt * KO * Ks * Kv * Cs * Cxc) / (F * DP * I)));
             }
 
             const sc = getValue('sc');
@@ -2069,7 +2195,99 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully! ✓');
+        }
+
+        // PDF Crosshairs Feature
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             MathJax.typesetPromise();
         });

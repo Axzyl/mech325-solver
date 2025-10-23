@@ -31,10 +31,10 @@
             max-height: 95vh;
         }
         .pdf-column embed {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -247,17 +247,105 @@
             margin: 20px 0;
             border-radius: 5px;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/belts/Mech_325_Bible_Mech-rope.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/belts/Mech_325_Bible_Mech-rope.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Wire Rope Design Calculator</h1>
             <div class="info-box">
                 ⚙️ Following Mott and Shigley methodologies for wire rope design. Extensive manual lookups required.
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -283,15 +371,15 @@
                     <div class="section">
                         <h3>Step 1: Rope Selection</h3>
                         <div class="warning-box">
-                            📊 <strong>MANUAL LOOKUP</strong> - Use Table 7-19 for standard rope diameters
+                            📊 <strong>MANUAL LOOKUP</strong> - Use <a href="#" onclick="goToPage(1)">Table 7-19</a> for standard rope diameters
                         </div>
                         <div class="input-row">
                             <label>Rope Diameter (d) [in]:</label>
                             <input type="number" id="d" step="any" oninput="syncAllInstances('d'); markAsUser('d'); calculate()">
-                            <span class="hint">From Table 7-19</span>
+                            <span class="hint">From <a href="#" onclick="goToPage(1)">Table 7-19</a></span>
                         </div>
                         <div class="warning-box">
-                            📊 Use Table 7-20 for rope type classification
+                            📊 Use <a href="#" onclick="goToPage(2)">Table 7-20</a> for rope type classification
                         </div>
                         <div class="input-row">
                             <label>Rope Type:</label>
@@ -308,12 +396,12 @@
                     <div class="section">
                         <h3>Step 2: Drum/Sheave Sizing</h3>
                         <div class="warning-box">
-                            📊 Look up D/d ratio from Table 7-22
+                            📊 Look up D/d ratio from <a href="#" onclick="goToPage(2)">Table 7-22</a>
                         </div>
                         <div class="input-row">
                             <label>D/d Ratio:</label>
                             <input type="number" id="D_d_ratio" step="any" oninput="syncAllInstances('D_d_ratio'); markAsUser('D_d_ratio'); calculate()">
-                            <span class="hint">Suggested or minimum from Table 7-22</span>
+                            <span class="hint">Suggested or minimum from <a href="#" onclick="goToPage(2)">Table 7-22</a></span>
                         </div>
                         <div class="input-row">
                             <label>Tread Diameter (D) [in]:</label>
@@ -426,12 +514,12 @@
                             </select>
                         </div>
                         <div class="warning-box">
-                            📊 Look up from Table 7-25 based on diameter and grade
+                            📊 Look up from <a href="#" onclick="goToPage(6)">Table 7-25</a> based on diameter and grade
                         </div>
                         <div class="input-row">
                             <label>Minimum Breaking Force [US tons]:</label>
                             <input type="number" id="min_breaking_force" step="any" oninput="syncAllInstances('min_breaking_force'); markAsUser('min_breaking_force'); calculate()">
-                            <span class="hint">From Table 7-25</span>
+                            <span class="hint">From <a href="#" onclick="goToPage(6)">Table 7-25</a></span>
                         </div>
                         <div class="input-row">
                             <label>Service Factor (SF):</label>
@@ -471,7 +559,7 @@
                     <div class="section">
                         <h3>Step 1: Rope Properties</h3>
                         <div class="warning-box">
-                            📊 Use Tables 17-24 or 17-27 for rope properties
+                            📊 Use Tables <a href="#" onclick="goToPage(7)">17-24</a> or <a href="#" onclick="goToPage(8)">17-27</a> for rope properties
                         </div>
                         <div class="input-row">
                             <label>Wire Diameter (d<sub>w</sub>) [in]:</label>
@@ -500,7 +588,7 @@
                             <input type="number" id="F_t" step="any" oninput="syncAllInstances('F_t'); markAsUser('F_t'); calculate()">
                         </div>
                         <div class="warning-box">
-                            📊 Look up strength reduction from D/d ratio graph
+                            📊 Look up strength reduction from <a href="#" onclick="goToPage(10)">D/d ratio graph</a>
                         </div>
                         <div class="input-row">
                             <label>Ultimate Wire Load (F<sub>u</sub>) [lbf]:</label>
@@ -559,7 +647,7 @@
                     <div class="section">
                         <h3>Step 4-5: Fatigue Analysis</h3>
                         <div class="warning-box">
-                            📊 Use fatigue graph for p/Su ratio lookup
+                            📊 Use <a href="#" onclick="goToPage(10)">fatigue graph</a> for p/Su ratio lookup
                         </div>
                         <div class="input-row">
                             <label>p/S<sub>u</sub> Ratio (÷1000):</label>
@@ -750,8 +838,6 @@
                         </div>
                     </div>
                 </div>
-
-                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
             </div>
             <!-- End Procedure Tab -->
 
@@ -1004,6 +1090,8 @@
     <script>
         const userValues = new Set();
         const g = 32.2; // gravitational acceleration
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
 
         // Variable instance map
         const varInstanceMap = {
@@ -1244,7 +1332,97 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully! ✓');
+        }
+
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             if (typeof MathJax !== 'undefined') {
                 MathJax.typesetPromise();

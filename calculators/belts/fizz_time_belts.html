@@ -31,10 +31,10 @@
             max-height: 95vh;
         }
         .pdf-column embed {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -240,10 +240,54 @@
             font-weight: 600;
             color: #1976d2;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
         .controls {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .save-btn, .load-btn {
             background: #28a745;
@@ -253,12 +297,36 @@
         .save-btn:hover, .load-btn:hover {
             background: #218838;
         }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/belts/Mech_325_Bible_Fizz-time_belts.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/belts/Mech_325_Bible_Fizz-time_belts.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Timing Belt Design Calculator (Fizz Guide)</h1>
@@ -269,7 +337,8 @@
             <!-- Session Controls -->
             <div class="controls">
                 <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
-                <button class="load-btn" onclick="loadSession()">📂 Load Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -285,7 +354,7 @@
                 <div class="section">
                     <h2>Step 1: Design Power Calculation</h2>
                     <div class="info-box">
-                        📊 Select service factor from Table 7-8 based on driven machine type and motor type
+                        📊 Select service factor from <a href="#" onclick="goToPage(2)">Table 7-8</a> based on driven machine type and motor type
                     </div>
                     <div class="input-row">
                         <label>Rated Power (P<sub>rated</sub>) [hp]:</label>
@@ -294,7 +363,7 @@
                     <div class="input-row">
                         <label>Service Factor (SF):</label>
                         <input type="number" id="SF" step="any" oninput="syncAllInstances('SF'); markAsUser('SF'); calculate()">
-                        <span class="hint">From Table 7-8</span>
+                        <span class="hint">from <a href="#" onclick="goToPage(2)">Table 7-8</a></span>
                     </div>
 
                     <h3>Design Power</h3>
@@ -389,7 +458,7 @@
                 <div class="section">
                     <h2>Step 4: Sprocket Selection</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Table 7-4 (Sprockets with 8 mm Belt Pitch):
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(5)">Table 7-4</a> (Sprockets with 8 mm Belt Pitch):
                         <ul>
                             <li>List candidate driver sprocket teeth (N<sub>driver</sub>)</li>
                             <li>List candidate driven sprocket teeth (N<sub>driven</sub>)</li>
@@ -416,8 +485,8 @@
                     <div class="warning-box">
                         📊 <strong>MANUAL LOOKUP REQUIRED</strong>:
                         <ol>
-                            <li>From Table 7-7: Find bushing size for each driver sprocket option</li>
-                            <li>From Table 7-5: Find max bore for that bushing size</li>
+                            <li>From <a href="#" onclick="goToPage(4)">Table 7-7</a>: Find bushing size for each driver sprocket option</li>
+                            <li>From <a href="#" onclick="goToPage(5)">Table 7-5</a>: Find max bore for that bushing size</li>
                             <li>Eliminate sprockets where max_bore ≤ motor_shaft_diameter</li>
                         </ol>
                     </div>
@@ -426,11 +495,11 @@
                         <input type="number" id="motor_shaft_diameter" step="any" oninput="syncAllInstances('motor_shaft_diameter'); markAsUser('motor_shaft_diameter'); calculate()">
                     </div>
                     <div class="input-row">
-                        <label>Bushing Size (from Table 7-7):</label>
+                        <label>Bushing Size (from <a href="#" onclick="goToPage(4)">Table 7-7</a>):</label>
                         <input type="text" id="bushing_size" oninput="syncAllInstances('bushing_size'); markAsUser('bushing_size')">
                     </div>
                     <div class="input-row">
-                        <label>Max Bore (from Table 7-5) [in]:</label>
+                        <label>Max Bore (from <a href="#" onclick="goToPage(5)">Table 7-5</a>) [in]:</label>
                         <input type="number" id="max_bore" step="any" oninput="syncAllInstances('max_bore'); markAsUser('max_bore'); calculate()">
                     </div>
                     <div class="info-box">
@@ -439,7 +508,7 @@
 
                     <h3>Sub-step 5b: Diameter Limit Check</h3>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-4:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From <a href="#" onclick="goToPage(5)">Table 7-4</a>:
                         <ul>
                             <li>Look up flange diameter for each sprocket option</li>
                             <li>Eliminate if exceeds space constraints</li>
@@ -451,11 +520,11 @@
                         <span class="hint">Optional constraint</span>
                     </div>
                     <div class="input-row">
-                        <label>Driver Flange Diameter (Table 7-4) [in]:</label>
+                        <label>Driver Flange Diameter (<a href="#" onclick="goToPage(5)">Table 7-4</a>) [in]:</label>
                         <input type="number" id="flange_diameter_driver" step="any" oninput="syncAllInstances('flange_diameter_driver'); markAsUser('flange_diameter_driver'); calculate()">
                     </div>
                     <div class="input-row">
-                        <label>Driven Flange Diameter (Table 7-4) [in]:</label>
+                        <label>Driven Flange Diameter (<a href="#" onclick="goToPage(5)">Table 7-4</a>) [in]:</label>
                         <input type="number" id="flange_diameter_driven" step="any" oninput="syncAllInstances('flange_diameter_driven'); markAsUser('flange_diameter_driven'); calculate()">
                     </div>
 
@@ -474,7 +543,7 @@
                 <div class="section">
                     <h2>Step 6: Pitch Diameter Determination</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-4:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From <a href="#" onclick="goToPage(5)">Table 7-4</a>:
                         <ul>
                             <li>Find row matching N<sub>driver</sub></li>
                             <li>Read PD<sub>1</sub> from column matching belt width</li>
@@ -485,12 +554,12 @@
                     <div class="input-row">
                         <label>Driver Pitch Diameter (PD<sub>1</sub>) [in]:</label>
                         <input type="number" id="PD1" step="any" oninput="syncAllInstances('PD1'); markAsUser('PD1'); calculate()">
-                        <span class="hint">From Table 7-4</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(5)">Table 7-4</a></span>
                     </div>
                     <div class="input-row">
                         <label>Driven Pitch Diameter (PD<sub>2</sub>) [in]:</label>
                         <input type="number" id="PD2" step="any" oninput="syncAllInstances('PD2'); markAsUser('PD2'); calculate()">
-                        <span class="hint">From Table 7-4</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(5)">Table 7-4</a></span>
                     </div>
                 </div>
 
@@ -498,7 +567,7 @@
                 <div class="section">
                     <h2>Step 7: Belt Length Selection</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-7 (8-mm Pitch GT Drive Selection Table):
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From <a href="#" onclick="goToPage(4)">Table 7-7</a> (8-mm Pitch GT Drive Selection Table):
                         <ul>
                             <li>Find row matching your driver and driven tooth combination</li>
                             <li>Look at center distances (CD) for various belt lengths</li>
@@ -522,7 +591,7 @@
                     <div class="input-row">
                         <label>Actual Center Distance (CD<sub>actual</sub>) [in]:</label>
                         <input type="number" id="CD_actual" step="any" oninput="syncAllInstances('CD_actual'); markAsUser('CD_actual'); calculate()">
-                        <span class="hint">From Table 7-7</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Table 7-7</a></span>
                     </div>
                 </div>
 
@@ -530,10 +599,10 @@
                 <div class="section">
                     <h2>Step 8: Belt Width and Rated Power</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-9 or 7-10:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From <a href="#" onclick="goToPage(6)">Table 7-9</a> or <a href="#" onclick="goToPage(7)">7-10</a>:
                         <ul>
                             <li>Select belt width: 30mm or 50mm</li>
-                            <li>Use Table 7-9 for 30mm, Table 7-10 for 50mm</li>
+                            <li>Use <a href="#" onclick="goToPage(6)">Table 7-9</a> for 30mm, <a href="#" onclick="goToPage(7)">Table 7-10</a> for 50mm</li>
                             <li>Row: RPM of faster shaft</li>
                             <li>Column: Number of teeth on small sprocket and pitch diameter</li>
                             <li>Read base rated horsepower</li>
@@ -552,7 +621,7 @@
                     <div class="input-row">
                         <label>Rated Power from Table (P<sub>rated,table</sub>) [hp]:</label>
                         <input type="number" id="Prated_table" step="any" oninput="syncAllInstances('Prated_table'); markAsUser('Prated_table'); calculate()">
-                        <span class="hint">From Table 7-9 or 7-10</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(6)">Table 7-9</a> or <a href="#" onclick="goToPage(7)">7-10</a></span>
                     </div>
                 </div>
 
@@ -560,7 +629,7 @@
                 <div class="section">
                     <h2>Step 9: Belt Length Correction Factor</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From Table 7-11:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - From <a href="#" onclick="goToPage(8)">Table 7-11</a>:
                         <ul>
                             <li>Find your belt designation (e.g., "800-8MGT")</li>
                             <li>Read the length correction factor C<sub>L</sub></li>
@@ -570,7 +639,7 @@
                     <div class="input-row">
                         <label>Length Correction Factor (C<sub>L</sub>):</label>
                         <input type="number" id="CL" step="any" oninput="syncAllInstances('CL'); markAsUser('CL'); calculate()">
-                        <span class="hint">From Table 7-11</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(8)">Table 7-11</a></span>
                     </div>
                 </div>
 
@@ -934,6 +1003,9 @@
     </div>
 
     <script>
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
         // Variable Instance Map - tracks all input IDs for each variable
         const varInstanceMap = {
             Prated: ['Prated', 'Prated_eq1', 'Prated_genEq1', 'var_Prated'],
@@ -1144,8 +1216,93 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         // Auto-load session on page load
         window.addEventListener('load', () => {
+            initCrosshairs();
             const savedData = localStorage.getItem('fizzTimeBeltSession');
             if (savedData) {
                 try {

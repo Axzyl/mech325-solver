@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spur Gear Spec Calculator</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #pdf-panel {
+            flex: 1;
+            background: #fff;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-panel iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        #calculator-panel {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .pitch-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .equation-block {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .equation-latex {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-input {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .var-input label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .var-input input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .var-input .unit {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin-top: 20px;
+        }
+
+        .given-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .module-converter {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .module-converter .note {
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .symbol {
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-content {
+            display: none !important;
+        }
+        .tab-content.active {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- PDF Panel -->
+    <div id="pdf-panel">
+        <iframe src="../../documents/gears/spur_design_spec.pdf" type="application/pdf"></iframe>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div id="calculator-panel">
+        <h1>⚙️ Spur Gear Spec Calculator</h1>
+        <p class="subtitle">Based on Mott's design specification for spur gears</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+            <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+            <button class="tab-button" onclick="showTab('variables')">Variables</button>
+        </div>
+
+        <!-- Procedure Tab -->
+        <div id="procedure-tab" class="tab-content active">
+        <!-- Given Information -->
+        <div class="section">
+            <h2>Given Information</h2>
+            <p style="margin-bottom: 10px;">Enter your known values below (you can edit any calculated value to override it):</p>
+
+            <div class="given-inputs">
+                <div class="var-input">
+                    <label>P<sub>d</sub> =</label>
+                    <input type="number" id="Pd" step="0.0001" oninput="syncAllInstances('Pd'); markAsUser('Pd'); calculate()">
+                    <span class="unit">teeth/in</span>
+                </div>
+
+                <div class="var-input">
+                    <label>φ =</label>
+                    <input type="number" id="phi" step="0.01" oninput="syncAllInstances('phi'); markAsUser('phi'); calculate()">
+                    <span class="unit">deg</span>
+                </div>
+
+                <div class="var-input">
+                    <label>N<sub>P</sub> =</label>
+                    <input type="number" id="Np" step="1" oninput="syncAllInstances('Np'); markAsUser('Np'); calculate()">
+                    <span class="unit">(teeth - pinion)</span>
+                </div>
+
+                <div class="var-input">
+                    <label>N<sub>G</sub> =</label>
+                    <input type="number" id="Ng" step="1" oninput="syncAllInstances('Ng'); markAsUser('Ng'); calculate()">
+                    <span class="unit">(teeth - gear)</span>
+                </div>
+            </div>
+
+            <!-- Module Converter -->
+            <div class="module-converter">
+                <div class="note">🔄 Module Conversion: P<sub>d</sub> = 25.4 / m</div>
+                <div class="var-input">
+                    <label>m =</label>
+                    <input type="number" id="m" step="0.0001" oninput="markAsUser('m'); calculateFromModule()">
+                    <span class="unit">mm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Calculations -->
+        <div class="section">
+            <h2>Calculations</h2>
+            <p class="hint">Green background = calculated value. You can override any value by editing it.</p>
+
+            <!-- Step 1 -->
+            <h3>Step 1: Calculate Pitch Diameters</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_P = \frac{N_P}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>P</sub> =</label>
+                        <input type="number" id="DP" step="0.0001" oninput="syncAllInstances('DP'); markAsUser('DP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="Np_eq1" step="1" oninput="syncInput('Np', 'Np_eq1'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq1" step="0.0001" oninput="syncInput('Pd', 'Pd_eq1'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_G = \frac{N_G}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>G</sub> =</label>
+                        <input type="number" id="DG" step="0.0001" oninput="syncAllInstances('DG'); markAsUser('DG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="Ng_eq2" step="1" oninput="syncInput('Ng', 'Ng_eq2'); calculate()">
+                    </div>
+                    <span>/</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq2" step="0.0001" oninput="syncInput('Pd', 'Pd_eq2'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 2 -->
+            <h3>Step 2: Calculate Circular Pitch</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$p = \frac{\pi}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>p =</label>
+                        <input type="number" id="p" step="0.0001" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= π /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq3" step="0.0001" oninput="syncInput('Pd', 'Pd_eq3'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 3 -->
+            <h3>Step 3: Calculate Addendum, Dedendum, and Clearance</h3>
+            <div id="pitch-type-indicator"></div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$a = \frac{1}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>a =</label>
+                        <input type="number" id="a" step="0.0001" oninput="syncAllInstances('a'); markAsUser('a'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= 1 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq4" step="0.0001" oninput="syncInput('Pd', 'Pd_eq4'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="b-equation-latex">
+                    $$b = \frac{1.25}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>b =</label>
+                        <input type="number" id="b" step="0.0001" oninput="syncAllInstances('b'); markAsUser('b'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="b-formula-text">= 1.25 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq5" step="0.0001" oninput="syncInput('Pd', 'Pd_eq5'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex" id="c-equation-latex">
+                    $$c = \frac{0.25}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>c =</label>
+                        <input type="number" id="c" step="0.0001" oninput="syncAllInstances('c'); markAsUser('c'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span id="c-formula-text">= 0.25 /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq6" step="0.0001" oninput="syncInput('Pd', 'Pd_eq6'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 4 -->
+            <h3>Step 4: Find Outside Diameters</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{oP} = \frac{N_P + 2}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>oP</sub> =</label>
+                        <input type="number" id="DoP" step="0.0001" oninput="syncAllInstances('DoP'); markAsUser('DoP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="Np_eq7" step="1" oninput="syncInput('Np', 'Np_eq7'); calculate()">
+                    </div>
+                    <span>+ 2) /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq7" step="0.0001" oninput="syncInput('Pd', 'Pd_eq7'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{oG} = \frac{N_G + 2}{P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>oG</sub> =</label>
+                        <input type="number" id="DoG" step="0.0001" oninput="syncAllInstances('DoG'); markAsUser('DoG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="Ng_eq8" step="1" oninput="syncInput('Ng', 'Ng_eq8'); calculate()">
+                    </div>
+                    <span>+ 2) /</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq8" step="0.0001" oninput="syncInput('Pd', 'Pd_eq8'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 5 -->
+            <h3>Step 5: Calculate Root Diameters</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{RP} = D_P - 2b$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>RP</sub> =</label>
+                        <input type="number" id="DRP" step="0.0001" oninput="syncAllInstances('DRP'); markAsUser('DRP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>D<sub>P</sub> =</label>
+                        <input type="number" id="DP_eq9" step="0.0001" oninput="syncInput('DP', 'DP_eq9'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>- 2 ×</span>
+                    <div class="var-input">
+                        <label>b =</label>
+                        <input type="number" id="b_eq9" step="0.0001" oninput="syncInput('b', 'b_eq9'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{RG} = D_G - 2b$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>RG</sub> =</label>
+                        <input type="number" id="DRG" step="0.0001" oninput="syncAllInstances('DRG'); markAsUser('DRG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>D<sub>G</sub> =</label>
+                        <input type="number" id="DG_eq10" step="0.0001" oninput="syncInput('DG', 'DG_eq10'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>- 2 ×</span>
+                    <div class="var-input">
+                        <label>b =</label>
+                        <input type="number" id="b_eq10" step="0.0001" oninput="syncInput('b', 'b_eq10'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 6 -->
+            <h3>Step 6: Calculate Whole Depth and Working Depth</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$h_t = a + b$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>h<sub>t</sub> =</label>
+                        <input type="number" id="ht" step="0.0001" oninput="syncAllInstances('ht'); markAsUser('ht'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>a =</label>
+                        <input type="number" id="a_eq11" step="0.0001" oninput="syncInput('a', 'a_eq11'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>+</span>
+                    <div class="var-input">
+                        <label>b =</label>
+                        <input type="number" id="b_eq11" step="0.0001" oninput="syncInput('b', 'b_eq11'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$h_k = 2a$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>h<sub>k</sub> =</label>
+                        <input type="number" id="hk" step="0.0001" oninput="syncAllInstances('hk'); markAsUser('hk'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= 2 ×</span>
+                    <div class="var-input">
+                        <label>a =</label>
+                        <input type="number" id="a_eq12" step="0.0001" oninput="syncInput('a', 'a_eq12'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 7 -->
+            <h3>Step 7: Calculate Tooth Thickness</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$t = \frac{\pi}{2P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>t =</label>
+                        <input type="number" id="t" step="0.0001" oninput="syncAllInstances('t'); markAsUser('t'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= π / (2 ×</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq13" step="0.0001" oninput="syncInput('Pd', 'Pd_eq13'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 8 -->
+            <h3>Step 8: Calculate Center Distance</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$C = \frac{N_G + N_P}{2P_d}$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>C =</label>
+                        <input type="number" id="C" step="0.0001" oninput="syncAllInstances('C'); markAsUser('C'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>= (</span>
+                    <div class="var-input">
+                        <label>N<sub>G</sub> =</label>
+                        <input type="number" id="Ng_eq14" step="1" oninput="syncInput('Ng', 'Ng_eq14'); calculate()">
+                    </div>
+                    <span>+</span>
+                    <div class="var-input">
+                        <label>N<sub>P</sub> =</label>
+                        <input type="number" id="Np_eq14" step="1" oninput="syncInput('Np', 'Np_eq14'); calculate()">
+                    </div>
+                    <span>) / (2 ×</span>
+                    <div class="var-input">
+                        <label>P<sub>d</sub> =</label>
+                        <input type="number" id="Pd_eq14" step="0.0001" oninput="syncInput('Pd', 'Pd_eq14'); calculate()">
+                        <span class="unit">teeth/in</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Step 9 -->
+            <h3>Step 9: Find Base Circle Diameter</h3>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{bP} = D_P \cos(\phi)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>bP</sub> =</label>
+                        <input type="number" id="DbP" step="0.0001" oninput="syncAllInstances('DbP'); markAsUser('DbP'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>D<sub>P</sub> =</label>
+                        <input type="number" id="DP_eq15" step="0.0001" oninput="syncInput('DP', 'DP_eq15'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>φ =</label>
+                        <input type="number" id="phi_eq15" step="0.01" oninput="syncInput('phi', 'phi_eq15'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="equation-block">
+                <div class="equation-latex">
+                    $$D_{bG} = D_G \cos(\phi)$$
+                </div>
+                <div class="equation-inputs">
+                    <div class="var-input">
+                        <label>D<sub>bG</sub> =</label>
+                        <input type="number" id="DbG" step="0.0001" oninput="syncAllInstances('DbG'); markAsUser('DbG'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>=</span>
+                    <div class="var-input">
+                        <label>D<sub>G</sub> =</label>
+                        <input type="number" id="DG_eq16" step="0.0001" oninput="syncInput('DG', 'DG_eq16'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <span>× cos(</span>
+                    <div class="var-input">
+                        <label>φ =</label>
+                        <input type="number" id="phi_eq16" step="0.01" oninput="syncInput('phi', 'phi_eq16'); calculate()">
+                        <span class="unit">deg</span>
+                    </div>
+                    <span>)</span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="success">✅ All calculations complete!</div>
+        </div> <!-- End Procedure Tab -->
+
+        <!-- General Equations Tab -->
+        <div id="equations-tab" class="tab-content">
+            <div class="section">
+                <h2>Spur Gear General Equations</h2>
+                <p class="info-box">⚙️ General equations for spur gears. These are the same equations used in the Procedure tab.</p>
+
+                <h3>Pitch Relationships</h3>
+                <div class="equation-latex">$$P_d = \frac{N}{D} \quad \text{(Diametral Pitch)}$$</div>
+                <div class="equation-latex">$$p = \frac{\pi}{P_d} \quad \text{(Circular Pitch)}$$</div>
+                <div class="equation-latex">$$m = \frac{25.4}{P_d} \quad \text{(Module)}$$</div>
+
+                <h3>Pitch Diameters</h3>
+                <div class="equation-latex">$$D_P = \frac{N_P}{P_d}, \quad D_G = \frac{N_G}{P_d}$$</div>
+                <div class="equation-latex">$$C = \frac{D_P + D_G}{2}$$</div>
+
+                <h3>Tooth Dimensions (Coarse Pitch: P<sub>d</sub> < 20)</h3>
+                <div class="equation-latex">$$a = \frac{1.00}{P_d} \quad \text{(Addendum)}$$</div>
+                <div class="equation-latex">$$b = \frac{1.25}{P_d} \quad \text{(Dedendum)}$$</div>
+                <div class="equation-latex">$$c = \frac{0.25}{P_d} \quad \text{(Clearance)}$$</div>
+                <div class="equation-latex">$$h_t = \frac{2.25}{P_d} \quad \text{(Whole Depth)}$$</div>
+
+                <h3>Tooth Dimensions (Fine Pitch: P<sub>d</sub> ≥ 20)</h3>
+                <div class="equation-latex">$$a = \frac{1.00}{P_d} \quad \text{(Addendum)}$$</div>
+                <div class="equation-latex">$$b = \frac{1.20}{P_d} + 0.002 \quad \text{(Dedendum)}$$</div>
+                <div class="equation-latex">$$c = \frac{0.20}{P_d} + 0.002 \quad \text{(Clearance)}$$</div>
+
+                <h3>Other Diameters</h3>
+                <div class="equation-latex">$$D_o = D + 2a \quad \text{(Outside Diameter)}$$</div>
+                <div class="equation-latex">$$D_R = D - 2b \quad \text{(Root Diameter)}$$</div>
+                <div class="equation-latex">$$D_b = D \cos(\phi) \quad \text{(Base Diameter)}$$</div>
+            </div>
+        </div> <!-- End General Equations Tab -->
+
+        <!-- Variables Tab -->
+        <div id="variables-tab" class="tab-content">
+            <div class="section">
+                <h2>📋 All Variables Reference</h2>
+                <p style="margin-bottom: 15px; color: #666;">All variables used in this calculator. Edit values here to update calculations.</p>
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #3498db; color: white;">
+                            <th style="padding: 10px; text-align: left;">Variable</th>
+                            <th style="padding: 10px; text-align: left;">Description</th>
+                            <th style="padding: 10px; text-align: left;">Value</th>
+                            <th style="padding: 10px; text-align: left;">Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Basic Parameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">N<sub>P</sub></td>
+                            <td style="padding: 8px;">Number of Teeth (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Np" step="1" oninput="syncAllInstances('var_Np'); markAsUser('var_Np'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">N<sub>G</sub></td>
+                            <td style="padding: 8px;">Number of Teeth (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Ng" step="1" oninput="syncAllInstances('var_Ng'); markAsUser('var_Ng'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">P<sub>d</sub></td>
+                            <td style="padding: 8px;">Diametral Pitch</td>
+                            <td style="padding: 8px;"><input type="number" id="var_Pd" step="any" oninput="syncAllInstances('var_Pd'); markAsUser('var_Pd'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">teeth/in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">φ</td>
+                            <td style="padding: 8px;">Pressure Angle</td>
+                            <td style="padding: 8px;"><input type="number" id="var_phi" step="any" oninput="syncAllInstances('var_phi'); markAsUser('var_phi'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">deg</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">m</td>
+                            <td style="padding: 8px;">Module</td>
+                            <td style="padding: 8px;"><input type="number" id="var_m" step="any" oninput="syncAllInstances('var_m'); markAsUser('var_m'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">mm</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Pitch Diameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>P</sub></td>
+                            <td style="padding: 8px;">Pitch Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DP" step="any" oninput="syncAllInstances('var_DP'); markAsUser('var_DP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>G</sub></td>
+                            <td style="padding: 8px;">Pitch Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DG" step="any" oninput="syncAllInstances('var_DG'); markAsUser('var_DG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">p</td>
+                            <td style="padding: 8px;">Circular Pitch</td>
+                            <td style="padding: 8px;"><input type="number" id="var_p" step="any" oninput="syncAllInstances('var_p'); markAsUser('var_p'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Tooth Dimensions</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">a</td>
+                            <td style="padding: 8px;">Addendum</td>
+                            <td style="padding: 8px;"><input type="number" id="var_a" step="any" oninput="syncAllInstances('var_a'); markAsUser('var_a'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">b</td>
+                            <td style="padding: 8px;">Dedendum</td>
+                            <td style="padding: 8px;"><input type="number" id="var_b" step="any" oninput="syncAllInstances('var_b'); markAsUser('var_b'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">c</td>
+                            <td style="padding: 8px;">Clearance</td>
+                            <td style="padding: 8px;"><input type="number" id="var_c" step="any" oninput="syncAllInstances('var_c'); markAsUser('var_c'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">h<sub>t</sub></td>
+                            <td style="padding: 8px;">Whole Depth</td>
+                            <td style="padding: 8px;"><input type="number" id="var_ht" step="any" oninput="syncAllInstances('var_ht'); markAsUser('var_ht'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">h<sub>k</sub></td>
+                            <td style="padding: 8px;">Working Depth</td>
+                            <td style="padding: 8px;"><input type="number" id="var_hk" step="any" oninput="syncAllInstances('var_hk'); markAsUser('var_hk'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">t</td>
+                            <td style="padding: 8px;">Tooth Thickness</td>
+                            <td style="padding: 8px;"><input type="number" id="var_t" step="any" oninput="syncAllInstances('var_t'); markAsUser('var_t'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+
+                        <tr style="background: #e3f2fd; font-weight: 600;"><td colspan="4" style="padding: 8px;">Other Diameters</td></tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>oP</sub></td>
+                            <td style="padding: 8px;">Outside Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DoP" step="any" oninput="syncAllInstances('var_DoP'); markAsUser('var_DoP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>oG</sub></td>
+                            <td style="padding: 8px;">Outside Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DoG" step="any" oninput="syncAllInstances('var_DoG'); markAsUser('var_DoG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>RP</sub></td>
+                            <td style="padding: 8px;">Root Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DRP" step="any" oninput="syncAllInstances('var_DRP'); markAsUser('var_DRP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>RG</sub></td>
+                            <td style="padding: 8px;">Root Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DRG" step="any" oninput="syncAllInstances('var_DRG'); markAsUser('var_DRG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>bP</sub></td>
+                            <td style="padding: 8px;">Base Diameter (Pinion)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DbP" step="any" oninput="syncAllInstances('var_DbP'); markAsUser('var_DbP'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">D<sub>bG</sub></td>
+                            <td style="padding: 8px;">Base Diameter (Gear)</td>
+                            <td style="padding: 8px;"><input type="number" id="var_DbG" step="any" oninput="syncAllInstances('var_DbG'); markAsUser('var_DbG'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e0e0e0;">
+                            <td style="padding: 8px;">C</td>
+                            <td style="padding: 8px;">Center Distance</td>
+                            <td style="padding: 8px;"><input type="number" id="var_C" step="any" oninput="syncAllInstances('var_C'); markAsUser('var_C'); calculate()" style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"></td>
+                            <td style="padding: 8px;">in</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- End Variables Tab -->
+
+    </div>
+
+    <script>
+        // Track which values are user-entered vs computed
+        let userValues = new Set(['Pd', 'phi', 'Np', 'Ng']);
+
+        // Mark a field as user-entered
+        function markAsUser(fieldId) {
+            userValues.add(fieldId);
+        }
+
+        // Sync duplicate fields (for the same variable shown in multiple equations)
+        function syncInput(mainId, sourceId) {
+            const value = document.getElementById(sourceId).value;
+            document.getElementById(mainId).value = value;
+            markAsUser(mainId);
+            calculate();
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Activate button
+            event.target.classList.add('active');
+
+            // Re-render MathJax for the active tab
+            if (tabName === 'equations' || tabName === 'procedure') {
+                const activeTab = document.getElementById(tabName + '-tab');
+                if (activeTab) {
+                    MathJax.typesetPromise([activeTab]).catch((err) => console.log(err));
+                }
+            }
+        }
+
+        // Variable Instance Mapping for Bidirectional Sync
+        const varInstanceMap = {
+            'Np': ['Np', 'var_Np', 'Np_eq1', 'Np_eq7', 'Np_eq14'],
+            'Ng': ['Ng', 'var_Ng', 'Ng_eq2', 'Ng_eq8', 'Ng_eq14'],
+            'Pd': ['Pd', 'var_Pd', 'Pd_eq1', 'Pd_eq2', 'Pd_eq3', 'Pd_eq4', 'Pd_eq5', 'Pd_eq6', 'Pd_eq7', 'Pd_eq8', 'Pd_eq13', 'Pd_eq14'],
+            'phi': ['phi', 'var_phi', 'phi_eq15', 'phi_eq16'],
+            'm': ['m', 'var_m'],
+            'DP': ['DP', 'var_DP', 'DP_eq9', 'DP_eq15'],
+            'DG': ['DG', 'var_DG', 'DG_eq10', 'DG_eq16'],
+            'p': ['p', 'var_p'],
+            'a': ['a', 'var_a', 'a_eq11', 'a_eq12'],
+            'b': ['b', 'var_b', 'b_eq9', 'b_eq10', 'b_eq11'],
+            'c': ['c', 'var_c'],
+            'ht': ['ht', 'var_ht'],
+            'hk': ['hk', 'var_hk'],
+            't': ['t', 'var_t'],
+            'C': ['C', 'var_C'],
+            'DoP': ['DoP', 'var_DoP'],
+            'DoG': ['DoG', 'var_DoG'],
+            'DRP': ['DRP', 'var_DRP'],
+            'DRG': ['DRG', 'var_DRG'],
+            'DbP': ['DbP', 'var_DbP'],
+            'DbG': ['DbG', 'var_DbG']
+        };
+
+        function getBaseVarName(id) {
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Match IDs like 'Np_eq1', 'Pd_eq14', etc.
+            const eqMatch = id.match(/^(.+)_eq\d+$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVarName(changedId);
+            const instances = varInstanceMap[baseVar];
+
+            if (!instances) {
+                // Variable not in map, try syncing directly
+                return;
+            }
+
+            const changedInput = document.getElementById(changedId);
+            if (!changedInput) return;
+
+            const newValue = changedInput.value;
+
+            // Update all other instances
+            instances.forEach(instanceId => {
+                if (instanceId !== changedId) {
+                    const input = document.getElementById(instanceId);
+                    if (input) {
+                        input.value = newValue;
+                    }
+                }
+            });
+        }
+
+        // Get value with fallback
+        function getValue(id) {
+            const val = parseFloat(document.getElementById(id).value);
+            return isNaN(val) ? null : val;
+        }
+
+        // Set value and mark as computed
+        function setValue(id, value) {
+            if (value !== null && !userValues.has(id)) {
+                document.getElementById(id).value = value.toFixed(4);
+                // Add computed class
+                document.getElementById(id).classList.add('computed');
+            }
+        }
+
+        // Sync all duplicate fields
+        function syncAllFields() {
+            const mainVars = ['Pd', 'phi', 'Np', 'Ng', 'DP', 'DG', 'a', 'b'];
+
+            mainVars.forEach(varId => {
+                const mainValue = getValue(varId);
+                if (mainValue !== null) {
+                    // Sync all instances
+                    document.querySelectorAll(`input[id^="${varId}_eq"]`).forEach(input => {
+                        if (getValue(input.id) !== mainValue) {
+                            input.value = mainValue.toFixed(4);
+                        }
+                    });
+                }
+            });
+        }
+
+        function calculateFromModule() {
+            const m = getValue('m');
+            if (m && m > 0) {
+                if (!userValues.has('Pd')) {
+                    document.getElementById('Pd').value = (25.4 / m).toFixed(4);
+                }
+            }
+            calculate();
+        }
+
+        function calculate() {
+            // Get primary input values
+            const Pd = getValue('Pd');
+            const phi = getValue('phi');
+            const Np = getValue('Np');
+            const Ng = getValue('Ng');
+
+            // Update module if Pd is known
+            if (Pd && Pd > 0 && !userValues.has('m')) {
+                document.getElementById('m').value = (25.4 / Pd).toFixed(4);
+            }
+
+            // Determine pitch type
+            let isCoarse = Pd < 20;
+            const pitchIndicator = document.getElementById('pitch-type-indicator');
+            const bLatex = document.getElementById('b-equation-latex');
+            const cLatex = document.getElementById('c-equation-latex');
+            const bText = document.getElementById('b-formula-text');
+            const cText = document.getElementById('c-formula-text');
+
+            if (Pd && Pd > 0) {
+                if (isCoarse) {
+                    pitchIndicator.innerHTML = '<div class="pitch-info">Coarse Pitch (P<sub>d</sub> < 20 teeth/in)</div>';
+                    bLatex.innerHTML = '$$b = \\frac{1.25}{P_d}$$';
+                    cLatex.innerHTML = '$$c = \\frac{0.25}{P_d}$$';
+                    bText.textContent = '= 1.25 /';
+                    cText.textContent = '= 0.25 /';
+                } else {
+                    pitchIndicator.innerHTML = '<div class="pitch-info">Fine Pitch (P<sub>d</sub> ≥ 20 teeth/in)</div>';
+                    bLatex.innerHTML = '$$b = \\frac{1.2}{P_d} + 0.002$$';
+                    cLatex.innerHTML = '$$c = \\frac{0.2}{P_d} + 0.002$$';
+                    bText.textContent = '= (1.2 / Pd) + 0.002';
+                    cText.textContent = '= (0.2 / Pd) + 0.002';
+                }
+                MathJax.typesetPromise([bLatex, cLatex]);
+            } else {
+                pitchIndicator.innerHTML = '';
+            }
+
+            // Calculate Step 1: Pitch Diameters
+            if (Pd && Pd > 0 && Np && Np > 0) {
+                setValue('DP', Np / Pd);
+            }
+            if (Pd && Pd > 0 && Ng && Ng > 0) {
+                setValue('DG', Ng / Pd);
+            }
+
+            // Step 2: Circular Pitch
+            if (Pd && Pd > 0) {
+                setValue('p', Math.PI / Pd);
+            }
+
+            // Step 3: Addendum, Dedendum, Clearance
+            if (Pd && Pd > 0) {
+                setValue('a', 1 / Pd);
+
+                if (isCoarse) {
+                    setValue('b', 1.25 / Pd);
+                    setValue('c', 0.25 / Pd);
+                } else {
+                    setValue('b', 1.2 / Pd + 0.002);
+                    setValue('c', 0.2 / Pd + 0.002);
+                }
+            }
+
+            // Step 4: Outside Diameters
+            if (Pd && Pd > 0 && Np && Np > 0) {
+                setValue('DoP', (Np + 2) / Pd);
+            }
+            if (Pd && Pd > 0 && Ng && Ng > 0) {
+                setValue('DoG', (Ng + 2) / Pd);
+            }
+
+            // Step 5: Root Diameters
+            const DP = getValue('DP');
+            const DG = getValue('DG');
+            const b = getValue('b');
+
+            if (DP !== null && b !== null) {
+                setValue('DRP', DP - 2 * b);
+            }
+            if (DG !== null && b !== null) {
+                setValue('DRG', DG - 2 * b);
+            }
+
+            // Step 6: Whole Depth and Working Depth
+            const a = getValue('a');
+
+            if (a !== null && b !== null) {
+                setValue('ht', a + b);
+            }
+            if (a !== null) {
+                setValue('hk', 2 * a);
+            }
+
+            // Step 7: Tooth Thickness
+            if (Pd && Pd > 0) {
+                setValue('t', Math.PI / (2 * Pd));
+            }
+
+            // Step 8: Center Distance
+            if (Pd && Pd > 0 && Np && Np > 0 && Ng && Ng > 0) {
+                setValue('C', (Ng + Np) / (2 * Pd));
+            }
+
+            // Step 9: Base Circle Diameters
+            if (DP !== null && phi !== null && phi > 0) {
+                const phiRad = phi * Math.PI / 180;
+                setValue('DbP', DP * Math.cos(phiRad));
+            }
+            if (DG !== null && phi !== null && phi > 0) {
+                const phiRad = phi * Math.PI / 180;
+                setValue('DbG', DG * Math.cos(phiRad));
+            }
+
+            // Sync duplicate fields
+            syncAllFields();
+        }
+
+        function saveSession() {
+            const data = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) {
+                    data[input.id] = input.value;
+                }
+            });
+            data._userValues = Array.from(userValues);
+            localStorage.setItem('spurGearSession', JSON.stringify(data));
+            alert('Session saved!');
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('spurGearSession');
+            if (saved) {
+                const data = JSON.parse(saved);
+                for (let key in data) {
+                    if (key === '_userValues') {
+                        userValues = new Set(data[key]);
+                    } else {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = data[key];
+                        }
+                    }
+                }
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                document.querySelectorAll('input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                userValues = new Set(['Pd', 'phi', 'Np', 'Ng']);
+                localStorage.removeItem('spurGearSession');
+                calculate();
+            }
+        }
+
+        // Load on startup
+        window.addEventListener('load', function() {
+            loadSession();
+            calculate();
+        });
+    </script>
+</body>
+</html>

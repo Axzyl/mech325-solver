@@ -151,6 +151,54 @@
             background: #3498db;
             color: white;
         }
+        .reference-docs {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 35px;
+        }
+        .reference-docs h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+        .reference-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .ref-btn {
+            background: white;
+            color: #2c3e50;
+            padding: 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 3px solid transparent;
+        }
+        .ref-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border-color: #ffd700;
+        }
+        .ref-btn .emoji {
+            font-size: 2.5em;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .ref-btn .title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .ref-btn .desc {
+            font-size: 0.85em;
+            color: #666;
+        }
         footer {
             text-align: center;
             margin-top: 40px;
@@ -175,95 +223,31 @@
 <body>
     <div class="container">
         <h1>Mech 325 Solver</h1>
-        <p class="subtitle">Reminder: Midterm on Thursday, October 23rd, 7:00 PM, Location TBD</p>
+        <p class="subtitle">Reminder: Midterm on Thursday, October 23rd, 7:00 PM, Location: HEBB 100</p>
 
         <div class="info-box">
             <h2>Welcome!</h2>
             <p>This HTML document adds interactivity to the Fizz and Mech bibles that we all know and love.</p>
             <p>Enter values into the text boxes, and the solver solves as much as it can with the info it has.</p>
             <p>The solver follows the bibles very closely, making it easy to follow and show your work in the homework/exams.</p>
-            <p>Unfortunately, I have not implemented automatic table/graph lookup yet. Maybe in time for the midterm, hopefully.</p>
-            <p><strong>Quick Start:</strong> Click any calculator below to get started.</p>
+            <p><strong>NEW FEATURE:</strong> Click "Enable Crosshair" to create a crosshair that generates lines where you click, making reading graphs and tables easier. 
+                In this mode, you <strong>cannot</strong> interact with the PDF, so make sure to disable it before scrolling again.</p>
+            <p><strong>Quick Start:</strong> Click any calculator below to get started. Good Luck!</p>
         </div>
 
-        <!-- GEARS - FIZZ -->
-        <div class="section">
-            <h2>Gears - Fizz Bible</h2>
-            <div class="calculator-grid">
-                <a href="calculators/gears/fizz_spur.html" class="calculator-card">
-                    <h3>Spur Gear Design</h3>
-                    <span class="badge">2.1</span>
+        <!-- REFERENCE DOCUMENTS -->
+        <div class="reference-docs">
+            <h2>📚 Reference Documents</h2>
+            <div class="reference-buttons">
+                <a href="original_documents/Mech_325_Bible_Mech.pdf" target="_blank" class="ref-btn">
+                    <span class="emoji">📚</span>
+                    <div class="title">Mech 325 Bible - Mech</div>
+                    <div class="desc">Complete Mech textbook reference</div>
                 </a>
-
-                <a href="calculators/gears/fizz_helical.html" class="calculator-card">
-                    <h3>Helical Gear Design</h3>
-                    <span class="badge">2.2</span>
-                </a>
-
-                <a href="calculators/gears/fizz_bevel.html" class="calculator-card">
-                    <h3>Bevel Gear Design</h3>
-                    <span class="badge">2.3</span>
-                </a>
-
-                <a href="calculators/gears/fizz_worm.html" class="calculator-card">
-                    <h3>Worm Gear Design</h3>
-                    <span class="badge">2.4</span>
-                </a>
-
-                <a href="calculators/gears/fizz_rack.html" class="calculator-card">
-                    <h3>Rack & Pinion Design</h3>
-                    <span class="badge">2.5</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- GEARS - MECH -->
-        <div class="section">
-            <h2>Gears - Mech Bible</h2>
-            <div class="calculator-grid">
-                <a href="calculators/gears/mech_spur_geometry.html" class="calculator-card">
-                    <h3>Spur Gear Geometry</h3>
-                    <span class="badge">9.3.1.1</span>
-                </a>
-
-                <a href="calculators/gears/mech_helical_geometry.html" class="calculator-card">
-                    <h3>Helical Gear Geometry</h3>
-                    <span class="badge">9.3.1.2</span>
-                </a>
-
-                <a href="calculators/gears/mech_bevel_geometry.html" class="calculator-card">
-                    <h3>Bevel Gear Geometry</h3>
-                    <span class="badge">9.3.1.3</span>
-                </a>
-
-                <a href="calculators/gears/mech_gear_forces.html" class="calculator-card">
-                    <h3>Gear Forces</h3>
-                    <span class="badge">9.3.2</span>
-                </a>
-
-                <a href="calculators/gears/mech_spur_stress.html" class="calculator-card">
-                    <h3>Spur Stress Analysis</h3>
-                    <span class="badge">9.3.3.1</span>
-                </a>
-
-                <a href="calculators/gears/mech_helical_stress.html" class="calculator-card">
-                    <h3>Helical Stress Analysis</h3>
-                    <span class="badge">9.3.3.2</span>
-                </a>
-
-                <a href="calculators/gears/mech_bevel_stress.html" class="calculator-card">
-                    <h3>Bevel Stress Analysis</h3>
-                    <span class="badge">9.3.3.3</span>
-                </a>
-
-                <a href="calculators/gears/mech_worm_calculator.html" class="calculator-card">
-                    <h3>Worm Gear Calculator</h3>
-                    <span class="badge">9.3.4.1</span>
-                </a>
-
-                <a href="calculators/gears/mech_rack_calculator.html" class="calculator-card">
-                    <h3>Rack & Pinion</h3>
-                    <span class="badge">9.3.4.2</span>
+                <a href="original_documents/Mech_325_Bible_Fizz.pdf" target="_blank" class="ref-btn">
+                    <span class="emoji">📘</span>
+                    <div class="title">Mech 325 Bible - Fizz</div>
+                    <div class="desc">Complete Fizz guide reference</div>
                 </a>
             </div>
         </div>
@@ -272,27 +256,27 @@
         <div class="section">
             <h2>Belts & Chains - Fizz Bible</h2>
             <div class="calculator-grid">
-                <a href="calculators/belts/fizz_chains.html" class="calculator-card">
+                <a href="calculators/belts/fizz_chains.html" class="calculator-card" target="_blank">
                     <h3>Chain Drives Design</h3>
                     <span class="badge">8.3.4</span>
                 </a>
 
-                <a href="calculators/belts/fizz_flat_belts.html" class="calculator-card">
+                <a href="calculators/belts/fizz_flat_belts.html" class="calculator-card" target="_blank">
                     <h3>Flat Belt Design</h3>
                     <span class="badge">8.3.1</span>
                 </a>
 
-                <a href="calculators/belts/fizz_rope.html" class="calculator-card">
+                <a href="calculators/belts/fizz_rope.html" class="calculator-card" target="_blank">
                     <h3>Wire Rope Design</h3>
                     <span class="badge">8.3.5</span>
                 </a>
 
-                <a href="calculators/belts/fizz_time_belts.html" class="calculator-card">
+                <a href="calculators/belts/fizz_time_belts.html" class="calculator-card" target="_blank">
                     <h3>Timing Belt Design</h3>
                     <span class="badge">8.3.2</span>
                 </a>
 
-                <a href="calculators/belts/fizz_v_belts.html" class="calculator-card">
+                <a href="calculators/belts/fizz_v_belts.html" class="calculator-card" target="_blank">
                     <h3>V-Belt Design</h3>
                     <span class="badge">8.3.3</span>
                 </a>
@@ -303,29 +287,123 @@
         <div class="section">
             <h2>Belts & Chains - Mech Bible</h2>
             <div class="calculator-grid">
-                <a href="calculators/belts/mech_chains.html" class="calculator-card">
+                <a href="calculators/belts/mech_chains.html" class="calculator-card" target="_blank">
                     <h3>Chain Drives (Mott)</h3>
                     <span class="badge">8.3.4.1</span>
                 </a>
 
-                <a href="calculators/belts/mech_flat_belts.html" class="calculator-card">
+                <a href="calculators/belts/mech_flat_belts.html" class="calculator-card" target="_blank">
                     <h3>Flat Belts (Mott)</h3>
                     <span class="badge">8.3.1</span>
                 </a>
 
-                <a href="calculators/belts/mech_rope.html" class="calculator-card">
+                <a href="calculators/belts/mech_rope.html" class="calculator-card" target="_blank">
                     <h3>Wire Rope (Mott & Shigley)</h3>
                     <span class="badge">8.3.5</span>
                 </a>
 
-                <a href="calculators/belts/mech_time_belts.html" class="calculator-card">
+                <a href="calculators/belts/mech_time_belts.html" class="calculator-card" target="_blank">
                     <h3>Timing Belts (Mott)</h3>
                     <span class="badge">8.3.2</span>
                 </a>
 
-                <a href="calculators/belts/mech_v_belts.html" class="calculator-card">
+                <a href="calculators/belts/mech_v_belts.html" class="calculator-card" target="_blank">
                     <h3>V-Belts (Mott)</h3>
                     <span class="badge">8.3.3</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- GEARS - FIZZ -->
+        <div class="section">
+            <h2>Gears - Fizz Bible</h2>
+            <div class="calculator-grid">
+                <a href="calculators/gears/fizz_spur.html" class="calculator-card" target="_blank">
+                    <h3>Spur Gear Design</h3>
+                    <span class="badge">2.1</span>
+                </a>
+
+                <a href="calculators/gears/fizz_helical.html" class="calculator-card" target="_blank">
+                    <h3>Helical Gear Design</h3>
+                    <span class="badge">2.2</span>
+                </a>
+
+                <a href="calculators/gears/fizz_bevel.html" class="calculator-card" target="_blank">
+                    <h3>Bevel Gear Design</h3>
+                    <span class="badge">2.3</span>
+                </a>
+
+                <a href="calculators/gears/fizz_worm.html" class="calculator-card" target="_blank">
+                    <h3>Worm Gear Design</h3>
+                    <span class="badge">2.4</span>
+                </a>
+
+                <a href="calculators/gears/fizz_rack.html" class="calculator-card" target="_blank">
+                    <h3>Rack & Pinion Design</h3>
+                    <span class="badge">2.5</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- GEARS - MECH -->
+        <div class="section">
+            <h2>Gears - Mech Bible</h2>
+            <div class="calculator-grid">
+                <a href="calculators/gears/mech_spur_geometry.html" class="calculator-card" target="_blank">
+                    <h3>Spur Gear Geometry</h3>
+                    <span class="badge">9.3.1.1</span>
+                </a>
+
+                <a href="calculators/gears/mech_helical_geometry.html" class="calculator-card" target="_blank">
+                    <h3>Helical Gear Geometry</h3>
+                    <span class="badge">9.3.1.2</span>
+                </a>
+
+                <a href="calculators/gears/mech_bevel_geometry.html" class="calculator-card" target="_blank">
+                    <h3>Bevel Gear Geometry</h3>
+                    <span class="badge">9.3.1.3</span>
+                </a>
+
+                <a href="calculators/gears/mech_gear_forces.html" class="calculator-card" target="_blank">
+                    <h3>Gear Forces</h3>
+                    <span class="badge">9.3.2</span>
+                </a>
+
+                <a href="calculators/gears/mech_spur_stress.html" class="calculator-card" target="_blank">
+                    <h3>Spur Stress Analysis</h3>
+                    <span class="badge">9.3.3.1</span>
+                </a>
+
+                <a href="calculators/gears/mech_helical_stress.html" class="calculator-card" target="_blank">
+                    <h3>Helical Stress Analysis</h3>
+                    <span class="badge">9.3.3.2</span>
+                </a>
+
+                <a href="calculators/gears/mech_bevel_stress.html" class="calculator-card" target="_blank">
+                    <h3>Bevel Stress Analysis</h3>
+                    <span class="badge">9.3.3.3</span>
+                </a>
+
+                <a href="calculators/gears/mech_worm_calculator.html" class="calculator-card" target="_blank">
+                    <h3>Worm Gear Calculator</h3>
+                    <span class="badge">9.3.4.1</span>
+                </a>
+
+                <a href="calculators/gears/mech_rack_calculator.html" class="calculator-card" target="_blank">
+                    <h3>Rack & Pinion</h3>
+                    <span class="badge">9.3.4.2</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- OTHER TOOLS -->
+        <div class="section">
+            <h2>Other Tools</h2>
+            <div class="calculator-grid">
+                <a href="calculators/other/unit_conversions.html" class="calculator-card" target="_blank">
+                    <h3>Unit Conversions</h3>
+                    <p>Metric ↔ Imperial conversions for length, mass, volume, power, temperature, pressure, and energy</p>
+                    <span class="badge">Unit 0</span>
                 </a>
             </div>
         </div>
@@ -356,7 +434,7 @@
 
         <footer>
             <p><strong>M325 Mechanical Design Calculator Suite</strong></p>
-            <p>24 calculators | Works offline | No installation required</p>
+            <p>25 calculators | Works offline | No installation required</p>
         </footer>
     </div>
 </body>

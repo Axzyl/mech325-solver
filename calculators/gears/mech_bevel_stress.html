@@ -32,10 +32,52 @@
             flex-direction: column;
         }
 
-        #pdf-panel iframe {
-            flex: 1;
-            border: none;
+        /* PDF Container for crosshairs */
+        .pdf-container {
+            position: relative;
             width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* PDF Crosshairs Feature */
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .crosshair-line.active {
+            opacity: 0.8;
         }
 
         #calculator-panel {
@@ -57,37 +99,77 @@
             margin-bottom: 20px;
         }
 
-        .controls {
+        /* Button Group */
+        .button-group {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .btn {
-            padding: 8px 16px;
+        .save-btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            flex: 1;
         }
 
-        .btn-primary {
-            background: #3498db;
+        .save-btn:hover {
+            background: #218838;
+        }
+
+        .reset-btn {
+            background: #dc3545;
             color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
         }
 
-        .btn-primary:hover {
-            background: #2980b9;
+        .reset-btn:hover {
+            background: #c82333;
         }
 
-        .btn-secondary {
-            background: #95a5a6;
+        .toggle-crosshairs-btn {
+            background: #6c757d;
             color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
         }
 
-        .btn-secondary:hover {
-            background: #7f8c8d;
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
         }
 
         .section {
@@ -116,6 +198,20 @@
             margin-bottom: 10px;
             font-size: 14px;
             color: #1976d2;
+        }
+
+        /* PDF navigation link styling */
+        .info-box a,
+        .bevel-info a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .info-box a:hover,
+        .bevel-info a:hover {
+            color: #004499;
         }
 
         .bevel-info {
@@ -238,6 +334,17 @@
             margin-top: 5px;
         }
 
+        .hint a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .hint a:hover {
+            color: #004499;
+        }
+
         /* Tab System */
         .tabs {
             display: flex;
@@ -316,7 +423,14 @@
 <body>
     <!-- PDF Panel -->
     <div id="pdf-panel">
-        <iframe src="../../documents/gears/bevel_stress.pdf" type="application/pdf"></iframe>
+        <div class="pdf-container">
+            <embed src="../../documents/gears/bevel_stress.pdf" type="application/pdf" id="pdf">
+            <div class="click-overlay" id="click-overlay"></div>
+            <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+            </svg>
+        </div>
     </div>
 
     <!-- Calculator Panel -->
@@ -324,13 +438,16 @@
         <h1>⚙️ Bevel Gear Stress Calculator</h1>
         <p class="subtitle">Complete bending and contact stress analysis for bevel gears</p>
 
-        <div class="controls">
-            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
-            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        <!-- Button Group -->
+        <div class="button-group">
+            <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+            <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+            <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
         </div>
 
         <div class="bevel-info">
             <strong>📋 Bevel Gear Note:</strong> Bevel gears use different factors (K<sub>mb</sub>, K<sub>s</sub>, C<sub>s</sub>, C<sub>xc</sub>) and stress cycle factors (K<sub>L</sub>, C<sub>L</sub>) compared to spur gears.
+            It is recommended to also have the spur stress analysis document open alongside this. 
         </div>
 
         <!-- Tab Navigation -->
@@ -349,7 +466,7 @@
 
             <!-- Step 1-2: Overload Factor -->
             <h3>Step 1-2: Overload Factor</h3>
-            <div class="info-box">Look up K<sub>o</sub> from Table 9-1 based on shock from power source and driven machine</div>
+            <div class="info-box">📊 <strong>MANUAL LOOKUP</strong> - Look up K<sub>o</sub> from <a href="#" onclick="goToPage(1)">Table 9-1</a> based on shock from power source and driven machine</div>
 
             <div class="var-input">
                 <label>K<sub>o</sub> =</label>
@@ -403,13 +520,13 @@
                     <span>= (π ×</span>
                     <div class="var-input">
                         <label>D =</label>
-                        <input type="number" id="D" step="0.0001" oninput="syncInput('D', 'D'); markAsUser('D'); calculate()">
+                        <input type="number" id="D" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
                         <span class="unit">in</span>
                     </div>
                     <span>×</span>
                     <div class="var-input">
                         <label>n =</label>
-                        <input type="number" id="n" step="0.1" oninput="syncInput('n', 'n'); markAsUser('n'); calculate()">
+                        <input type="number" id="n" step="any" oninput="syncAllInstances('n'); markAsUser('n'); calculate()">
                         <span class="unit">rpm</span>
                     </div>
                     <span>) / 12</span>
@@ -513,7 +630,7 @@
             <!-- Steps 7-8: Quality Number and Dynamic Factor -->
             <h3>Steps 7-8: Quality Number and Dynamic Factor</h3>
             <div class="info-box">
-                Look up A<sub>v</sub> from Table 9-5 based on application or pitch line speed
+                📊 <strong>MANUAL LOOKUP</strong> - Look up A<sub>v</sub> from <a href="#" onclick="goToPage(2)">Table 9-5</a> based on application or pitch line speed
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -522,7 +639,7 @@
             </div>
 
             <div class="info-box">
-                Look up K<sub>v</sub> from dynamic factor graph using A<sub>v</sub> and v<sub>t</sub>
+                📈 <strong>MANUAL LOOKUP</strong> - Look up K<sub>v</sub> from <a href="#" onclick="goToPage(2)">dynamic factor graph</a> using A<sub>v</sub> and v<sub>t</sub>
             </div>
 
             <div class="var-input">
@@ -535,12 +652,19 @@
             <!-- Step 9: Geometry Factor J -->
             <h3>Step 9: Geometry Factor J</h3>
             <div class="info-box">
-                Look up J from bevel gear geometry factor graph (Figure in PDF) using number of teeth in mate
+                📈 <strong>MANUAL LOOKUP</strong> - Look up J from <a href="#" onclick="goToPage(3)">bevel gear geometry factor graph</a><br><br>
+                <strong>How to use the graph:</strong><br>
+                • Calculate J for <strong>both pinion and gear</strong> separately<br>
+                • For pinion: Use pinion curve, x-axis = number of teeth in <strong>gear</strong> (N<sub>G</sub>)<br>
+                • For gear: Use gear curve, x-axis = number of teeth in <strong>pinion</strong> (N<sub>P</sub>)<br>
+                • Read J value from y-axis at the intersection<br>
+                • Use the lower J value (more conservative) for stress calculations
             </div>
 
             <div class="var-input">
                 <label>J =</label>
                 <input type="number" id="J" step="0.0001" oninput="syncAllInstances('J'); markAsUser('J'); calculate()">
+                <span class="unit">(use lower of J<sub>P</sub> and J<sub>G</sub>)</span>
             </div>
 
             <div class="divider"></div>
@@ -643,19 +767,19 @@
                     <span>×</span>
                     <div class="var-input">
                         <label>n =</label>
-                        <input type="number" id="n_eq13" step="0.1" oninput="syncInput('n', 'n_eq13'); calculate()">
+                        <input type="number" id="n_eq13" step="any" oninput="syncInput('n', 'n_eq13'); calculate()">
                         <span class="unit">rpm</span>
                     </div>
                 </div>
             </div>
-            <p class="hint">Look up lifetime from Table 9-12 based on application</p>
+            <p class="hint">Look up lifetime from <a href="#" onclick="goToPage(4)">Table 9-12</a> based on application</p>
 
             <div class="divider"></div>
 
             <!-- Step 14: Stress Cycle Factor KL (BEVEL-SPECIFIC) -->
             <h3>Step 14: Stress Cycle Factor K<sub>L</sub> (BEVEL-SPECIFIC)</h3>
             <div class="bevel-info">
-                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific K<sub>L</sub> graph (not Y<sub>N</sub>) with N<sub>L</sub>
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific <a href="#" onclick="goToPage(5)">K<sub>L</sub> graph</a> (not Y<sub>N</sub>) with N<sub>L</sub>
             </div>
 
             <div class="var-input">
@@ -713,6 +837,42 @@
             <h3>Step 16: Material Selection (Bending)</h3>
             <div class="bevel-info">
                 <strong>⚠️ BEVEL-SPECIFIC:</strong> Use bevel-specific material graphs (different from spur!)
+            </div>
+
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3;">
+                🧮 <strong>BEVEL BENDING STRESS EQUATIONS</strong><br>
+                <div style="margin-top: 10px;">
+                    <strong>Grade 1:</strong> s<sub>at</sub> = 0.044 × HB + 2.10 (ksi)<br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>at</sub> =</label>
+                        <input type="number" id="bevel_sat_g1_input" step="0.0001" style="width: 100px;" oninput="calculateBevelSatG1FromStress()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="bevel_HB_g1_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="bevel_HB_g1_input" step="1" style="width: 100px;" oninput="calculateBevelSatG1FromHB()">
+                        <span>→ s<sub>at</sub> =</span>
+                        <input type="number" id="bevel_sat_g1_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>Grade 2:</strong> s<sub>at</sub> = 0.048 × HB + 5.989 (ksi)<br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>at</sub> =</label>
+                        <input type="number" id="bevel_sat_g2_input" step="0.0001" style="width: 100px;" oninput="calculateBevelSatG2FromStress()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="bevel_HB_g2_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="bevel_HB_g2_input" step="1" style="width: 100px;" oninput="calculateBevelSatG2FromHB()">
+                        <span>→ s<sub>at</sub> =</span>
+                        <input type="number" id="bevel_sat_g2_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -786,7 +946,7 @@
             <!-- Step 17: Elastic Coefficient -->
             <h3>Step 17: Elastic Coefficient</h3>
             <div class="info-box">
-                C<sub>p</sub> = 2300 psi<sup>1/2</sup> for steel gears (look up Table 9-7 for other materials)
+                📊 C<sub>p</sub> = 2300 psi<sup>1/2</sup> for steel gears (look up <a href="#" onclick="goToPage(6)">Table 9-7</a> for other materials)
             </div>
 
             <div class="var-input">
@@ -842,7 +1002,7 @@
             <!-- Step 20: Pitting Geometry Factor I -->
             <h3>Step 20: Pitting Geometry Factor I</h3>
             <div class="info-box">
-                Look up I from bevel gear pitting geometry factor graph (Figure in PDF)
+                📈 <strong>MANUAL LOOKUP</strong> - Look up I from <a href="#" onclick="goToPage(6)">bevel gear pitting geometry factor graph</a>
             </div>
 
             <div class="var-input">
@@ -944,7 +1104,7 @@
             <!-- Step 23: Stress Cycle Factor CL (BEVEL-SPECIFIC) -->
             <h3>Step 23: Stress Cycle Factor C<sub>L</sub> (BEVEL-SPECIFIC)</h3>
             <div class="bevel-info">
-                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific C<sub>L</sub> graph (not Z<sub>N</sub>) with N<sub>L</sub>
+                <strong>⚠️ DIFFERENT FROM SPUR!</strong> Use bevel-specific <a href="#" onclick="goToPage(7)">C<sub>L</sub> graph</a> (not Z<sub>N</sub>) with N<sub>L</sub>
             </div>
 
             <div class="var-input">
@@ -1002,6 +1162,42 @@
             <h3>Step 25: Material Selection (Contact)</h3>
             <div class="bevel-info">
                 <strong>⚠️ BEVEL-SPECIFIC:</strong> Use bevel-specific contact stress material graphs
+            </div>
+
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3;">
+                🧮 <strong>BEVEL CONTACT STRESS EQUATIONS</strong><br>
+                <div style="margin-top: 10px;">
+                    <strong>Grade 1:</strong> s<sub>ac</sub> = 0.341 × HB + 23.62 (ksi)<br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>ac</sub> =</label>
+                        <input type="number" id="bevel_sac_g1_input" step="0.0001" style="width: 100px;" oninput="calculateBevelSacG1FromStress()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="bevel_HB_contact_g1_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="bevel_HB_contact_g1_input" step="1" style="width: 100px;" oninput="calculateBevelSacG1FromHB()">
+                        <span>→ s<sub>ac</sub> =</span>
+                        <input type="number" id="bevel_sac_g1_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>Grade 2:</strong> s<sub>ac</sub> = 0.3636 × HB + 29.56 (ksi)<br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>ac</sub> =</label>
+                        <input type="number" id="bevel_sac_g2_input" step="0.0001" style="width: 100px;" oninput="calculateBevelSacG2FromStress()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="bevel_HB_contact_g2_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="bevel_HB_contact_g2_input" step="1" style="width: 100px;" oninput="calculateBevelSacG2FromHB()">
+                        <span>→ s<sub>ac</sub> =</span>
+                        <input type="number" id="bevel_sac_g2_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -1338,13 +1534,13 @@
                     <tr>
                         <td>n</td>
                         <td>Speed</td>
-                        <td><input type="number" id="var_n" step="0.1" oninput="syncAllInstances('var_n'); markAsUser('var_n'); calculate()"></td>
+                        <td><input type="number" id="var_n" step="any" oninput="syncAllInstances('var_n'); markAsUser('var_n'); calculate()"></td>
                         <td>rpm</td>
                     </tr>
                     <tr>
                         <td>D</td>
                         <td>Pitch Diameter</td>
-                        <td><input type="number" id="var_D" step="0.0001" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
+                        <td><input type="number" id="var_D" step="any" oninput="syncAllInstances('var_D'); markAsUser('var_D'); calculate()"></td>
                         <td>in</td>
                     </tr>
                     <tr>
@@ -1597,10 +1793,17 @@
         // User-modified values tracking
         const userValues = new Set();
 
+        // Crosshairs state
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
         // Sync input values across multiple instances
         function syncInput(mainId, sourceId) {
             const sourceEl = document.getElementById(sourceId);
             const mainEl = document.getElementById(mainId);
+
+            // Save cursor position
+            const cursorPos = sourceEl ? sourceEl.selectionStart : null;
 
             if (sourceEl && mainEl) {
                 mainEl.value = sourceEl.value;
@@ -1609,6 +1812,12 @@
             // Sync to all instances including Variables tab
             syncAllInstances(sourceId);
             markAsUser(mainId);
+
+            // Restore cursor position before calculate
+            if (sourceEl && cursorPos !== null) {
+                sourceEl.setSelectionRange(cursorPos, cursorPos);
+            }
+
             calculate();
         }
 
@@ -1700,6 +1909,8 @@
             const changedInput = document.getElementById(changedId);
             if (!changedInput) return;
 
+            // Save cursor position of the changed field
+            const cursorPos = changedInput.selectionStart;
             const newValue = changedInput.value;
 
             instances.forEach(instanceId => {
@@ -1710,6 +1921,11 @@
                     }
                 }
             });
+
+            // Restore cursor position for the field that was actually changed
+            if (cursorPos !== null) {
+                changedInput.setSelectionRange(cursorPos, cursorPos);
+            }
         }
 
         // Mark field as user-modified
@@ -1742,6 +1958,90 @@
                 } else {
                     el.classList.remove('computed');
                 }
+            }
+        }
+
+        // Bevel Bending Stress Material Calculators (Grade 1: s_at = 0.044×HB + 2.10)
+        function calculateBevelSatG1FromStress() {
+            const sat = parseFloat(document.getElementById('bevel_sat_g1_input').value);
+            if (!isNaN(sat)) {
+                const HB = (sat - 2.10) / 0.044;
+                document.getElementById('bevel_HB_g1_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('bevel_HB_g1_output').value = '';
+            }
+        }
+
+        function calculateBevelSatG1FromHB() {
+            const HB = parseFloat(document.getElementById('bevel_HB_g1_input').value);
+            if (!isNaN(HB)) {
+                const sat = 0.044 * HB + 2.10;
+                document.getElementById('bevel_sat_g1_output').value = sat.toFixed(2);
+            } else {
+                document.getElementById('bevel_sat_g1_output').value = '';
+            }
+        }
+
+        // Bevel Bending Stress Material Calculators (Grade 2: s_at = 0.048×HB + 5.989)
+        function calculateBevelSatG2FromStress() {
+            const sat = parseFloat(document.getElementById('bevel_sat_g2_input').value);
+            if (!isNaN(sat)) {
+                const HB = (sat - 5.989) / 0.048;
+                document.getElementById('bevel_HB_g2_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('bevel_HB_g2_output').value = '';
+            }
+        }
+
+        function calculateBevelSatG2FromHB() {
+            const HB = parseFloat(document.getElementById('bevel_HB_g2_input').value);
+            if (!isNaN(HB)) {
+                const sat = 0.048 * HB + 5.989;
+                document.getElementById('bevel_sat_g2_output').value = sat.toFixed(2);
+            } else {
+                document.getElementById('bevel_sat_g2_output').value = '';
+            }
+        }
+
+        // Bevel Contact Stress Material Calculators (Grade 1: s_ac = 0.341×HB + 23.62)
+        function calculateBevelSacG1FromStress() {
+            const sac = parseFloat(document.getElementById('bevel_sac_g1_input').value);
+            if (!isNaN(sac)) {
+                const HB = (sac - 23.62) / 0.341;
+                document.getElementById('bevel_HB_contact_g1_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('bevel_HB_contact_g1_output').value = '';
+            }
+        }
+
+        function calculateBevelSacG1FromHB() {
+            const HB = parseFloat(document.getElementById('bevel_HB_contact_g1_input').value);
+            if (!isNaN(HB)) {
+                const sac = 0.341 * HB + 23.62;
+                document.getElementById('bevel_sac_g1_output').value = sac.toFixed(2);
+            } else {
+                document.getElementById('bevel_sac_g1_output').value = '';
+            }
+        }
+
+        // Bevel Contact Stress Material Calculators (Grade 2: s_ac = 0.3636×HB + 29.56)
+        function calculateBevelSacG2FromStress() {
+            const sac = parseFloat(document.getElementById('bevel_sac_g2_input').value);
+            if (!isNaN(sac)) {
+                const HB = (sac - 29.56) / 0.3636;
+                document.getElementById('bevel_HB_contact_g2_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('bevel_HB_contact_g2_output').value = '';
+            }
+        }
+
+        function calculateBevelSacG2FromHB() {
+            const HB = parseFloat(document.getElementById('bevel_HB_contact_g2_input').value);
+            if (!isNaN(HB)) {
+                const sac = 0.3636 * HB + 29.56;
+                document.getElementById('bevel_sac_g2_output').value = sac.toFixed(2);
+            } else {
+                document.getElementById('bevel_sac_g2_output').value = '';
             }
         }
 
@@ -2014,8 +2314,93 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         // Load session on page load
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             if (window.MathJax) {
                 MathJax.typesetPromise();

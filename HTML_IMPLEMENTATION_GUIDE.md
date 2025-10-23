@@ -93,10 +93,107 @@ Each calculator is a single HTML file with the following structure:
 ## Core Features
 
 ### 1. Two-Panel Layout
-- **Left panel**: Embedded PDF reference document (resizable)
+- **Left panel**: Embedded PDF reference document with interactive crosshairs
 - **Right panel**: Interactive calculator with scrolling
 
-### 2. Three-Tab System
+### 2. PDF Page Navigation Feature
+
+**Purpose:** Allow users to jump directly to the page containing a referenced table or graph with a single click.
+
+**How it works:**
+- When a table/graph is referenced (e.g., "Look up from Table 7-1"), provide a clickable link
+- Clicking the link jumps the PDF viewer to the specific page
+- Uses PDF URL fragment syntax: `file.pdf#page=5`
+
+**Important:** Use `<embed>` tag (not `<iframe>`) with id="pdf" for reliable PDF page navigation.
+
+**Implementation:**
+```html
+<!-- PDF embed with id="pdf" -->
+<embed src="../../documents/your_pdf.pdf" type="application/pdf" id="pdf">
+
+<!-- Info box with page navigation link -->
+<div class="info-box">
+    📊 <strong>MANUAL LOOKUP</strong> - Look up K<sub>s</sub> from <a href="#" onclick="goToPage(3)">Table 7-1</a> based on machine type
+</div>
+```
+
+**JavaScript function:**
+```javascript
+function goToPage(page) {
+    const embed = document.getElementById("pdf");
+    const currSrc = embed.src.split('#')[0];
+
+    // Force complete reload by clearing and resetting with delay
+    embed.src = '';
+    setTimeout(() => {
+        embed.src = `${currSrc}#page=${page}`;
+    }, 50);
+}
+```
+
+**Important:**
+- Use `embed.src` (property) not `embed.getAttribute('src')` - the `.src` property returns the fully resolved absolute URL
+- The function clears the embed first (`src = ''`) then reloads with the page parameter after a brief delay
+- This forces a complete reload, which is necessary for reliable page navigation with `<embed>` tags
+
+**Note:** The PDF will briefly disappear and reload when navigating to a new page. This is expected behavior to force the browser to load the correct page.
+
+**CSS styling:**
+```css
+/* Style both iframe and embed for compatibility */
+.pdf-column embed,
+.pdf-column iframe {
+    width: 100%;
+    height: 90vh;
+    border: none;
+    border-radius: 8px;
+}
+
+/* PDF navigation link styling */
+.warning-box a,
+.info-box a {
+    color: #0066cc;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.warning-box a:hover,
+.info-box a:hover {
+    color: #004499;
+}
+```
+
+**Required in specification:**
+- All table/graph references MUST include page numbers
+- Format: "Table 7-1 (page 3)", "Figure 14-2 (page 11)"
+
+### 3. PDF Crosshairs Feature
+
+**Purpose:** Help users read precise values from tables and graphs by displaying crosshair guide lines.
+
+**Key Design Decision - Toggle Button Approach:**
+- The feature uses a toggle button to enable/disable crosshairs functionality
+- **Why?** The click overlay that captures crosshair clicks blocks PDF scrolling/zooming
+- **Solution:** Overlay is hidden by default, shown only when user explicitly enables crosshairs
+- **Result:** PDF is fully interactive by default, crosshairs available when needed
+
+**Functionality:**
+- **Toggle button** to enable/disable the crosshairs feature
+- **When DISABLED (default):**
+  - Click overlay is hidden
+  - PDF is fully interactive (scroll, zoom, text selection, link clicking all work)
+  - Button shows gray with text "🎯 Enable Crosshairs"
+- **When ENABLED:**
+  - Click overlay becomes visible (transparent layer above PDF)
+  - Crosshair cursor (➕) appears when hovering over PDF
+  - Clicking PDF toggles crosshairs on/off at click position
+  - Button shows green with text "🎯 Disable Crosshairs"
+- **Lines stay static** and extend to the edges of the PDF viewer for precise reading
+- **Useful for** reading values from tables, graphs, and aligning with equations
+
+### 3. Three-Tab System
 - **Procedure Tab**: Step-by-step workflow following the PDF
 - **General Equations Tab**: All equations with editable input boxes
 - **Variables Tab**: Complete table of all variables with inputs
@@ -633,9 +730,11 @@ Quick reference table based on your specification's Source Type column:
         <h1>Calculator Title</h1>
         <p class="subtitle">Brief description</p>
 
-        <div class="controls">
-            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
-            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        <!-- IMPORTANT: Control buttons MUST be at the top, immediately after title -->
+        <div class="button-group">
+            <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+            <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+            <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
         </div>
 
         <!-- Tab buttons -->
@@ -740,7 +839,43 @@ body {
 }
 ```
 
-3. **Input styling**
+3. **Toggle Crosshairs Button**
+```css
+/* Button styling */
+.toggle-crosshairs-btn {
+    background: #6c757d;  /* Gray when disabled (default) */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle-crosshairs-btn:hover {
+    background: #5a6268;  /* Darker gray on hover */
+}
+
+/* Active state - when crosshairs are enabled */
+.toggle-crosshairs-btn.active {
+    background: #28a745;  /* Green when enabled */
+}
+
+.toggle-crosshairs-btn.active:hover {
+    background: #218838;  /* Darker green on hover */
+}
+```
+
+**Important Notes:**
+- The `.active` class is toggled by the `toggleCrosshairsFeature()` function
+- Color coding provides instant visual feedback:
+  - Gray = Crosshairs DISABLED, PDF fully interactive
+  - Green = Crosshairs ENABLED, click overlay active
+- Button text also changes: "Enable Crosshairs" ↔ "Disable Crosshairs"
+
+4. **Input styling**
 ```css
 input[type="number"] {
     padding: 5px;
@@ -1095,6 +1230,389 @@ function showTab(tabName) {
     }
 }
 ```
+
+---
+
+## PDF Crosshairs Feature
+
+The PDF crosshairs feature helps users read values from tables and graphs by displaying vertical and horizontal guide lines at the click position.
+
+---
+
+### Quick Reference Summary
+
+**What:** Toggle-enabled crosshair guide lines for precise PDF measurements
+
+**Why:** Users need to read exact values from tables/graphs, but also need full PDF interactivity (scrolling/zooming)
+
+**How:**
+1. Toggle button enables/disables a transparent click overlay
+2. When enabled: Overlay captures clicks to place/remove crosshairs
+3. When disabled: Overlay hidden, PDF fully interactive
+
+**Key Components:**
+- **Toggle Button** - Gray (disabled) / Green (enabled)
+- **Click Overlay** - Transparent div, captures clicks when visible
+- **SVG Crosshairs** - Red dashed lines, pointer-events: none
+- **JavaScript** - `initCrosshairs()` + `toggleCrosshairsFeature()`
+
+**User Flow:**
+```
+Default → PDF scrollable
+Click "Enable" → Overlay appears → Crosshair cursor
+Click PDF → Crosshairs appear/disappear
+Click "Disable" → Overlay hidden → PDF scrollable again
+```
+
+**Implementation Checklist:**
+- [ ] Add toggle button to HTML (with Save/Reset)
+- [ ] Add click-overlay div (initially hidden)
+- [ ] Add SVG with crosshair lines
+- [ ] Implement toggleCrosshairsFeature() function
+- [ ] Start with overlay hidden: `clickOverlay.style.display = 'none'`
+- [ ] Test: Enable → Place crosshairs → Disable → PDF scrolls
+
+---
+
+### HTML Structure for PDF Panel
+
+```html
+<div id="pdf-panel">
+    <div class="pdf-container">
+        <embed src="../../documents/your_pdf.pdf" type="application/pdf" id="pdf-embed">
+        <div class="click-overlay" id="click-overlay"></div>
+        <svg id="pdf-crosshairs" class="crosshairs-overlay">
+            <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+            <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+        </svg>
+    </div>
+</div>
+```
+
+### CSS for Crosshairs
+
+```css
+.pdf-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.pdf-container embed {
+    width: 100%;
+    height: 90vh;
+    border: none;
+    border-radius: 8px;
+}
+
+.click-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    cursor: crosshair;
+}
+
+.crosshairs-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;  /* Don't block PDF scrolling/interaction */
+    z-index: 10;
+}
+
+.crosshair-line {
+    stroke: #ff0000;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.crosshair-line.active {
+    opacity: 0.8;
+}
+```
+
+### JavaScript for Crosshairs
+
+```javascript
+let crosshairsActive = false;
+let crosshairsFeatureEnabled = false;
+
+// Initialize crosshairs functionality
+function initCrosshairs() {
+    const pdfContainer = document.querySelector('.pdf-container');
+    const clickOverlay = document.getElementById('click-overlay');
+    const svg = document.getElementById('pdf-crosshairs');
+    const verticalLine = document.getElementById('crosshair-vertical');
+    const horizontalLine = document.getElementById('crosshair-horizontal');
+
+    if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+    // Start with overlay hidden (PDF fully interactive by default)
+    clickOverlay.style.display = 'none';
+
+    // Listen for clicks on the click overlay - toggle crosshairs on/off
+    clickOverlay.addEventListener('click', function(e) {
+        if (!crosshairsActive) {
+            // SHOW CROSSHAIRS
+            // Get click position relative to container
+            const rect = pdfContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Update line positions (static - don't move with mouse)
+            verticalLine.setAttribute('x1', x);
+            verticalLine.setAttribute('x2', x);
+            verticalLine.setAttribute('y2', rect.height);
+
+            horizontalLine.setAttribute('y1', y);
+            horizontalLine.setAttribute('y2', y);
+            horizontalLine.setAttribute('x2', rect.width);
+
+            // Show lines
+            verticalLine.classList.add('active');
+            horizontalLine.classList.add('active');
+            crosshairsActive = true;
+        } else {
+            // HIDE CROSSHAIRS
+            verticalLine.classList.remove('active');
+            horizontalLine.classList.remove('active');
+            crosshairsActive = false;
+        }
+    });
+}
+
+// Toggle crosshairs feature on/off
+function toggleCrosshairsFeature() {
+    const clickOverlay = document.getElementById('click-overlay');
+    const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+    const verticalLine = document.getElementById('crosshair-vertical');
+    const horizontalLine = document.getElementById('crosshair-horizontal');
+
+    if (!clickOverlay || !toggleBtn) return;
+
+    // Toggle the enabled state
+    crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+    if (crosshairsFeatureEnabled) {
+        // ENABLE CROSSHAIRS FEATURE
+        clickOverlay.style.display = 'block';  // Show overlay (captures clicks)
+        toggleBtn.textContent = '🎯 Disable Crosshairs';  // Update button text
+        toggleBtn.classList.add('active');  // Turn button green
+    } else {
+        // DISABLE CROSSHAIRS FEATURE
+        clickOverlay.style.display = 'none';  // Hide overlay (PDF interactive)
+        toggleBtn.textContent = '🎯 Enable Crosshairs';  // Update button text
+        toggleBtn.classList.remove('active');  // Turn button gray
+
+        // Also hide any active crosshairs when disabling
+        if (crosshairsActive) {
+            verticalLine.classList.remove('active');
+            horizontalLine.classList.remove('active');
+            crosshairsActive = false;
+        }
+    }
+}
+
+/**
+ * HOW THE TOGGLE MECHANISM WORKS:
+ *
+ * 1. Default State (Page Load):
+ *    - clickOverlay.style.display = 'none'
+ *    - PDF is fully interactive (scrolling, zooming work)
+ *    - Button is gray, shows "Enable Crosshairs"
+ *
+ * 2. User Clicks "Enable Crosshairs":
+ *    - clickOverlay.style.display = 'block'
+ *    - Transparent overlay now covers PDF
+ *    - Overlay captures all clicks (for placing crosshairs)
+ *    - PDF scrolling is blocked (trade-off for crosshair placement)
+ *    - Button turns green, shows "Disable Crosshairs"
+ *    - User can now click PDF to place/remove crosshairs
+ *
+ * 3. User Clicks "Disable Crosshairs":
+ *    - clickOverlay.style.display = 'none'
+ *    - Overlay hidden, no longer captures clicks
+ *    - PDF is fully interactive again
+ *    - Any visible crosshairs are removed
+ *    - Button turns gray, shows "Enable Crosshairs"
+ *
+ * KEY INSIGHT: The overlay must be hidden to allow PDF interaction.
+ * This is why we use a toggle button instead of always-on crosshairs.
+ */
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', function() {
+    initCrosshairs();
+    loadSession();
+});
+```
+
+### Usage
+
+#### Step-by-Step User Workflow
+
+**Scenario 1: Using Crosshairs to Read a Table Value**
+
+1. **Open the calculator** - PDF is fully scrollable/zoomable by default
+2. **Scroll to the table** you need to read from (PDF works normally)
+3. **Click "Enable Crosshairs" button**
+   - Button turns green
+   - Crosshair cursor (➕) appears when hovering over PDF
+4. **Click on the table** at the intersection of the row/column you need
+   - Red crosshair lines appear, extending to edges
+   - Lines stay static, making it easy to trace to axis values
+5. **Read the value** using the aligned crosshairs
+6. **Click on PDF again** to remove crosshairs (or leave them for reference)
+7. **Click "Disable Crosshairs" button**
+   - Button turns gray
+   - Crosshairs disappear
+   - PDF becomes fully interactive again
+8. **Continue scrolling** or zooming the PDF normally
+
+**Scenario 2: Quick Toggle Workflow**
+
+1. **Need to measure something?**
+   - Click "Enable Crosshairs" → Click PDF → Read value
+2. **Done measuring?**
+   - Click "Disable Crosshairs" → Resume normal PDF use
+3. **Need to measure again?**
+   - Click "Enable Crosshairs" → Click new position → Read value
+
+#### How It Works Internally
+
+**When Crosshairs are DISABLED (default state):**
+- `clickOverlay.style.display = 'none'`
+- Click overlay is completely hidden
+- All clicks go directly to the PDF embed element
+- PDF's native controls work: scroll, zoom, text selection, links
+- Button is gray, shows "🎯 Enable Crosshairs"
+
+**When Crosshairs are ENABLED:**
+- `clickOverlay.style.display = 'block'`
+- Transparent overlay covers the PDF
+- Overlay captures all click events (for placing crosshairs)
+- PDF scrolling is blocked (overlay is in front)
+- Button is green, shows "🎯 Disable Crosshairs"
+- Clicking PDF toggles crosshair visibility at click position
+
+#### Benefits of Toggle Button Approach
+
+✅ **No interference by default** - PDF works exactly like a normal embedded PDF
+✅ **Opt-in feature** - Users only enable when they need precise measurements
+✅ **Clear state indication** - Button color shows whether feature is active
+✅ **Flexible workflow** - Easy to switch between measuring and browsing
+✅ **Clean UX** - No permanent overlay blocking interaction
+
+This feature is especially useful for:
+- Reading values from tables (align with row/column)
+- Reading graph coordinates
+- Measuring distances in diagrams
+- Aligning with specific points on charts and figures
+
+---
+
+### Implementation Notes and Best Practices
+
+#### Critical Requirements
+
+**1. Click Overlay Must Start Hidden**
+```javascript
+// In initCrosshairs() function:
+clickOverlay.style.display = 'none';  // CRITICAL - Start hidden
+```
+- **Why?** Ensures PDF is interactive on page load
+- **Common mistake:** Forgetting to hide overlay initially
+
+**2. Toggle Function Must Update 3 Things**
+```javascript
+function toggleCrosshairsFeature() {
+    // 1. Toggle the boolean state
+    crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+    // 2. Show/hide the overlay
+    clickOverlay.style.display = crosshairsFeatureEnabled ? 'block' : 'none';
+
+    // 3. Update button appearance
+    toggleBtn.textContent = crosshairsFeatureEnabled ? '🎯 Disable' : '🎯 Enable';
+    toggleBtn.classList.toggle('active');
+}
+```
+
+**3. Clean Up on Disable**
+- Always remove any active crosshairs when disabling the feature
+- Prevents orphaned crosshairs from staying visible
+- See implementation in code example above
+
+#### Common Issues and Solutions
+
+**Issue 1: PDF scrolling doesn't work**
+- **Cause:** Click overlay is visible (not hidden)
+- **Solution:** Ensure `clickOverlay.style.display = 'none'` on page load and when disabled
+
+**Issue 2: Crosshairs don't appear when clicking**
+- **Cause:** Overlay is hidden when it should be visible
+- **Solution:** Check that toggle button properly shows overlay when enabled
+
+**Issue 3: Button doesn't change color**
+- **Cause:** `.active` class not being toggled
+- **Solution:** Use `classList.add('active')` when enabling, `classList.remove('active')` when disabling
+
+**Issue 4: Crosshairs stay visible after disabling**
+- **Cause:** Forgetting to clear crosshairs in disable logic
+- **Solution:** Add cleanup code that removes `.active` class from crosshair lines
+
+#### Styling Considerations
+
+**Button Placement:**
+- Place in button-group with Save/Reset buttons
+- Users should see it immediately (top of page, after title)
+- Consistent positioning across all calculator pages
+
+**Color Choices:**
+- Gray (#6c757d) for disabled: Neutral, indicates inactive state
+- Green (#28a745) for enabled: Positive action, clearly different from gray
+- Avoid red/yellow for toggle (reserved for reset/warning buttons)
+
+**Crosshair Line Styling:**
+- Red (#ff0000) lines: High contrast, easy to see against most PDF backgrounds
+- Dashed pattern: Distinguishes from PDF content
+- 80% opacity: Visible but not overwhelming
+- 2px width: Thin enough for precision, thick enough to see
+
+#### Testing Checklist
+
+When implementing crosshairs, test these scenarios:
+
+- [ ] **Default state:** Open page → PDF scrolls normally
+- [ ] **Enable:** Click button → Button turns green → Crosshair cursor appears
+- [ ] **Place crosshairs:** Click PDF → Red lines appear at exact position
+- [ ] **Remove crosshairs:** Click PDF again → Lines disappear
+- [ ] **Reposition:** Click PDF third time → Lines appear at new position
+- [ ] **Disable:** Click button → Button turns gray → Lines disappear → PDF scrolls normally
+- [ ] **Edge case:** Enable → Place crosshairs → Disable → Verify lines removed
+- [ ] **Edge case:** Enable → Disable (without placing) → No errors
+
+#### Browser Compatibility
+
+The crosshairs feature uses standard DOM APIs and should work in:
+- ✅ Chrome/Edge (Chromium) - Tested
+- ✅ Firefox - Works
+- ✅ Safari - Works (may have slight styling differences)
+
+**Fallback:** If SVG doesn't render, crosshairs simply won't appear (graceful degradation).
+
+#### Performance Considerations
+
+- **Minimal overhead:** Feature only active when explicitly enabled
+- **No continuous tracking:** Lines update only on click, not on mouse move
+- **Small footprint:** SVG overlay is lightweight, doesn't impact PDF rendering
 
 ---
 
@@ -1462,10 +1980,13 @@ Use this checklist when implementing a new HTML calculator from a completed spec
 
 ### HTML Structure
 - [ ] Create two-panel layout (PDF left, calculator right)
+- [ ] Add PDF container with relative positioning
+- [ ] Add click-overlay div for capturing clicks (z-index: 5, initially hidden)
+- [ ] Add PDF crosshairs SVG overlay with vertical/horizontal lines (z-index: 10, pointer-events: none)
 - [ ] Add header with title and description
-- [ ] Add Save/Reset buttons
+- [ ] Add Save/Reset/Toggle Crosshairs buttons at TOP (immediately after title, before tabs)
 - [ ] Create tabs based on planning decision (typically 3 tabs)
-- [ ] Link to correct PDF in iframe
+- [ ] Link to correct PDF in embed element
 
 ### Procedure Tab
 - [ ] Create step-by-step workflow from PDF
@@ -1516,13 +2037,44 @@ Use this checklist when implementing a new HTML calculator from a completed spec
 - [ ] Implement resetAll() with confirmation
 - [ ] Test save/load/reset functionality
 
+### JavaScript - PDF Page Navigation
+- [ ] Implement goToPage(page) function (simple version using template literals)
+- [ ] Use `<embed>` tag (not `<iframe>`) with id="pdf" for the PDF
+- [ ] Add page navigation links to all table/graph references using format: `<a href="#" onclick="goToPage(N)">Table X-Y</a>`
+- [ ] Verify all page numbers are correct from PDF
+- [ ] Test navigation links jump to correct pages within the embedded PDF
+- [ ] Update CSS to style both iframe and embed elements
+
+### JavaScript - PDF Crosshairs
+- [ ] Implement initCrosshairs() function
+- [ ] Add transparent click-overlay div above PDF (starts HIDDEN)
+- [ ] Add single click event listener to click-overlay that toggles crosshairs
+- [ ] In click handler: check if crosshairsActive
+  - [ ] If false: calculate position, show lines, set crosshairsActive = true
+  - [ ] If true: hide lines, set crosshairsActive = false
+- [ ] Implement toggleCrosshairsFeature() function
+  - [ ] Toggle crosshairsFeatureEnabled boolean
+  - [ ] Show/hide click-overlay based on state
+  - [ ] Update button text and styling
+  - [ ] Clear any active crosshairs when disabling
+- [ ] Ensure SVG has pointer-events: none so it doesn't block clicks to overlay
+- [ ] Lines should stay static at click position (no mousemove tracking)
+- [ ] Test enable button shows overlay (crosshair cursor appears)
+- [ ] Test clicking PDF shows/hides crosshairs
+- [ ] Test disable button hides overlay and restores PDF interaction
+
 ### CSS Styling
-- [ ] Two-panel responsive layout
+- [ ] Two-panel responsive layout with PDF container
+- [ ] PDF page navigation links (style .warning-box a and .info-box a with blue underlined links)
+- [ ] Click overlay styling (transparent, z-index: 5, crosshair cursor)
+- [ ] PDF crosshairs SVG overlay (z-index: 10, pointer-events: none)
+- [ ] Crosshair line styling (red, dashed, opacity transitions)
 - [ ] Tab system styling (active state)
 - [ ] Equation blocks with borders
 - [ ] Input styling (consistent for all inputs)
 - [ ] Variables table styling
-- [ ] Button styling
+- [ ] Button styling (save-btn, reset-btn, toggle-crosshairs-btn at top)
+- [ ] Toggle button active state (gray when off, green when on)
 - [ ] Mobile responsiveness
 
 ### Testing
@@ -1530,6 +2082,19 @@ Use this checklist when implementing a new HTML calculator from a completed spec
 - [ ] Test calculations with various inputs
 - [ ] Test tab navigation and LaTeX rendering
 - [ ] Test session save/load/reset
+- [ ] Test PDF crosshairs workflow:
+  - [ ] Default state: PDF is fully scrollable/interactive
+  - [ ] Click "Enable Crosshairs" button
+    - [ ] Button turns green
+    - [ ] Crosshair cursor appears over PDF
+  - [ ] Click on PDF → crosshairs appear at click position
+  - [ ] Lines stay static and don't move
+  - [ ] Click on PDF again → crosshairs disappear
+  - [ ] Click on PDF third time → crosshairs appear at new position
+  - [ ] Click "Disable Crosshairs" button
+    - [ ] Button turns gray
+    - [ ] Any active crosshairs disappear
+    - [ ] PDF becomes fully interactive again (scrolling works)
 - [ ] Test with empty inputs (no errors)
 - [ ] Test piecewise equations at boundary conditions
 - [ ] Test in multiple browsers

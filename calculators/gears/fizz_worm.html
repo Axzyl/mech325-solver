@@ -30,11 +30,49 @@
             overflow-y: auto;
             max-height: 95vh;
         }
-        .pdf-column embed {
+        .pdf-column embed,
+        .pdf-column iframe {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
+        }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
         }
         .calculator-column {
             flex: 1;
@@ -154,17 +192,74 @@
             margin: 10px 0;
             font-size: 0.9em;
         }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .info-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .info-box a:hover {
+            color: #004499;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
         button {
             padding: 10px 20px;
-            background: #dc3545;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        button:hover {
+        .save-btn {
+            background: #28a745;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            flex: 1;
+        }
+        .reset-btn:hover {
             background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
         }
 
         /* Tab System */
@@ -239,10 +334,24 @@
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/gears/fizz_worm.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/gears/fizz_worm.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Worm Gear Design Calculator</h1>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
 
             <!-- Tab Navigation -->
             <div class="tabs">
@@ -400,7 +509,9 @@
                     <label>μ - Coefficient of Friction:</label>
                     <input type="number" id="mu" step="any" oninput="markAsUser('mu'); calculate()">
                 </div>
-                <div class="note">Look up from friction charts based on V<sub>w</sub> and material pair</div>
+                <div class="info-box">
+                    📊 <strong>MANUAL LOOKUP</strong> - Look up μ from friction charts in the PDF based on V<sub>w</sub> and material pair
+                </div>
             </div>
 
             <div class="section">
@@ -526,7 +637,9 @@
                     <label>y - Lewis Form Factor:</label>
                     <input type="number" id="y" step="any" oninput="markAsUser('y'); calculate()">
                 </div>
-                <div class="note">Look up from Lewis factor table based on N<sub>g</sub></div>
+                <div class="info-box">
+                    📊 <strong>MANUAL LOOKUP</strong> - Look up y from Lewis factor table in the PDF based on N<sub>g</sub>
+                </div>
 
                 <div class="equation-block">
                     <div class="equation-latex">$$\sigma_t = \frac{W_t P_d}{F y}$$</div>
@@ -553,7 +666,9 @@
                     <label>C<sub>v</sub> - Velocity Factor:</label>
                     <input type="number" id="Cv" step="any" oninput="markAsUser('Cv'); calculate()">
                 </div>
-                <div class="note">Look up C<sub>m</sub> and C<sub>v</sub> from tables based on material and velocity</div>
+                <div class="info-box">
+                    📊 <strong>MANUAL LOOKUP</strong> - Look up C<sub>m</sub> and C<sub>v</sub> from tables in the PDF based on material and velocity
+                </div>
             </div>
 
             <div class="section">
@@ -611,7 +726,9 @@
                     <label>K - Wear Factor:</label>
                     <input type="number" id="K" step="any" oninput="markAsUser('K'); calculate()">
                 </div>
-                <div class="note">Look up K from wear factor table based on material combination</div>
+                <div class="info-box">
+                    📊 <strong>MANUAL LOOKUP</strong> - Look up K from wear factor table in the PDF based on material combination
+                </div>
 
                 <div class="equation-block">
                     <div class="equation-latex">$$W_{wear} = D \times F \times K$$</div>
@@ -1005,15 +1122,13 @@
                     </table>
                 </div>
             </div> <!-- End Variables Tab -->
-
-            <div style="margin-top: 20px;">
-                <button onclick="resetAll()">Reset All Values</button>
-            </div>
         </div>
     </div>
 
     <script>
         const userValues = new Set();
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
 
         function markAsUser(varId) {
             userValues.add(varId);
@@ -1282,6 +1397,95 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully! ✓');
+        }
+
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         // Tab Management
         function showTab(tabName) {
             // Hide all tabs
@@ -1394,6 +1598,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             MathJax.typesetPromise();
         });

@@ -32,7 +32,8 @@
             flex-direction: column;
         }
 
-        #pdf-panel iframe {
+        #pdf-panel iframe,
+        #pdf-panel embed {
             flex: 1;
             border: none;
             width: 100%;
@@ -297,12 +298,111 @@
             font-weight: bold;
             color: #2c3e50;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            flex: 1;
+        }
+
+        /* PDF Navigation Links */
+        .info-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .info-box a:hover {
+            color: #004499;
+        }
     </style>
 </head>
 <body>
     <!-- PDF Panel -->
     <div id="pdf-panel">
-        <iframe src="../../documents/gears/spur_stress.pdf" type="application/pdf"></iframe>
+        <div class="pdf-container">
+            <embed src="../../documents/gears/spur_stress.pdf" type="application/pdf" id="pdf">
+            <div class="click-overlay" id="click-overlay"></div>
+            <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+            </svg>
+        </div>
     </div>
 
     <!-- Calculator Panel -->
@@ -310,9 +410,10 @@
         <h1>⚙️ Spur Gear Stress Calculator</h1>
         <p class="subtitle">Complete bending and contact stress analysis for spur gears</p>
 
-        <div class="controls">
-            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
-            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        <div class="button-group">
+            <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+            <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+            <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
         </div>
 
         <!-- Tab Navigation -->
@@ -331,7 +432,7 @@
 
             <!-- Step 1-2: Overload Factor -->
             <h3>Step 1-2: Overload Factor</h3>
-            <div class="info-box">Look up K<sub>o</sub> from Table 9-1 based on shock from power source and driven machine</div>
+            <div class="info-box">📊 <strong>MANUAL LOOKUP</strong> - Look up K<sub>o</sub> from <a href="#" onclick="goToPage(2)">Table 9-1</a> based on shock from power source and driven machine</div>
 
             <div class="var-input">
                 <label>K<sub>o</sub> =</label>
@@ -372,7 +473,7 @@
             <!-- Step 4: Diametral Pitch -->
             <h3>Step 4: Diametral Pitch</h3>
             <div class="info-box">
-                Use Figure 9-11: Plot design power vs pinion speed to find P<sub>d</sub><br>
+                📊 <strong>MANUAL LOOKUP</strong> - Use <a href="#" onclick="goToPage(3)">Figure 9-11</a>: Plot design power vs pinion speed to find P<sub>d</sub><br>
                 ⚠️ Round to the smallest standard number!
             </div>
 
@@ -621,7 +722,7 @@
             <!-- Step 14: Quality Number -->
             <h3>Step 14: Quality Number</h3>
             <div class="info-box">
-                Look up A<sub>v</sub> from Table 9-5 based on application or pitch line speed
+                📊 <strong>MANUAL LOOKUP</strong> - Look up A<sub>v</sub> from <a href="#" onclick="goToPage(5)">Table 9-5</a> based on application or pitch line speed
             </div>
 
             <div class="var-input">
@@ -634,7 +735,7 @@
             <!-- Step 15: Dynamic Factor -->
             <h3>Step 15: Dynamic Factor</h3>
             <div class="info-box">
-                Look up K<sub>v</sub> from graph using A<sub>v</sub> and v<sub>t</sub>
+                📈 <strong>MANUAL LOOKUP</strong> - Look up K<sub>v</sub> from graph using A<sub>v</sub> and v<sub>t</sub>
             </div>
 
             <div class="var-input">
@@ -647,7 +748,7 @@
             <!-- Step 16: Geometry Factor J -->
             <h3>Step 16: Geometry Factor J</h3>
             <div class="info-box">
-                Look up J<sub>P</sub> and J<sub>G</sub> from graphs using N<sub>P</sub> and N<sub>G</sub>
+                📈 <strong>MANUAL LOOKUP</strong> - Look up J<sub>P</sub> and J<sub>G</sub> from graphs using N<sub>P</sub> and N<sub>G</sub>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -667,7 +768,7 @@
             <!-- Step 17: Size Factor -->
             <h3>Step 17: Size Factor</h3>
             <div class="info-box">
-                Look up K<sub>s</sub> from Table 9-2 based on P<sub>d</sub>
+                📊 <strong>MANUAL LOOKUP</strong> - Look up K<sub>s</sub> from <a href="#" onclick="goToPage(8)">Table 9-2</a> based on P<sub>d</sub>
             </div>
 
             <div class="var-input">
@@ -703,8 +804,57 @@
             </div>
 
             <div class="info-box">
-                C<sub>pf</sub>: Use Figure 9-12 with F and F/D<sub>P</sub><br>
-                C<sub>ma</sub>: Use Figure 9-13 with F
+                📈 <strong>MANUAL LOOKUP</strong><br>
+                C<sub>pf</sub>: Use <a href="#" onclick="goToPage(8)">Figure 9-12</a> with F and F/D<sub>P</sub><br>
+                C<sub>ma</sub>: Use <a href="#" onclick="goToPage(8)">Figure 9-13</a> with F
+            </div>
+
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3;">
+                🧮 <strong>C<sub>pf</sub> EQUATION CALCULATOR</strong> (Pinion Proportion Factor)<br>
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label>F =</label>
+                        <input type="number" id="cpf_F_input" step="0.001" style="width: 100px;" oninput="calculateCpf()">
+                        <span>in</span>
+                        <label style="margin-left: 10px;">D<sub>P</sub> =</label>
+                        <input type="number" id="cpf_DP_input" step="0.001" style="width: 100px;" oninput="calculateCpf()">
+                        <span>in</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label>C<sub>pf</sub> =</label>
+                        <input type="number" id="cpf_output" readonly style="width: 120px; background-color: #d4edda;">
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                        Formula: F ≤ 1.0: C<sub>pf</sub> = F/(10D<sub>P</sub>) + 0.025<br>
+                        Formula: 1.0 ≤ F < 15: C<sub>pf</sub> = F/(10D<sub>P</sub>) + 0.0375 + 0.0125F
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3; margin-top: 10px;">
+                🧮 <strong>C<sub>ma</sub> EQUATION CALCULATOR</strong> (Mesh Alignment Factor)<br>
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label>F =</label>
+                        <input type="number" id="cma_F_input" step="0.001" style="width: 100px;" oninput="calculateCma()">
+                        <span>in</span>
+                        <label style="margin-left: 10px;">Gear Type:</label>
+                        <select id="cma_gear_type" style="width: 200px;" onchange="calculateCma()">
+                            <option value="">Select type...</option>
+                            <option value="open">Open gearing</option>
+                            <option value="commercial">Commercial enclosed</option>
+                            <option value="precision">Precision enclosed</option>
+                            <option value="extra">Extra-precision enclosed</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label>C<sub>ma</sub> =</label>
+                        <input type="number" id="cma_output" readonly style="width: 120px; background-color: #d4edda;">
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                        Formula: C<sub>ma</sub> = a + bF + cF² (coefficients vary by gear type)
+                    </div>
+                </div>
             </div>
 
             <div class="var-input">
@@ -768,7 +918,7 @@
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>Lifetime =</label>
                 <input type="number" id="lifetime" step="1" oninput="syncAllInstances('lifetime'); markAsUser('lifetime'); calculate()">
-                <span class="unit">hours (from Table 9-12)</span>
+                <span class="unit">hours (from <a href="#" onclick="goToPage(10)">Table 9-12</a>)</span>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -786,13 +936,13 @@
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>Y<sub>NP</sub> =</label>
                 <input type="number" id="YNP" step="0.0001" oninput="syncAllInstances('YNP'); markAsUser('YNP'); calculate()">
-                <span class="unit">(from Figure 9-21)</span>
+                <span class="unit">(from <a href="#" onclick="goToPage(11)">Figure 9-21</a>)</span>
             </div>
 
             <div class="var-input">
                 <label>Y<sub>NG</sub> =</label>
                 <input type="number" id="YNG" step="0.0001" oninput="syncAllInstances('YNG'); markAsUser('YNG'); calculate()">
-                <span class="unit">(from Figure 9-21)</span>
+                <span class="unit">(from <a href="#" onclick="goToPage(11)">Figure 9-21</a>)</span>
             </div>
 
             <div class="divider"></div>
@@ -830,8 +980,39 @@
             <!-- Step 23: Material Selection -->
             <h3>Step 23: Material Selection (Bending)</h3>
             <div class="info-box">
-                Use Figure 9-18 to find required Brinell Hardness from s<sub>at</sub><br>
+                📈 <strong>MANUAL LOOKUP</strong><br>
+                Use <a href="#" onclick="goToPage(12)">Figure 9-18</a> to find required Brinell Hardness from s<sub>at</sub><br>
                 Choose material from Appendix 3 or 5 with HB ≥ required
+            </div>
+
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3;">
+                🧮 <strong>EQUATION CALCULATOR</strong> - Figure 9-18 Bending Stress Equations<br>
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                    <label><strong>Select Grade:</strong></label>
+                    <select id="fig918_grade" style="margin-left: 10px; padding: 5px;" onchange="calculateFig918Sat(); calculateFig918HB();">
+                        <option value="1">Grade 1: s<sub>at</sub> = 0.0773 × HB + 12.8 ksi</option>
+                        <option value="2">Grade 2: s<sub>at</sub> = 0.102 × HB + 16.40 ksi</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>From stress to hardness:</strong><br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>at</sub> =</label>
+                        <input type="number" id="fig918_sat_input" step="0.0001" style="width: 100px;" oninput="calculateFig918HB()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="fig918_HB_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>From hardness to stress:</strong><br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="fig918_HB_input" step="1" style="width: 100px;" oninput="calculateFig918Sat()">
+                        <span>→ s<sub>at</sub> =</span>
+                        <input type="number" id="fig918_sat_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -852,7 +1033,7 @@
             <div class="var-input">
                 <label>s<sub>at,P</sub> (actual) =</label>
                 <input type="number" id="sat_P_actual_ksi" step="0.0001" oninput="syncAllInstances('sat_P_actual_ksi'); markAsUser('sat_P_actual_ksi'); calculate()">
-                <span class="unit">ksi (from Figure 9-18)</span>
+                <span class="unit">ksi (from <a href="#" onclick="goToPage(12)">Figure 9-18</a>)</span>
             </div>
 
             <div class="divider"></div>
@@ -893,7 +1074,7 @@
             <!-- Step 26: Elastic Coefficient -->
             <h3>Step 26: Elastic Coefficient</h3>
             <div class="info-box">
-                C<sub>p</sub> = 2300 psi<sup>1/2</sup> for steel (look up Table 9-7 for other materials)
+                📊 C<sub>p</sub> = 2300 psi<sup>1/2</sup> for steel (look up <a href="#" onclick="goToPage(16)">Table 9-7</a> for other materials)
             </div>
 
             <div class="var-input">
@@ -907,7 +1088,7 @@
             <!-- Step 27: Pitting Geometry Factor -->
             <h3>Step 27: Pitting Geometry Factor</h3>
             <div class="info-box">
-                Look up I from Figure 9-17 using gear ratio (VR) and N<sub>P</sub>
+                📈 <strong>MANUAL LOOKUP</strong> - Look up I from <a href="#" onclick="goToPage(17)">Figure 9-17</a> using gear ratio (VR) and N<sub>P</sub>
             </div>
 
             <div class="var-input">
@@ -939,7 +1120,7 @@
             <h3>Step 29: Allowable Contact Stress</h3>
 
             <div class="info-box">
-                Look up Z<sub>NP</sub> and Z<sub>NG</sub> from Figure 9-22 using N<sub>c</sub>
+                📈 <strong>MANUAL LOOKUP</strong> - Look up Z<sub>NP</sub> and Z<sub>NG</sub> from <a href="#" onclick="goToPage(18)">Figure 9-22</a> using N<sub>c</sub>
             </div>
 
             <div class="var-input" style="margin-bottom: 10px;">
@@ -969,6 +1150,36 @@
                 <span class="unit">ksi</span>
             </div>
 
+            <div class="info-box" style="background-color: #e8f4f8; border-left: 4px solid #2196F3;">
+                🧮 <strong>EQUATION CALCULATOR</strong> - Figure 9-19 Contact Stress Equations<br>
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                    <label><strong>Select Grade:</strong></label>
+                    <select id="fig919_grade" style="margin-left: 10px; padding: 5px;" onchange="calculateFig919Sac(); calculateFig919HB();">
+                        <option value="1">Grade 1: s<sub>ac</sub> = 0.322 × HB + 29.1 ksi</option>
+                        <option value="2">Grade 2: s<sub>ac</sub> = 0.349 × HB + 34.30 ksi</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>From stress to hardness:</strong><br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>s<sub>ac</sub> =</label>
+                        <input type="number" id="fig919_sac_input" step="0.0001" style="width: 100px;" oninput="calculateFig919HB()">
+                        <span>ksi → HB =</span>
+                        <input type="number" id="fig919_HB_output" readonly style="width: 100px; background-color: #d4edda;">
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>From hardness to stress:</strong><br>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <label>HB =</label>
+                        <input type="number" id="fig919_HB_input" step="1" style="width: 100px;" oninput="calculateFig919Sac()">
+                        <span>→ s<sub>ac</sub> =</span>
+                        <input type="number" id="fig919_sac_output" readonly style="width: 100px; background-color: #d4edda;">
+                        <span>ksi</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>HB (required, contact) =</label>
                 <input type="number" id="HB_contact_required" step="1" oninput="syncAllInstances('HB_contact_required'); markAsUser('HB_contact_required'); calculate()">
@@ -982,7 +1193,7 @@
             <div class="var-input" style="margin-bottom: 10px;">
                 <label>s<sub>ac</sub> (actual) =</label>
                 <input type="number" id="sac_actual_ksi" step="0.0001" oninput="syncAllInstances('sac_actual_ksi'); markAsUser('sac_actual_ksi'); calculate()">
-                <span class="unit">ksi (from Figure 9-19)</span>
+                <span class="unit">ksi (from <a href="#" onclick="goToPage(19)">Figure 9-19</a>)</span>
             </div>
 
             <div class="equation-block">
@@ -1405,6 +1616,8 @@
 
     <script>
         const userValues = new Set();
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
 
         function syncInput(mainId, sourceId) {
             const sourceEl = document.getElementById(sourceId);
@@ -1536,6 +1749,137 @@
                 syncAllInstances(id);
             } else {
                 el.classList.remove('computed');
+            }
+        }
+
+        // C_pf Calculator (Pinion Proportion Factor)
+        function calculateCpf() {
+            const F = parseFloat(document.getElementById('cpf_F_input').value);
+            const DP = parseFloat(document.getElementById('cpf_DP_input').value);
+
+            if (!isNaN(F) && !isNaN(DP) && DP > 0) {
+                let Cpf;
+                if (F <= 1.0) {
+                    Cpf = F / (10 * DP) + 0.025;
+                } else if (F < 15) {
+                    Cpf = F / (10 * DP) + 0.0375 + 0.0125 * F;
+                } else {
+                    document.getElementById('cpf_output').value = 'Out of range (F ≥ 15)';
+                    return;
+                }
+                document.getElementById('cpf_output').value = Cpf.toFixed(4);
+            } else {
+                document.getElementById('cpf_output').value = '';
+            }
+        }
+
+        // C_ma Calculator (Mesh Alignment Factor)
+        function calculateCma() {
+            const F = parseFloat(document.getElementById('cma_F_input').value);
+            const gearType = document.getElementById('cma_gear_type').value;
+
+            if (!isNaN(F) && gearType) {
+                let Cma;
+                const F2 = F * F;
+
+                switch(gearType) {
+                    case 'open':
+                        Cma = 0.247 + 0.0167 * F - 0.765e-4 * F2;
+                        break;
+                    case 'commercial':
+                        Cma = 0.127 + 0.0158 * F - 1.093e-4 * F2;
+                        break;
+                    case 'precision':
+                        Cma = 0.0675 + 0.0128 * F - 0.926e-4 * F2;
+                        break;
+                    case 'extra':
+                        Cma = 0.0380 + 0.0102 * F - 0.822e-4 * F2;
+                        break;
+                    default:
+                        document.getElementById('cma_output').value = '';
+                        return;
+                }
+                document.getElementById('cma_output').value = Cma.toFixed(4);
+            } else {
+                document.getElementById('cma_output').value = '';
+            }
+        }
+
+        // Figure 9-18 Equation Calculator (Bending Strength vs Hardness)
+        function calculateFig918HB() {
+            const sat = parseFloat(document.getElementById('fig918_sat_input').value);
+            const grade = document.getElementById('fig918_grade').value;
+
+            if (!isNaN(sat)) {
+                let HB;
+                if (grade === '1') {
+                    // Grade 1: sat = 0.0773 × HB + 12.8
+                    HB = (sat - 12.8) / 0.0773;
+                } else {
+                    // Grade 2: sat = 0.102 × HB + 16.40
+                    HB = (sat - 16.40) / 0.102;
+                }
+                document.getElementById('fig918_HB_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('fig918_HB_output').value = '';
+            }
+        }
+
+        function calculateFig918Sat() {
+            const HB = parseFloat(document.getElementById('fig918_HB_input').value);
+            const grade = document.getElementById('fig918_grade').value;
+
+            if (!isNaN(HB)) {
+                let sat;
+                if (grade === '1') {
+                    // Grade 1: sat = 0.0773 × HB + 12.8
+                    sat = 0.0773 * HB + 12.8;
+                } else {
+                    // Grade 2: sat = 0.102 × HB + 16.40
+                    sat = 0.102 * HB + 16.40;
+                }
+                document.getElementById('fig918_sat_output').value = sat.toFixed(2);
+            } else {
+                document.getElementById('fig918_sat_output').value = '';
+            }
+        }
+
+        // Figure 9-19 Equation Calculator (Contact Strength vs Hardness)
+        function calculateFig919HB() {
+            const sac = parseFloat(document.getElementById('fig919_sac_input').value);
+            const grade = document.getElementById('fig919_grade').value;
+
+            if (!isNaN(sac)) {
+                let HB;
+                if (grade === '1') {
+                    // Grade 1: sac = 0.322 × HB + 29.1
+                    HB = (sac - 29.1) / 0.322;
+                } else {
+                    // Grade 2: sac = 0.349 × HB + 34.30
+                    HB = (sac - 34.30) / 0.349;
+                }
+                document.getElementById('fig919_HB_output').value = HB.toFixed(1);
+            } else {
+                document.getElementById('fig919_HB_output').value = '';
+            }
+        }
+
+        function calculateFig919Sac() {
+            const HB = parseFloat(document.getElementById('fig919_HB_input').value);
+            const grade = document.getElementById('fig919_grade').value;
+
+            if (!isNaN(HB)) {
+                let sac;
+                if (grade === '1') {
+                    // Grade 1: sac = 0.322 × HB + 29.1
+                    sac = 0.322 * HB + 29.1;
+                } else {
+                    // Grade 2: sac = 0.349 × HB + 34.30
+                    sac = 0.349 * HB + 34.30;
+                }
+                document.getElementById('fig919_sac_output').value = sac.toFixed(2);
+            } else {
+                document.getElementById('fig919_sac_output').value = '';
             }
         }
 
@@ -1830,7 +2174,92 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             if (window.MathJax) {
                 MathJax.typesetPromise();

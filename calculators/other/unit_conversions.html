@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Conversions - MECH 325</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-column embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.2em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .conversion-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .conversion-row {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .conversion-input {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .conversion-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .conversion-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .conversion-input label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 80px;
+            text-align: right;
+        }
+        .conversion-arrow {
+            font-size: 1.5em;
+            color: #3498db;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .note {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .formula-display {
+            background: #fff3cd;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #856404;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/other/unit_conv.pdf" type="application/pdf" id="pdf-embed">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+        </div>
+        <div class="calculator-column">
+            <h1>Unit Conversions - MECH 325</h1>
+
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
+
+            <div class="info-box">
+                📚 <strong>Exam Reminder:</strong> These conversions appear on the final exam in a NO Calculator, Closed Book portion.
+                Know them by heart! You can do conversions in any direction you prefer.
+                <br><br>
+                🎯 <strong>PDF Crosshairs:</strong> Click the "Enable Crosshairs" button above to activate the crosshairs feature. Then click on the PDF to place crosshairs for easier reading. Click the button again to disable and restore full PDF interaction.
+            </div>
+
+            <!-- LENGTH CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>📏 Metric and Imperial Lengths</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>in:</label>
+                        <input type="number" id="inches_cm" step="any" oninput="convert('inches_cm', 'cm_inches', 2.54)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>cm:</label>
+                        <input type="number" id="cm_inches" step="any" oninput="convert('cm_inches', 'inches_cm', 1/2.54)">
+                    </div>
+                </div>
+                <div class="formula-display">1 in = 2.54 cm</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>ft:</label>
+                        <input type="number" id="ft_m" step="any" oninput="convert('ft_m', 'm_ft', 0.305)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>m:</label>
+                        <input type="number" id="m_ft" step="any" oninput="convert('m_ft', 'ft_m', 1/0.305)">
+                    </div>
+                </div>
+                <div class="formula-display">1 ft = 0.305 m</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>ft:</label>
+                        <input type="number" id="ft_in" step="any" oninput="convert('ft_in', 'in_ft', 12)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>in:</label>
+                        <input type="number" id="in_ft" step="any" oninput="convert('in_ft', 'ft_in', 1/12)">
+                    </div>
+                </div>
+                <div class="formula-display">1 ft = 12 in</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Yard:</label>
+                        <input type="number" id="yard_ft" step="any" oninput="convert('yard_ft', 'ft_yard', 3)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>ft:</label>
+                        <input type="number" id="ft_yard" step="any" oninput="convert('ft_yard', 'yard_ft', 1/3)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Yard = 3 ft</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Mile:</label>
+                        <input type="number" id="mile_yard" step="any" oninput="convert('mile_yard', 'yard_mile', 1760)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>Yards:</label>
+                        <input type="number" id="yard_mile" step="any" oninput="convert('yard_mile', 'mile_yard', 1/1760)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Mile = 1760 Yards</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Mile:</label>
+                        <input type="number" id="mile_km" step="any" oninput="convert('mile_km', 'km_mile', 1.609)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>km:</label>
+                        <input type="number" id="km_mile" step="any" oninput="convert('km_mile', 'mile_km', 1/1.609)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Mile = 1.609 km</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Nautical Mile:</label>
+                        <input type="number" id="nmile_m" step="any" oninput="convert('nmile_m', 'm_nmile', 1852)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>m:</label>
+                        <input type="number" id="m_nmile" step="any" oninput="convert('m_nmile', 'nmile_m', 1/1852)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Nautical Mile = 1852 m</div>
+            </div>
+
+            <!-- MASS CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>⚖️ Metric and Imperial Mass</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Slug:</label>
+                        <input type="number" id="slug_lb" step="any" oninput="convert('slug_lb', 'lb_slug', 32.2)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>lb:</label>
+                        <input type="number" id="lb_slug" step="any" oninput="convert('lb_slug', 'slug_lb', 1/32.2)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Slug = 32.2 lb</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>kg:</label>
+                        <input type="number" id="kg_lb" step="any" oninput="convert('kg_lb', 'lb_kg', 2.2)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>lb:</label>
+                        <input type="number" id="lb_kg" step="any" oninput="convert('lb_kg', 'kg_lb', 1/2.2)">
+                    </div>
+                </div>
+                <div class="formula-display">1 kg = 2.2 lb</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Tonne:</label>
+                        <input type="number" id="tonne_kg" step="any" oninput="convert('tonne_kg', 'kg_tonne', 1000)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>kg:</label>
+                        <input type="number" id="kg_tonne" step="any" oninput="convert('kg_tonne', 'tonne_kg', 1/1000)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Tonne = 1000 kg</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Imperial Ton:</label>
+                        <input type="number" id="imperton_lb" step="any" oninput="convert('imperton_lb', 'lb_imperton', 2240)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>lb:</label>
+                        <input type="number" id="lb_imperton" step="any" oninput="convert('lb_imperton', 'imperton_lb', 1/2240)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Imperial Ton = 2240 lb</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>US Ton:</label>
+                        <input type="number" id="uston_lb" step="any" oninput="convert('uston_lb', 'lb_uston', 2000)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>lb:</label>
+                        <input type="number" id="lb_uston" step="any" oninput="convert('lb_uston', 'uston_lb', 1/2000)">
+                    </div>
+                </div>
+                <div class="formula-display">1 US Ton = 2000 lb</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>US Ton:</label>
+                        <input type="number" id="uston_kg" step="any" oninput="convert('uston_kg', 'kg_uston', 907.2)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>kg:</label>
+                        <input type="number" id="kg_uston" step="any" oninput="convert('kg_uston', 'uston_kg', 1/907.2)">
+                    </div>
+                </div>
+                <div class="formula-display">1 US Ton = 907.2 kg</div>
+            </div>
+
+            <!-- VOLUME CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>🫗 Metric and Imperial Volume</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Gallon:</label>
+                        <input type="number" id="gal_in3" step="any" oninput="convert('gal_in3', 'in3_gal', 231)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>in³:</label>
+                        <input type="number" id="in3_gal" step="any" oninput="convert('in3_gal', 'gal_in3', 1/231)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Gallon = 231 in³</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Gallon:</label>
+                        <input type="number" id="gal_L" step="any" oninput="convert('gal_L', 'L_gal', 3.785)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>L:</label>
+                        <input type="number" id="L_gal" step="any" oninput="convert('L_gal', 'gal_L', 1/3.785)">
+                    </div>
+                </div>
+                <div class="formula-display">1 Gallon = 3.785 L</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Fluid Oz:</label>
+                        <input type="number" id="floz_ml" step="any" oninput="convert('floz_ml', 'ml_floz', 355/12)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>mL:</label>
+                        <input type="number" id="ml_floz" step="any" oninput="convert('ml_floz', 'floz_ml', 12/355)">
+                    </div>
+                </div>
+                <div class="formula-display">12 Fluid Oz = 355 mL</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>Dry Oz:</label>
+                        <input type="number" id="dryoz_ml" step="any" oninput="convert('dryoz_ml', 'ml_dryoz', 341/12)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>mL:</label>
+                        <input type="number" id="ml_dryoz" step="any" oninput="convert('ml_dryoz', 'dryoz_ml', 12/341)">
+                    </div>
+                </div>
+                <div class="formula-display">12 Dry Oz = 341 mL</div>
+                <div class="note">⚠️ This conversion value may be incorrect - verify with instructor!</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>m³:</label>
+                        <input type="number" id="m3_L" step="any" oninput="convert('m3_L', 'L_m3', 1000)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>L:</label>
+                        <input type="number" id="L_m3" step="any" oninput="convert('L_m3', 'm3_L', 1/1000)">
+                    </div>
+                </div>
+                <div class="formula-display">1 m³ = 1000 L</div>
+            </div>
+
+            <!-- POWER CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>⚡ Power Conversions</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>hp:</label>
+                        <input type="number" id="hp_W" step="any" oninput="convert('hp_W', 'W_hp', 746)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>W:</label>
+                        <input type="number" id="W_hp" step="any" oninput="convert('W_hp', 'hp_W', 1/746)">
+                    </div>
+                </div>
+                <div class="formula-display">1 hp = 746 W</div>
+                <div class="note">⚠️ Some sources say 1 hp = 735.5 W, but Jon uses 746 W</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>hp:</label>
+                        <input type="number" id="hp_ftlbs" step="any" oninput="convert('hp_ftlbs', 'ftlbs_hp', 550)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>ft-lb/s:</label>
+                        <input type="number" id="ftlbs_hp" step="any" oninput="convert('ftlbs_hp', 'hp_ftlbs', 1/550)">
+                    </div>
+                </div>
+                <div class="formula-display">1 hp = 550 ft-lb/s</div>
+            </div>
+
+            <!-- TEMPERATURE CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>🌡️ Temperature Conversions</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>°F:</label>
+                        <input type="number" id="F_C" step="any" oninput="convertTemperature('F_C', 'C_F', 'F_to_C')">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>°C:</label>
+                        <input type="number" id="C_F" step="any" oninput="convertTemperature('C_F', 'F_C', 'C_to_F')">
+                    </div>
+                </div>
+                <div class="formula-display">°F = (9/5)°C + 32</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>K:</label>
+                        <input type="number" id="K_C" step="any" oninput="convertTemperature('K_C', 'C_K', 'K_to_C')">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>°C:</label>
+                        <input type="number" id="C_K" step="any" oninput="convertTemperature('C_K', 'K_C', 'C_to_K')">
+                    </div>
+                </div>
+                <div class="formula-display">K = 273.15 + °C</div>
+            </div>
+
+            <!-- PRESSURE CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>💨 Pressure Conversions</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>lb/in²:</label>
+                        <input type="number" id="psi_Pa" step="any" oninput="convert('psi_Pa', 'Pa_psi', 6895)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>Pa:</label>
+                        <input type="number" id="Pa_psi" step="any" oninput="convert('Pa_psi', 'psi_Pa', 1/6895)">
+                    </div>
+                </div>
+                <div class="formula-display">1 lb/in² = 6895 Pa</div>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>atm:</label>
+                        <input type="number" id="atm_kPa" step="any" oninput="convert('atm_kPa', 'kPa_atm', 101.325)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>kPa:</label>
+                        <input type="number" id="kPa_atm" step="any" oninput="convert('kPa_atm', 'atm_kPa', 1/101.325)">
+                    </div>
+                </div>
+                <div class="formula-display">1 atm = 101.325 kPa</div>
+            </div>
+
+            <!-- ENERGY CONVERSIONS -->
+            <div class="conversion-section">
+                <h2>🔥 Energy Conversions</h2>
+
+                <div class="conversion-row">
+                    <div class="conversion-input">
+                        <label>BTU:</label>
+                        <input type="number" id="BTU_ftlb" step="any" oninput="convert('BTU_ftlb', 'ftlb_BTU', 778.2)">
+                    </div>
+                    <span class="conversion-arrow">⟷</span>
+                    <div class="conversion-input">
+                        <label>ft-lb:</label>
+                        <input type="number" id="ftlb_BTU" step="any" oninput="convert('ftlb_BTU', 'BTU_ftlb', 1/778.2)">
+                    </div>
+                </div>
+                <div class="formula-display">1 BTU = 778.2 ft-lb</div>
+            </div>
+
+            <div class="info-box" style="margin-top: 30px;">
+                💡 <strong>Tip:</strong> Practice these conversions without a calculator! They appear on the final exam in a closed-book portion.
+                You can perform conversions in any direction you prefer - remember what's easiest for you!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple conversion function for linear conversions
+        function convert(sourceId, targetId, factor) {
+            const sourceInput = document.getElementById(sourceId);
+            const targetInput = document.getElementById(targetId);
+
+            const sourceValue = parseFloat(sourceInput.value);
+
+            if (!isNaN(sourceValue)) {
+                const result = sourceValue * factor;
+                targetInput.value = result.toFixed(6);
+            } else {
+                targetInput.value = '';
+            }
+        }
+
+        // Special function for temperature conversions
+        function convertTemperature(sourceId, targetId, conversionType) {
+            const sourceInput = document.getElementById(sourceId);
+            const targetInput = document.getElementById(targetId);
+
+            const sourceValue = parseFloat(sourceInput.value);
+
+            if (!isNaN(sourceValue)) {
+                let result;
+
+                switch(conversionType) {
+                    case 'F_to_C':
+                        result = (sourceValue - 32) * (5/9);
+                        break;
+                    case 'C_to_F':
+                        result = (sourceValue * (9/5)) + 32;
+                        break;
+                    case 'K_to_C':
+                        result = sourceValue - 273.15;
+                        break;
+                    case 'C_to_K':
+                        result = sourceValue + 273.15;
+                        break;
+                }
+
+                targetInput.value = result.toFixed(6);
+            } else {
+                targetInput.value = '';
+            }
+        }
+
+        // Save session to localStorage
+        function saveSession() {
+            const sessionData = {};
+
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value !== '') {
+                    sessionData[input.id] = input.value;
+                }
+            });
+
+            localStorage.setItem('unit_conversion_session', JSON.stringify(sessionData));
+            alert('✅ Session saved successfully!');
+        }
+
+        // Load session from localStorage
+        function loadSession() {
+            const savedData = localStorage.getItem('unit_conversion_session');
+
+            if (!savedData) {
+                console.log('No saved session found');
+                return;
+            }
+
+            try {
+                const sessionData = JSON.parse(savedData);
+
+                Object.keys(sessionData).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = sessionData[id];
+                    }
+                });
+
+                console.log('Session loaded successfully');
+            } catch (e) {
+                console.error('Error loading session:', e);
+            }
+        }
+
+        // Reset all values
+        function resetAll() {
+            if (!confirm('Reset all values? This cannot be undone.')) {
+                return;
+            }
+
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+
+            localStorage.removeItem('unit_conversion_session');
+            console.log('All values reset');
+        }
+
+        // PDF Crosshairs Feature
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    // Get click position relative to container
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // Update line positions (static - don't move with mouse)
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    // Show lines
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // Auto-load session on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            initCrosshairs();
+            loadSession();
+        });
+    </script>
+</body>
+</html>

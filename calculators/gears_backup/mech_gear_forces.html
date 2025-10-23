@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gear Forces Calculator</title>
+
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #pdf-panel {
+            flex: 1;
+            background: #fff;
+            border-right: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-panel iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        #calculator-panel {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .tab:hover {
+            background: #d5dbdb;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            padding: 12px;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .equation-block {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .equation-latex {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .var-input {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .var-input label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .var-input input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .var-input .unit {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin-top: 20px;
+        }
+
+        .given-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- PDF Panel -->
+    <div id="pdf-panel">
+        <iframe src="../../documents/gears/gear_forces.pdf" type="application/pdf"></iframe>
+    </div>
+
+    <!-- Calculator Panel -->
+    <div id="calculator-panel">
+        <h1>⚙️ Gear Forces Calculator</h1>
+        <p class="subtitle">Based on Mott's gear force formulas</p>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="saveSession()">💾 Save Session</button>
+            <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset All</button>
+        </div>
+
+        <!-- Tabs for different gear types -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('spur')">Spur Gears</button>
+            <button class="tab" onclick="switchTab('helical')">Helical Gears</button>
+            <button class="tab" onclick="switchTab('bevel')">Bevel Gears</button>
+        </div>
+
+        <!-- Spur Gears Tab -->
+        <div id="spur-tab" class="tab-content active">
+            <div class="section">
+                <h2>Spur Gear Forces</h2>
+                <p class="hint">Green background = calculated value. You can override any value by editing it.</p>
+
+                <h3>Given Information</h3>
+                <div class="given-inputs">
+                    <div class="var-input">
+                        <label>P =</label>
+                        <input type="number" id="spur_P" step="0.01" oninput="markAsUser('spur_P'); calculateSpur()">
+                        <span class="unit">hp (power)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>n =</label>
+                        <input type="number" id="spur_n" step="1" oninput="markAsUser('spur_n'); calculateSpur()">
+                        <span class="unit">rpm (speed)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="spur_D" step="0.0001" oninput="markAsUser('spur_D'); calculateSpur()">
+                        <span class="unit">in (pitch diameter)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>φ =</label>
+                        <input type="number" id="spur_phi" step="0.01" oninput="markAsUser('spur_phi'); calculateSpur()">
+                        <span class="unit">deg (pressure angle)</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>Torque</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$T = \frac{63000P}{n} = \frac{W_t D}{2}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>T =</label>
+                            <input type="number" id="spur_T" step="0.01" oninput="markAsUser('spur_T'); calculateSpur()">
+                            <span class="unit">lb·in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Tangential Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_t = \frac{126000P}{nD}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> =</label>
+                            <input type="number" id="spur_Wt" step="0.01" oninput="markAsUser('spur_Wt'); calculateSpur()">
+                            <span class="unit">lbf</span>
+                        </div>
+                        <span>= 126000 ×</span>
+                        <div class="var-input">
+                            <label>P =</label>
+                            <input type="number" id="spur_P_eq1" step="0.01" oninput="syncInput('spur_P', 'spur_P_eq1'); calculateSpur()">
+                            <span class="unit">hp</span>
+                        </div>
+                        <span>/ (</span>
+                        <div class="var-input">
+                            <label>n =</label>
+                            <input type="number" id="spur_n_eq1" step="1" oninput="syncInput('spur_n', 'spur_n_eq1'); calculateSpur()">
+                            <span class="unit">rpm</span>
+                        </div>
+                        <span>×</span>
+                        <div class="var-input">
+                            <label>D =</label>
+                            <input type="number" id="spur_D_eq1" step="0.0001" oninput="syncInput('spur_D', 'spur_D_eq1'); calculateSpur()">
+                            <span class="unit">in</span>
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <h3>Radial Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_r = W_t \tan(\phi)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>r</sub> =</label>
+                            <input type="number" id="spur_Wr" step="0.01" oninput="markAsUser('spur_Wr'); calculateSpur()">
+                            <span class="unit">lbf</span>
+                        </div>
+                        <span>=</span>
+                        <div class="var-input">
+                            <label>W<sub>t</sub> =</label>
+                            <input type="number" id="spur_Wt_eq2" step="0.01" oninput="syncInput('spur_Wt', 'spur_Wt_eq2'); calculateSpur()">
+                            <span class="unit">lbf</span>
+                        </div>
+                        <span>× tan(</span>
+                        <div class="var-input">
+                            <label>φ =</label>
+                            <input type="number" id="spur_phi_eq2" step="0.01" oninput="syncInput('spur_phi', 'spur_phi_eq2'); calculateSpur()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <span>)</span>
+                    </div>
+                </div>
+
+                <h3>Normal Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_n = \frac{W_t}{\cos(\phi)} = \sqrt{W_t^2 + W_r^2}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>n</sub> =</label>
+                            <input type="number" id="spur_Wn" step="0.01" oninput="markAsUser('spur_Wn'); calculateSpur()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success">✅ Forces calculated!</div>
+            </div>
+        </div>
+
+        <!-- Helical Gears Tab -->
+        <div id="helical-tab" class="tab-content">
+            <div class="section">
+                <h2>Helical Gear Forces</h2>
+                <p class="hint">Green background = calculated value. You can override any value by editing it.</p>
+
+                <h3>Given Information</h3>
+                <div class="given-inputs">
+                    <div class="var-input">
+                        <label>P =</label>
+                        <input type="number" id="helical_P" step="0.01" oninput="markAsUser('helical_P'); calculateHelical()">
+                        <span class="unit">hp (power)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>n =</label>
+                        <input type="number" id="helical_n" step="1" oninput="markAsUser('helical_n'); calculateHelical()">
+                        <span class="unit">rpm (speed)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="helical_D" step="0.0001" oninput="markAsUser('helical_D'); calculateHelical()">
+                        <span class="unit">in (pitch diameter)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>φ<sub>t</sub> =</label>
+                        <input type="number" id="helical_phi_t" step="0.01" oninput="markAsUser('helical_phi_t'); calculateHelical()">
+                        <span class="unit">deg (transverse pressure angle)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>ψ =</label>
+                        <input type="number" id="helical_psi" step="0.01" oninput="markAsUser('helical_psi'); calculateHelical()">
+                        <span class="unit">deg (helix angle)</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>Torque</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$T = \frac{63000P}{n} = \frac{W_t D}{2}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>T =</label>
+                            <input type="number" id="helical_T" step="0.01" oninput="markAsUser('helical_T'); calculateHelical()">
+                            <span class="unit">lb·in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Pitch Line Speed</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$v_t = \frac{\pi D n}{12}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>v<sub>t</sub> =</label>
+                            <input type="number" id="helical_vt" step="0.01" oninput="markAsUser('helical_vt'); calculateHelical()">
+                            <span class="unit">ft/min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Tangential Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_t = \frac{126000P}{nD}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> =</label>
+                            <input type="number" id="helical_Wt" step="0.01" oninput="markAsUser('helical_Wt'); calculateHelical()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Radial Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_r = W_t \tan(\phi_t)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>r</sub> =</label>
+                            <input type="number" id="helical_Wr" step="0.01" oninput="markAsUser('helical_Wr'); calculateHelical()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Axial Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_x = W_t \tan(\psi)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>x</sub> =</label>
+                            <input type="number" id="helical_Wx" step="0.01" oninput="markAsUser('helical_Wx'); calculateHelical()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success">✅ Forces calculated!</div>
+            </div>
+        </div>
+
+        <!-- Bevel Gears Tab -->
+        <div id="bevel-tab" class="tab-content">
+            <div class="section">
+                <h2>Bevel Gear Forces</h2>
+                <p class="hint">Green background = calculated value. You can override any value by editing it.</p>
+
+                <h3>Given Information</h3>
+                <div class="info-box">
+                    💡 Note: The PDF shows multiple formulas for W<sub>t</sub>. This calculator uses the recommended formula: W<sub>t</sub> = 63000P / (r<sub>m,p</sub> × n<sub>p</sub>)
+                </div>
+                <div class="given-inputs">
+                    <div class="var-input">
+                        <label>P =</label>
+                        <input type="number" id="bevel_P" step="0.01" oninput="markAsUser('bevel_P'); calculateBevel()">
+                        <span class="unit">hp (power)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>n<sub>P</sub> =</label>
+                        <input type="number" id="bevel_np" step="1" oninput="markAsUser('bevel_np'); calculateBevel()">
+                        <span class="unit">rpm (pinion speed)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>d =</label>
+                        <input type="number" id="bevel_d" step="0.0001" oninput="markAsUser('bevel_d'); calculateBevel()">
+                        <span class="unit">in (pinion pitch diameter)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>D =</label>
+                        <input type="number" id="bevel_D" step="0.0001" oninput="markAsUser('bevel_D'); calculateBevel()">
+                        <span class="unit">in (gear pitch diameter)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>F =</label>
+                        <input type="number" id="bevel_F" step="0.0001" oninput="markAsUser('bevel_F'); calculateBevel()">
+                        <span class="unit">in (face width)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>φ =</label>
+                        <input type="number" id="bevel_phi" step="0.01" oninput="markAsUser('bevel_phi'); calculateBevel()">
+                        <span class="unit">deg (pressure angle)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>γ =</label>
+                        <input type="number" id="bevel_gamma" step="0.0001" oninput="markAsUser('bevel_gamma'); calculateBevel()">
+                        <span class="unit">deg (pinion cone angle)</span>
+                    </div>
+
+                    <div class="var-input">
+                        <label>Γ =</label>
+                        <input type="number" id="bevel_Gamma" step="0.0001" oninput="markAsUser('bevel_Gamma'); calculateBevel()">
+                        <span class="unit">deg (gear cone angle)</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>Mean Radii</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$r_m = \frac{d}{2} - \frac{F}{2} \sin(\gamma)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>r<sub>m</sub> =</label>
+                            <input type="number" id="bevel_rm" step="0.0001" oninput="markAsUser('bevel_rm'); calculateBevel()">
+                            <span class="unit">in (pinion mean radius)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$R_m = \frac{D}{2} - \frac{F}{2} \sin(\Gamma)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>R<sub>m</sub> =</label>
+                            <input type="number" id="bevel_Rm" step="0.0001" oninput="markAsUser('bevel_Rm'); calculateBevel()">
+                            <span class="unit">in (gear mean radius)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Tangential Force (Recommended Formula)</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_t = \frac{63000P}{r_{m,p} n_p}$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>t</sub> =</label>
+                            <input type="number" id="bevel_Wt" step="0.01" oninput="markAsUser('bevel_Wt'); calculateBevel()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Radial Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_r = W_t \tan(\phi) \cos(\Gamma) = W_t \tan(\phi) \cos(\gamma)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>r</sub> =</label>
+                            <input type="number" id="bevel_Wr" step="0.01" oninput="markAsUser('bevel_Wr'); calculateBevel()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Axial Force</h3>
+                <div class="equation-block">
+                    <div class="equation-latex">
+                        $$W_x = W_t \tan(\phi) \sin(\Gamma) = W_t \tan(\phi) \sin(\gamma)$$
+                    </div>
+                    <div class="equation-inputs">
+                        <div class="var-input">
+                            <label>W<sub>x</sub> =</label>
+                            <input type="number" id="bevel_Wx" step="0.01" oninput="markAsUser('bevel_Wx'); calculateBevel()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success">✅ Forces calculated!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Track which values are user-entered vs computed
+        let userValues = new Set();
+
+        // Mark a field as user-entered
+        function markAsUser(fieldId) {
+            userValues.add(fieldId);
+        }
+
+        // Sync duplicate fields
+        function syncInput(mainId, sourceId) {
+            const sourceElement = document.getElementById(sourceId);
+            const mainElement = document.getElementById(mainId);
+            const value = sourceElement.value;
+            mainElement.value = value;
+
+            // Only mark as user input if source was user-entered
+            if (userValues.has(sourceId) || !sourceElement.classList.contains('computed')) {
+                markAsUser(mainId);
+            }
+        }
+
+        // Get value with fallback
+        function getValue(id) {
+            const element = document.getElementById(id);
+            if (!element) return null;
+            const val = parseFloat(element.value);
+            return isNaN(val) ? null : val;
+        }
+
+        // Set value and mark as computed
+        function setValue(id, value) {
+            if (value !== null && !userValues.has(id)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = value.toFixed(4);
+                    element.classList.add('computed');
+                }
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+
+            // Calculate for the new tab
+            if (tabName === 'spur') calculateSpur();
+            else if (tabName === 'helical') calculateHelical();
+            else if (tabName === 'bevel') calculateBevel();
+        }
+
+        // ===== SPUR GEAR CALCULATIONS =====
+        function calculateSpur() {
+            const P = getValue('spur_P');
+            const n = getValue('spur_n');
+            const D = getValue('spur_D');
+            const phi = getValue('spur_phi');
+
+            // Torque: T = 63000P / n
+            if (P !== null && n !== null && n > 0) {
+                setValue('spur_T', (63000 * P) / n);
+            }
+
+            // Tangential Force: Wt = 126000P / (nD)
+            if (P !== null && n !== null && D !== null && n > 0 && D > 0) {
+                setValue('spur_Wt', (126000 * P) / (n * D));
+            }
+
+            // Radial Force: Wr = Wt * tan(phi)
+            const Wt = getValue('spur_Wt');
+            if (Wt !== null && phi !== null) {
+                const phiRad = phi * Math.PI / 180;
+                setValue('spur_Wr', Wt * Math.tan(phiRad));
+            }
+
+            // Normal Force: Wn = Wt / cos(phi) = sqrt(Wt^2 + Wr^2)
+            const Wr = getValue('spur_Wr');
+            if (Wt !== null && Wr !== null) {
+                setValue('spur_Wn', Math.sqrt(Wt * Wt + Wr * Wr));
+            }
+
+            syncSpurFields();
+        }
+
+        function syncSpurFields() {
+            const mainVars = ['spur_P', 'spur_n', 'spur_D', 'spur_phi', 'spur_Wt'];
+            mainVars.forEach(varId => {
+                const mainValue = getValue(varId);
+                const mainElement = document.getElementById(varId);
+                const isComputed = mainElement && mainElement.classList.contains('computed');
+
+                if (mainValue !== null) {
+                    document.querySelectorAll(`input[id^="${varId}_eq"]`).forEach(input => {
+                        if (getValue(input.id) !== mainValue) {
+                            input.value = mainValue.toFixed(4);
+                        }
+                        if (isComputed && !userValues.has(input.id)) {
+                            input.classList.add('computed');
+                        }
+                    });
+                }
+            });
+        }
+
+        // ===== HELICAL GEAR CALCULATIONS =====
+        function calculateHelical() {
+            const P = getValue('helical_P');
+            const n = getValue('helical_n');
+            const D = getValue('helical_D');
+            const phi_t = getValue('helical_phi_t');
+            const psi = getValue('helical_psi');
+
+            // Torque: T = 63000P / n
+            if (P !== null && n !== null && n > 0) {
+                setValue('helical_T', (63000 * P) / n);
+            }
+
+            // Pitch line speed: vt = pi * D * n / 12
+            if (D !== null && n !== null) {
+                setValue('helical_vt', (Math.PI * D * n) / 12);
+            }
+
+            // Tangential Force: Wt = 126000P / (nD)
+            if (P !== null && n !== null && D !== null && n > 0 && D > 0) {
+                setValue('helical_Wt', (126000 * P) / (n * D));
+            }
+
+            // Radial Force: Wr = Wt * tan(phi_t)
+            const Wt = getValue('helical_Wt');
+            if (Wt !== null && phi_t !== null) {
+                const phi_t_rad = phi_t * Math.PI / 180;
+                setValue('helical_Wr', Wt * Math.tan(phi_t_rad));
+            }
+
+            // Axial Force: Wx = Wt * tan(psi)
+            if (Wt !== null && psi !== null) {
+                const psi_rad = psi * Math.PI / 180;
+                setValue('helical_Wx', Wt * Math.tan(psi_rad));
+            }
+        }
+
+        // ===== BEVEL GEAR CALCULATIONS =====
+        function calculateBevel() {
+            const P = getValue('bevel_P');
+            const np = getValue('bevel_np');
+            const d = getValue('bevel_d');
+            const D = getValue('bevel_D');
+            const F = getValue('bevel_F');
+            const phi = getValue('bevel_phi');
+            const gamma = getValue('bevel_gamma');
+            const Gamma = getValue('bevel_Gamma');
+
+            // Mean radius pinion: rm = d/2 - (F/2) * sin(gamma)
+            if (d !== null && F !== null && gamma !== null) {
+                const gammaRad = gamma * Math.PI / 180;
+                setValue('bevel_rm', d / 2 - (F / 2) * Math.sin(gammaRad));
+            }
+
+            // Mean radius gear: Rm = D/2 - (F/2) * sin(Gamma)
+            if (D !== null && F !== null && Gamma !== null) {
+                const GammaRad = Gamma * Math.PI / 180;
+                setValue('bevel_Rm', D / 2 - (F / 2) * Math.sin(GammaRad));
+            }
+
+            // Tangential Force: Wt = 63000P / (rm * np)
+            const rm = getValue('bevel_rm');
+            if (P !== null && rm !== null && np !== null && rm > 0 && np > 0) {
+                setValue('bevel_Wt', (63000 * P) / (rm * np));
+            }
+
+            // Radial Force: Wr = Wt * tan(phi) * cos(Gamma)
+            const Wt = getValue('bevel_Wt');
+            if (Wt !== null && phi !== null && Gamma !== null) {
+                const phiRad = phi * Math.PI / 180;
+                const GammaRad = Gamma * Math.PI / 180;
+                setValue('bevel_Wr', Wt * Math.tan(phiRad) * Math.cos(GammaRad));
+            }
+
+            // Axial Force: Wx = Wt * tan(phi) * sin(Gamma)
+            if (Wt !== null && phi !== null && Gamma !== null) {
+                const phiRad = phi * Math.PI / 180;
+                const GammaRad = Gamma * Math.PI / 180;
+                setValue('bevel_Wx', Wt * Math.tan(phiRad) * Math.sin(GammaRad));
+            }
+        }
+
+        function saveSession() {
+            const data = {};
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if (input.value) {
+                    data[input.id] = input.value;
+                }
+            });
+            data._userValues = Array.from(userValues);
+            localStorage.setItem('gearForcesSession', JSON.stringify(data));
+            alert('Session saved!');
+        }
+
+        function loadSession() {
+            const saved = localStorage.getItem('gearForcesSession');
+            if (saved) {
+                const data = JSON.parse(saved);
+                for (let key in data) {
+                    if (key === '_userValues') {
+                        userValues = new Set(data[key]);
+                    } else {
+                        const element = document.getElementById(key);
+                        if (element) {
+                            element.value = data[key];
+                        }
+                    }
+                }
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Reset all values?')) {
+                document.querySelectorAll('input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                userValues = new Set();
+                localStorage.removeItem('gearForcesSession');
+                calculateSpur();
+                calculateHelical();
+                calculateBevel();
+            }
+        }
+
+        // Load on startup
+        window.addEventListener('load', function() {
+            loadSession();
+            calculateSpur();
+        });
+    </script>
+</body>
+</html>

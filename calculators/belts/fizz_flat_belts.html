@@ -31,10 +31,10 @@
             max-height: 95vh;
         }
         .pdf-column embed {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -240,10 +240,54 @@
             font-weight: 600;
             color: #1976d2;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
         .controls {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .save-btn, .load-btn {
             background: #28a745;
@@ -253,12 +297,36 @@
         .save-btn:hover, .load-btn:hover {
             background: #218838;
         }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/belts/Mech_325_Bible_Fizz-flat_belts.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/belts/Mech_325_Bible_Fizz-flat_belts.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Flat Belt Design Calculator (Fizz Guide)</h1>
@@ -269,7 +337,8 @@
             <!-- Session Controls -->
             <div class="controls">
                 <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
-                <button class="load-btn" onclick="loadSession()">📂 Load Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -350,7 +419,7 @@
                 <div class="section">
                     <h2>Step 2: Belt Material Selection</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Table 17-2 to get belt material properties:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(4)">Table 17-2</a> to get belt material properties:
                         <ul>
                             <li>Belt thickness (t)</li>
                             <li>Specific weight (γ)</li>
@@ -377,27 +446,27 @@
                     <div class="input-row">
                         <label>Belt Thickness (t) [in]:</label>
                         <input type="number" id="t" step="any" oninput="syncAllInstances('t'); markAsUser('t'); calculate()">
-                        <span class="hint">From Table 17-2</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Table 17-2</a></span>
                     </div>
                     <div class="input-row">
                         <label>Specific Weight (γ) [lb/in³]:</label>
                         <input type="number" id="gamma" step="any" oninput="syncAllInstances('gamma'); markAsUser('gamma'); calculate()">
-                        <span class="hint">From Table 17-2</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Table 17-2</a></span>
                     </div>
                     <div class="input-row">
                         <label>Allowable Tension (F<sub>a</sub>) [lbf/in]:</label>
                         <input type="number" id="Fa" step="any" oninput="syncAllInstances('Fa'); markAsUser('Fa'); calculate()">
-                        <span class="hint">At 600 ft/min, from Table 17-2</span>
+                        <span class="hint">At 600 ft/min, from <a href="#" onclick="goToPage(4)">Table 17-2</a></span>
                     </div>
                     <div class="input-row">
                         <label>Max Coefficient of Friction (f):</label>
                         <input type="number" id="f" step="any" oninput="syncAllInstances('f'); markAsUser('f'); calculate()">
-                        <span class="hint">From Table 17-2</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Table 17-2</a></span>
                     </div>
                     <div class="input-row">
                         <label>Min Pulley Diameter (d<sub>min</sub>) [in]:</label>
                         <input type="number" id="dmin" step="any" oninput="syncAllInstances('dmin'); markAsUser('dmin'); calculate()">
-                        <span class="hint">From Table 17-2</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Table 17-2</a></span>
                     </div>
                 </div>
 
@@ -542,14 +611,14 @@
                     <div class="warning-box">
                         📊 <strong>MANUAL LOOKUP REQUIRED</strong>:
                         <ul>
-                            <li>C<sub>P</sub>: Pulley correction factor from Table 17-4 (based on small pulley diameter and material)</li>
+                            <li>C<sub>P</sub>: Pulley correction factor from <a href="#" onclick="goToPage(5)">Table 17-4</a> (based on small pulley diameter and material)</li>
                             <li>C<sub>V</sub>: Velocity correction factor from graph (for leather) or 1.0 for polyamide/urethane</li>
                         </ul>
                     </div>
                     <div class="input-row">
                         <label>Pulley Correction Factor (C<sub>P</sub>):</label>
                         <input type="number" id="CP" step="any" oninput="syncAllInstances('CP'); markAsUser('CP'); calculate()">
-                        <span class="hint">From Table 17-4</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(5)">Table 17-4</a></span>
                     </div>
                     <div class="input-row">
                         <label>Velocity Correction Factor (C<sub>V</sub>):</label>
@@ -1162,6 +1231,9 @@
     </div>
 
     <script>
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
         // Variable Instance Map
         const varInstanceMap = {
             Hnom: ['Hnom', 'Hnom_eq1', 'Hnom_genEq1', 'var_Hnom'],
@@ -1392,7 +1464,92 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('load', () => {
+            initCrosshairs();
             const savedData = localStorage.getItem('fizzFlatBeltSession');
             if (savedData) {
                 loadSession();

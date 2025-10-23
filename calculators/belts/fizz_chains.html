@@ -31,10 +31,10 @@
             max-height: 95vh;
         }
         .pdf-column embed {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -240,10 +240,54 @@
             font-weight: 600;
             color: #1976d2;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
         .controls {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .save-btn, .load-btn {
             background: #28a745;
@@ -253,12 +297,36 @@
         .save-btn:hover, .load-btn:hover {
             background: #218838;
         }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/belts/Mech_325_Bible_Fizz-chains.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/belts/Mech_325_Bible_Fizz-chains.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Chain Drive Design Calculator (Fizz Guide)</h1>
@@ -269,7 +337,8 @@
             <!-- Session Controls -->
             <div class="controls">
                 <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
-                <button class="load-btn" onclick="loadSession()">📂 Load Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -325,7 +394,7 @@
                 <div class="section">
                     <h2>Step 2: Service Factor & Design Power</h2>
                     <div class="info-box">
-                        📊 Select service factor from Table 7-17 based on load type and driver type
+                        📊 Select service factor from <a href="#" onclick="goToPage(2)">Table 7-17</a> based on load type and driver type
                     </div>
                     <div class="input-row">
                         <label>Load Type:</label>
@@ -377,13 +446,13 @@
                 <div class="section">
                     <h2>Step 3: Chain Selection & Validation</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use Table 7-12 and Tables 7-14/15/16:
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(2)">Table 7-12</a> and <a href="#" onclick="goToPage(4)">Tables 7-14/15/16</a>:
                         <ul>
-                            <li>Select number of strands (1-4)</li>
+                            <li>Select number of strands (1-4) - <a href="#" onclick="goToPage(3)">strand factors</a></li>
                             <li>Select chain number (25, 35, 40, 50, 60, 80, etc.)</li>
-                            <li>Get chain pitch (p) and tensile strength from Table 7-12</li>
+                            <li>Get chain pitch (p) and tensile strength from <a href="#" onclick="goToPage(2)">Table 7-12</a></li>
                             <li>Choose small sprocket teeth (N<sub>1</sub>) ≥ 17, N<sub>1</sub> × VR < 120</li>
-                            <li>Look up rated power (P<sub>rated</sub>) from Tables 7-14/15/16</li>
+                            <li>Look up rated power (P<sub>rated</sub>) from <a href="#" onclick="goToPage(4)">Tables 7-14/15/16</a></li>
                             <li>Validate P<sub>rated</sub> > P<sub>des</sub></li>
                         </ul>
                     </div>
@@ -419,12 +488,12 @@
                     <div class="input-row">
                         <label>Chain Pitch (p) [in]:</label>
                         <input type="number" id="p" step="any" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
-                        <span class="hint">From Table 7-12</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(2)">Table 7-12</a></span>
                     </div>
                     <div class="input-row">
                         <label>Tensile Strength [lbf]:</label>
                         <input type="number" id="tensile_strength" step="any" oninput="syncAllInstances('tensile_strength'); markAsUser('tensile_strength'); calculate()">
-                        <span class="hint">From Table 7-12</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(2)">Table 7-12</a></span>
                     </div>
                     <div class="input-row">
                         <label>Small Sprocket Teeth (N<sub>1</sub>) [teeth]:</label>
@@ -434,7 +503,7 @@
                     <div class="input-row">
                         <label>Rated Power (P<sub>rated</sub>) [hp]:</label>
                         <input type="number" id="Prated" step="any" oninput="syncAllInstances('Prated'); markAsUser('Prated'); calculate()">
-                        <span class="hint">From Tables 7-14/15/16 (requires interpolation)</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Tables 7-14/15/16</a> (requires interpolation)</span>
                     </div>
                     <div class="input-row">
                         <label>Lubrication Type:</label>
@@ -444,7 +513,7 @@
                             <option value="B">Type B</option>
                             <option value="C">Type C</option>
                         </select>
-                        <span class="hint">From Tables 7-14/15/16</span>
+                        <span class="hint">From <a href="#" onclick="goToPage(4)">Tables 7-14/15/16</a></span>
                     </div>
 
                     <h3>Power per Strand</h3>
@@ -1179,6 +1248,10 @@
         // User-modified variables tracking
         let userModified = new Set();
 
+        // Crosshairs state
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
+
         // Sync all instances of a variable
         function syncAllInstances(changedId) {
             const baseVar = getBaseVariable(changedId);
@@ -1410,8 +1483,93 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         // Auto-load session on page load
         window.addEventListener('load', () => {
+            initCrosshairs();
             const savedData = localStorage.getItem('fizzChainSession');
             if (savedData) {
                 loadSession();

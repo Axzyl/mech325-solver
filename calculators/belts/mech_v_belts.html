@@ -30,11 +30,12 @@
             overflow-y: auto;
             max-height: 95vh;
         }
-        .pdf-column embed {
+        .pdf-column embed,
+        .pdf-column iframe {
+            flex: 1;
             width: 100%;
-            height: 90vh;
+            height: 100%;
             border: none;
-            border-radius: 8px;
         }
         .calculator-column {
             flex: 1;
@@ -258,17 +259,115 @@
             font-weight: 600;
             color: #1976d2;
         }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+
+        /* PDF Page Navigation Links */
+        .warning-box a,
+        .info-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .warning-box a:hover,
+        .info-box a:hover {
+            color: #004499;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/belts/Mech_325_Bible_Mech-v_belts.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/belts/Mech_325_Bible_Mech-v_belts.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>V-Belt Design Calculator</h1>
             <div class="info-box">
                 ⚙️ Following Mott methodology for V-belt drive design. 7-step process with iterative refinement.
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -301,7 +400,7 @@
                 <div class="section">
                     <h2>Step 2: Service Factor & Design Power</h2>
                     <div class="warning-box">
-                        📊 <strong>MANUAL LOOKUP</strong> - Select K<sub>s</sub> from Table 7-1 based on machine type, driver, and operating hours
+                        📊 <strong>MANUAL LOOKUP</strong> - Select K<sub>s</sub> from <a href="#" onclick="goToPage(1)">Table 7-1</a> based on machine type, driver, and operating hours
                     </div>
                     <div class="input-row">
                         <label>Service Factor (K<sub>s</sub>):</label>
@@ -373,7 +472,7 @@
                     </div>
 
                     <div class="warning-box">
-                        📊 Select standard driving diameter from Tables 7-15/16/17
+                        📊 Select standard driving diameter from <a href="#" onclick="goToPage(3)">Figure 7-14 (3V)</a>, <a href="#" onclick="goToPage(4)">Figure 7-15 (5V)</a>, or <a href="#" onclick="goToPage(4)">Figure 7-16 (8V)</a>
                     </div>
                     <div class="input-row">
                         <label>Driving Sheave Diameter (d) [in]:</label>
@@ -402,7 +501,7 @@
                     </div>
 
                     <div class="warning-box">
-                        📊 Select standard driven diameter from Tables 7-15/16/17
+                        📊 Select standard driven diameter from <a href="#" onclick="goToPage(3)">Figure 7-14 (3V)</a>, <a href="#" onclick="goToPage(4)">Figure 7-15 (5V)</a>, or <a href="#" onclick="goToPage(4)">Figure 7-16 (8V)</a>
                     </div>
                     <div class="input-row">
                         <label>Driven Sheave Diameter (D) [in]:</label>
@@ -483,7 +582,7 @@
                     <h2>Step 4: Power Ratings</h2>
 
                     <div class="warning-box">
-                        📊 For 3V/8V belts: Look up P<sub>1</sub> and P<sub>2</sub> from Figures 7-14 or 7-16
+                        📊 For 3V/8V belts: Look up P<sub>1</sub> and P<sub>2</sub> from <a href="#" onclick="goToPage(3)">Figure 7-14 (3V)</a> or <a href="#" onclick="goToPage(4)">Figure 7-16 (8V)</a>
                     </div>
                     <div class="input-row">
                         <label>P<sub>1</sub> (at VR=1) [hp]:</label>
@@ -497,7 +596,7 @@
                     </div>
 
                     <div class="warning-box">
-                        📊 For 5V belts: Look up H<sub>s</sub> from Figure 7-15 and H<sub>added</sub> from Figure 7-17
+                        📊 For 5V belts: Look up H<sub>s</sub> from <a href="#" onclick="goToPage(4)">Figure 7-15</a> and H<sub>added</sub> from <a href="#" onclick="goToPage(5)">Figure 7-17</a>
                     </div>
                     <div class="input-row">
                         <label>H<sub>s</sub> (base power) [hp]:</label>
@@ -576,7 +675,7 @@
                     </div>
 
                     <div class="warning-box">
-                        📊 Select standard belt length from Table 7-2 (closest to L<sub>p,calc</sub>)
+                        📊 Select standard belt length from <a href="#" onclick="goToPage(6)">Table 7-2</a> (closest to L<sub>p,calc</sub>)
                     </div>
                     <div class="input-row">
                         <label>Standard Belt Length (L<sub>p</sub>) [in]:</label>
@@ -664,7 +763,7 @@
                     </div>
 
                     <div class="warning-box">
-                        📊 Look up correction factors from graphs or use interpolation
+                        📊 Look up correction factors from <a href="#" onclick="goToPage(7)">page 7 graphs</a> (C<sub>θ</sub> wrap angle and C<sub>L</sub> length correction)
                     </div>
                     <div class="input-row">
                         <label>Wrap Angle Correction (C<sub>θ</sub>):</label>
@@ -731,8 +830,6 @@
                         </div>
                     </div>
                 </div>
-
-                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
             </div>
             <!-- End Procedure Tab -->
 
@@ -934,6 +1031,8 @@
 
     <script>
         const userValues = new Set();
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
 
         // Variable instance map
         const varInstanceMap = {
@@ -1202,6 +1301,11 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved!');
+        }
+
         function resetAll() {
             if (confirm('Reset all values?')) {
                 localStorage.removeItem('mech_v_belts_state');
@@ -1217,7 +1321,82 @@
             }
         }
 
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            clickOverlay.style.display = 'none';
+
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
             if (typeof MathJax !== 'undefined') {
                 MathJax.typesetPromise();

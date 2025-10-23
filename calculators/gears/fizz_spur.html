@@ -30,11 +30,51 @@
             overflow-y: auto;
             max-height: 95vh;
         }
-        .pdf-column embed {
+
+        /* PDF Container for Crosshairs */
+        .pdf-container {
+            position: relative;
             width: 100%;
-            height: 90vh;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-column embed,
+        .pdf-column iframe {
+            flex: 1;
+            width: 100%;
+            height: 100%;
             border: none;
-            border-radius: 8px;
+        }
+
+        /* PDF Crosshairs Feature */
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
         }
         .calculator-column {
             flex: 1;
@@ -160,10 +200,18 @@
             color: #666;
             margin-left: 10px;
         }
+        /* Button Group */
         .button-group {
             display: flex;
             gap: 10px;
             margin: 20px 0;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         button {
             flex: 1;
@@ -175,12 +223,45 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
         .reset-btn {
             background: #dc3545;
             color: white;
         }
         .reset-btn:hover {
             background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+
+        /* PDF Navigation Links */
+        .warning-box a,
+        .info-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .warning-box a:hover,
+        .info-box a:hover {
+            color: #004499;
         }
         .summary-section {
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
@@ -277,12 +358,26 @@
 <body>
     <div class="container">
         <div class="pdf-column">
-            <embed src="../../documents/gears/fizz_spur.pdf" type="application/pdf">
+            <div class="pdf-container">
+                <embed src="../../documents/gears/fizz_spur.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
         </div>
         <div class="calculator-column">
             <h1>Spur Gear Design Guide</h1>
             <div class="info-box">
                 ⚠️ This follows the Fizz design process. Many parameters require manual lookup from tables/graphs in the PDF. Reference the PDF for complete design process (40 steps total).
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button class="save-btn" onclick="saveSessionManual()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
             </div>
 
             <!-- Tab Navigation -->
@@ -307,7 +402,7 @@
                 <div class="input-row">
                     <label>Overload Factor (K<sub>O</sub>):</label>
                     <input type="number" id="KO" value="1.25" step="any" oninput="markAsUser('KO'); calculate()">
-                    <span class="hint">(Table 9-1)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(1); return false;">Table 9-1</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Diametral Pitch (P<sub>d</sub>):</label>
@@ -472,50 +567,52 @@
             <div class="section">
                 <h2>Stress Analysis Factors</h2>
                 <div class="info-box">
-                    📊 These require manual lookup from PDF graphs/tables
+                    📊 <strong>MANUAL LOOKUP REQUIRED</strong> - These require manual lookup from PDF graphs/tables. Click table/figure references to jump to the page.
                 </div>
                 <div class="input-row">
                     <label>Quality Number (A<sub>v</sub>):</label>
                     <input type="number" id="Av" value="6" step="1" oninput="markAsUser('Av'); calculate()">
-                    <span class="hint">(Table 9-5)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(3); return false;">Table 9-5</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Dynamic Factor (K<sub>v</sub>):</label>
                     <input type="number" id="Kv" step="any" oninput="markAsUser('Kv'); calculate()">
-                    <span class="hint">(Step 17 graph)</span>
+                    <span class="hint">(Step 17 graph - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Bending Factor Pinion (J<sub>P</sub>):</label>
                     <input type="number" id="JP" step="any" oninput="markAsUser('JP'); calculate()">
-                    <span class="hint">(Step 18 graph)</span>
+                    <span class="hint">(Step 18 graph - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Bending Factor Gear (J<sub>G</sub>):</label>
                     <input type="number" id="JG" step="any" oninput="markAsUser('JG'); calculate()">
+                    <span class="hint">(Step 18 graph - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Pitting Geometry Factor (I):</label>
                     <input type="number" id="I" step="any" oninput="markAsUser('I'); calculate()">
-                    <span class="hint">(Step 19 graph)</span>
+                    <span class="hint">(Step 19 graph - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Load Distribution (K<sub>m</sub>):</label>
                     <input type="number" id="Km" value="1.6" step="any" oninput="markAsUser('Km'); calculate()">
-                    <span class="hint">(Steps 20-22)</span>
+                    <span class="hint">(Steps 20-22 - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Size Factor (K<sub>s</sub>):</label>
                     <input type="number" id="Ks" value="1" step="any" oninput="markAsUser('Ks'); calculate()">
-                    <span class="hint">(Table 9-2)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(2); return false;">Table 9-2</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Rim Thickness (K<sub>B</sub>):</label>
                     <input type="number" id="KB" value="1" step="any" oninput="markAsUser('KB'); calculate()">
+                    <span class="hint">(Step 23 - see PDF)</span>
                 </div>
                 <div class="input-row">
                     <label>Elastic Coefficient (C<sub>P</sub>):</label>
                     <input type="number" id="CP" value="2300" step="any" oninput="markAsUser('CP'); calculate()">
-                    <span class="hint">(2300 for steel)</span>
+                    <span class="hint">(2300 for steel - <a href="#" onclick="goToPage(4); return false;">Table 9-7</a>)</span>
                 </div>
             </div>
 
@@ -572,32 +669,38 @@
 
             <div class="section">
                 <h2>Life/Reliability Factors</h2>
+                <div class="info-box">
+                    📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Cycle factors based on expected number of load cycles. Click references to jump to the page.
+                </div>
                 <div class="input-row">
                     <label>Service Factor (SF):</label>
                     <input type="number" id="SF" value="1" step="any" oninput="markAsUser('SF'); calculate()">
+                    <span class="hint">(Default 1.0)</span>
                 </div>
                 <div class="input-row">
                     <label>Reliability Factor (K<sub>R</sub>):</label>
                     <input type="number" id="KR" value="1" step="any" oninput="markAsUser('KR'); calculate()">
-                    <span class="hint">(Table 9-11)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(5); return false;">Table 9-11</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Bending Cycle Pinion (Y<sub>N,P</sub>):</label>
                     <input type="number" id="YNP" step="any" oninput="markAsUser('YNP'); calculate()">
-                    <span class="hint">(Fig 9-21)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(6); return false;">Fig 9-21</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Bending Cycle Gear (Y<sub>N,G</sub>):</label>
                     <input type="number" id="YNG" step="any" oninput="markAsUser('YNG'); calculate()">
+                    <span class="hint">(<a href="#" onclick="goToPage(6); return false;">Fig 9-21</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Pitting Cycle Pinion (Z<sub>N,P</sub>):</label>
                     <input type="number" id="ZNP" step="any" oninput="markAsUser('ZNP'); calculate()">
-                    <span class="hint">(Fig 9-22)</span>
+                    <span class="hint">(<a href="#" onclick="goToPage(7); return false;">Fig 9-22</a>)</span>
                 </div>
                 <div class="input-row">
                     <label>Pitting Cycle Gear (Z<sub>N,G</sub>):</label>
                     <input type="number" id="ZNG" step="any" oninput="markAsUser('ZNG'); calculate()">
+                    <span class="hint">(<a href="#" onclick="goToPage(7); return false;">Fig 9-22</a>)</span>
                 </div>
             </div>
 
@@ -745,10 +848,6 @@
                         <span>/ 1000 - 12.8) / 0.0773</span>
                     </div>
                 </div>
-            </div>
-
-            <div class="button-group">
-                <button class="reset-btn" onclick="resetAll()">Reset All Values</button>
             </div>
 
             <div class="summary-section">
@@ -1352,6 +1451,8 @@
 
     <script>
         const userValues = new Set();
+        let crosshairsActive = false;
+        let crosshairsFeatureEnabled = false;
 
         function showTab(tabName) {
             // Hide all tabs
@@ -1662,6 +1763,11 @@
             }
         }
 
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully! ✓');
+        }
+
         function resetAll() {
             if (confirm('Reset all values?')) {
                 localStorage.removeItem('fizz_spur_state');
@@ -1676,9 +1782,96 @@
             }
         }
 
+        // Initialize crosshairs functionality
+        function initCrosshairs() {
+            const pdfContainer = document.querySelector('.pdf-container');
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!pdfContainer || !clickOverlay || !svg || !verticalLine || !horizontalLine) return;
+
+            // Start with overlay hidden (PDF fully interactive by default)
+            clickOverlay.style.display = 'none';
+
+            // Listen for clicks on the click overlay - toggle crosshairs on/off
+            clickOverlay.addEventListener('click', function(e) {
+                if (!crosshairsActive) {
+                    // SHOW CROSSHAIRS
+                    const rect = pdfContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    verticalLine.setAttribute('y2', rect.height);
+
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    horizontalLine.setAttribute('x2', rect.width);
+
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // HIDE CROSSHAIRS
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        // Toggle crosshairs feature on/off
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                // ENABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                // DISABLE CROSSHAIRS FEATURE
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                // Also hide any active crosshairs
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // PDF Page Navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
             loadSession();
-            MathJax.typesetPromise();
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise();
+            }
         });
     </script>
 </body>
