@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Screw Calculator (Fizz Guide)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            gap: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .click-overlay.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .crosshairs-overlay.visible {
+            display: block;
+        }
+        .crosshair-line {
+            stroke: #00ff00;
+            stroke-width: 1;
+            opacity: 0.8;
+        }
+        .crosshair-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 15;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .crosshair-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .crosshair-btn.active {
+            background: #27ae60;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            padding: 25px 30px;
+            font-size: 1.8em;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            background: #34495e;
+            border-bottom: 2px solid #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-right: 1px solid #2c3e50;
+        }
+        .tab:hover {
+            background: #3d566e;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+            padding-left: 12px;
+            border-left: 5px solid #3498db;
+        }
+        h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: 1.05em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .input-row label {
+            min-width: 320px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95em;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95em;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .input-row .unit {
+            font-weight: 600;
+            color: #666;
+            min-width: 60px;
+            font-size: 0.9em;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-left: 8px;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 12px;
+            border-left: 4px solid #2196f3;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid #ffc107;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+        .equation-block {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .equation-latex {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 8px;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .equation-inputs > span {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #495057;
+            margin: 0 5px;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/screws/fizz_power.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+            <button class="crosshair-btn" id="crosshair-toggle" onclick="toggleCrosshairsFeature()">
+                ➕ Enable Crosshairs
+            </button>
+        </div>
+
+        <div class="calculator-column">
+            <h1>Power Screw Design Calculator</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('procedure')">Procedure</button>
+                <button class="tab" onclick="switchTab('equations')">General Equations</button>
+                <button class="tab" onclick="switchTab('variables')">Variables</button>
+            </div>
+
+            <!-- PROCEDURE TAB -->
+            <div id="procedure" class="tab-content active">
+                <div class="button-group">
+                    <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                    <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                </div>
+
+                <!-- Step 1: Calculate Required Tensile Stress Area -->
+                <div class="section">
+                    <h2>Step 1: Calculate Required Tensile Stress Area</h2>
+                    <div class="note">
+                        📖 Reference: Fizz Guide Chapter 17 - Power Screw Design
+                    </div>
+
+                    <div class="input-row">
+                        <label>Applied Load (F) [lbf]:</label>
+                        <input type="number" id="F" step="any" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Maximum Tensile Stress (σ<sub>d</sub>) [psi]:</label>
+                        <input type="number" id="sigma_d" step="any" oninput="syncAllInstances('sigma_d'); markAsUser('sigma_d'); calculate()">
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$A_t = \frac{F}{\sigma_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>A<sub>t</sub></label>
+                                <input type="number" id="A_t_eq" step="any" oninput="syncAllInstances('A_t_eq'); markAsUser('A_t_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq1" step="any" oninput="syncAllInstances('F_eq1'); markAsUser('F_eq1'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>σ<sub>d</sub></label>
+                                <input type="number" id="sigma_d_eq1" step="any" oninput="syncAllInstances('sigma_d_eq1'); markAsUser('sigma_d_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Screw from Table -->
+                <div class="section">
+                    <h2>Step 2: Select Screw from Table</h2>
+                    <div class="note">
+                        📋 Select a screw from <a href="#" onclick="goToPage(2)">Table 17-1 (Acme, page 2)</a> or <a href="#" onclick="goToPage(3)">Table 17-1M (Metric, page 3)</a> where rated A<sub>t</sub> ≥ calculated A<sub>t</sub>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Screw Type:</label>
+                        <select id="screw_type" onchange="updateThreadAngle(); calculate()">
+                            <option value="acme">Acme (φ = 14.5°)</option>
+                            <option value="square">Square (φ = 0°)</option>
+                            <option value="trapezoidal">Trapezoidal (φ = 15°)</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Screw Designation (from table):</label>
+                        <input type="text" id="screw_designation" class="lookup" oninput="saveSession()">
+                    </div>
+                    <div class="input-row">
+                        <label>Major Diameter (D) [in] (from table):</label>
+                        <input type="number" id="D" class="lookup" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
+                        <span class="hint">From table</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Pitch (p) [in] (from table):</label>
+                        <input type="number" id="p" class="lookup" step="any" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
+                        <span class="hint">From table</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Pitch Diameter (D<sub>p</sub>) [in] (from table):</label>
+                        <input type="number" id="D_p" class="lookup" step="any" oninput="syncAllInstances('D_p'); markAsUser('D_p'); calculate()">
+                        <span class="hint">From table</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Rated A<sub>s</sub> [in²/in] (from table):</label>
+                        <input type="number" id="A_s_rated" class="lookup" step="any" oninput="syncAllInstances('A_s_rated'); markAsUser('A_s_rated'); calculate()">
+                        <span class="hint">From table</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Calculate Nut Length -->
+                <div class="section">
+                    <h2>Step 3: Calculate Required Nut Length</h2>
+
+                    <div class="input-row">
+                        <label>Maximum Shear Stress (τ<sub>d</sub>) [psi]:</label>
+                        <input type="number" id="tau_d" step="any" oninput="syncAllInstances('tau_d'); markAsUser('tau_d'); calculate()">
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$A_s = \frac{F}{\tau_d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>A<sub>s</sub></label>
+                                <input type="number" id="A_s_eq" step="any" oninput="syncAllInstances('A_s_eq'); markAsUser('A_s_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq2" step="any" oninput="syncAllInstances('F_eq2'); markAsUser('F_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>τ<sub>d</sub></label>
+                                <input type="number" id="tau_d_eq" step="any" oninput="syncAllInstances('tau_d_eq'); markAsUser('tau_d_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$h = \frac{A_{s,calc}}{A_{s,rated}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>h</label>
+                                <input type="number" id="h_eq" step="any" oninput="syncAllInstances('h_eq'); markAsUser('h_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>A<sub>s,calc</sub></label>
+                                <input type="number" id="A_s_calc_eq" step="any" oninput="syncAllInstances('A_s_calc_eq'); markAsUser('A_s_calc_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>A<sub>s,rated</sub></label>
+                                <input type="number" id="A_s_rated_eq" step="any" oninput="syncAllInstances('A_s_rated_eq'); markAsUser('A_s_rated_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Lead Angle -->
+                <div class="section">
+                    <h2>Step 4: Compute Lead Angle</h2>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\lambda = \tan^{-1}\left(\frac{p}{\pi D_p}\right)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>λ</label>
+                                <input type="number" id="lambda_eq" step="any" oninput="syncAllInstances('lambda_eq'); markAsUser('lambda_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>arctan(</span>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_eq" step="any" oninput="syncAllInstances('p_eq'); markAsUser('p_eq'); calculate()">
+                            </div>
+                            <span>/ (π ×</span>
+                            <div class="var-input">
+                                <label>D<sub>p</sub></label>
+                                <input type="number" id="D_p_eq" step="any" oninput="syncAllInstances('D_p_eq'); markAsUser('D_p_eq'); calculate()">
+                            </div>
+                            <span>))</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Torque Calculations -->
+                <div class="section">
+                    <h2>Step 5: Calculate Raising and Lowering Torques</h2>
+
+                    <div class="input-row">
+                        <label>Friction Coefficient (f):</label>
+                        <input type="number" id="f" step="any" oninput="syncAllInstances('f'); markAsUser('f'); calculate()">
+                    </div>
+
+                    <h3>Collar Friction (Optional)</h3>
+                    <div class="input-row">
+                        <label>Bearing Type:</label>
+                        <select id="bearing_type" onchange="toggleCollarFriction(); calculate()">
+                            <option value="roller">Roller Bearing (f<sub>c</sub> = 0)</option>
+                            <option value="plain">Plain Bearing (include collar friction)</option>
+                        </select>
+                    </div>
+                    <div id="collar_friction_inputs" style="display: none;">
+                        <div class="input-row">
+                            <label>Collar Friction (f<sub>c</sub>):</label>
+                            <input type="number" id="f_c" step="any" value="0" oninput="syncAllInstances('f_c'); markAsUser('f_c'); calculate()">
+                        </div>
+                        <div class="input-row">
+                            <label>Collar Radius (R<sub>c</sub>) [in]:</label>
+                            <input type="number" id="R_c" step="any" value="0" oninput="syncAllInstances('R_c'); markAsUser('R_c'); calculate()">
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_u = \frac{FD_p}{2}\left[\frac{\cos\phi\tan\lambda + f}{\cos\phi - f\tan\lambda}\right] + f_cFR_c$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T<sub>u</sub></label>
+                                <input type="number" id="T_u_eq" step="any" oninput="syncAllInstances('T_u_eq'); markAsUser('T_u_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq3" step="any" oninput="syncAllInstances('F_eq3'); markAsUser('F_eq3'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>D<sub>p</sub></label>
+                                <input type="number" id="D_p_eq2" step="any" oninput="syncAllInstances('D_p_eq2'); markAsUser('D_p_eq2'); calculate()">
+                            </div>
+                            <span>/ 2) × [(cos</span>
+                            <div class="var-input">
+                                <label>φ</label>
+                                <input type="number" id="phi_eq" step="any" oninput="syncAllInstances('phi_eq'); markAsUser('phi_eq'); calculate()">
+                            </div>
+                            <span>× tan</span>
+                            <div class="var-input">
+                                <label>λ</label>
+                                <input type="number" id="lambda_eq2" step="any" oninput="syncAllInstances('lambda_eq2'); markAsUser('lambda_eq2'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>f</label>
+                                <input type="number" id="f_eq" step="any" oninput="syncAllInstances('f_eq'); markAsUser('f_eq'); calculate()">
+                            </div>
+                            <span>) / (cos</span>
+                            <div class="var-input">
+                                <label>φ</label>
+                                <input type="number" id="phi_eq2" step="any" oninput="syncAllInstances('phi_eq2'); markAsUser('phi_eq2'); calculate()">
+                            </div>
+                            <span>-</span>
+                            <div class="var-input">
+                                <label>f</label>
+                                <input type="number" id="f_eq2" step="any" oninput="syncAllInstances('f_eq2'); markAsUser('f_eq2'); calculate()">
+                            </div>
+                            <span>× tan</span>
+                            <div class="var-input">
+                                <label>λ</label>
+                                <input type="number" id="lambda_eq3" step="any" oninput="syncAllInstances('lambda_eq3'); markAsUser('lambda_eq3'); calculate()">
+                            </div>
+                            <span>)] +</span>
+                            <div class="var-input">
+                                <label>f<sub>c</sub></label>
+                                <input type="number" id="f_c_eq" step="any" oninput="syncAllInstances('f_c_eq'); markAsUser('f_c_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq4" step="any" oninput="syncAllInstances('F_eq4'); markAsUser('F_eq4'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>R<sub>c</sub></label>
+                                <input type="number" id="R_c_eq" step="any" oninput="syncAllInstances('R_c_eq'); markAsUser('R_c_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_d = \frac{FD_p}{2}\left[\frac{f - \cos\phi\tan\lambda}{\cos\phi + f\tan\lambda}\right] + f_cFR_c$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T<sub>d</sub></label>
+                                <input type="number" id="T_d_eq" step="any" oninput="syncAllInstances('T_d_eq'); markAsUser('T_d_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq5" step="any" oninput="syncAllInstances('F_eq5'); markAsUser('F_eq5'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>D<sub>p</sub></label>
+                                <input type="number" id="D_p_eq3" step="any" oninput="syncAllInstances('D_p_eq3'); markAsUser('D_p_eq3'); calculate()">
+                            </div>
+                            <span>/ 2) × [(</span>
+                            <div class="var-input">
+                                <label>f</label>
+                                <input type="number" id="f_eq3" step="any" oninput="syncAllInstances('f_eq3'); markAsUser('f_eq3'); calculate()">
+                            </div>
+                            <span>- cos</span>
+                            <div class="var-input">
+                                <label>φ</label>
+                                <input type="number" id="phi_eq3" step="any" oninput="syncAllInstances('phi_eq3'); markAsUser('phi_eq3'); calculate()">
+                            </div>
+                            <span>× tan</span>
+                            <div class="var-input">
+                                <label>λ</label>
+                                <input type="number" id="lambda_eq4" step="any" oninput="syncAllInstances('lambda_eq4'); markAsUser('lambda_eq4'); calculate()">
+                            </div>
+                            <span>) / (cos</span>
+                            <div class="var-input">
+                                <label>φ</label>
+                                <input type="number" id="phi_eq4" step="any" oninput="syncAllInstances('phi_eq4'); markAsUser('phi_eq4'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>f</label>
+                                <input type="number" id="f_eq4" step="any" oninput="syncAllInstances('f_eq4'); markAsUser('f_eq4'); calculate()">
+                            </div>
+                            <span>× tan</span>
+                            <div class="var-input">
+                                <label>λ</label>
+                                <input type="number" id="lambda_eq5" step="any" oninput="syncAllInstances('lambda_eq5'); markAsUser('lambda_eq5'); calculate()">
+                            </div>
+                            <span>)] +</span>
+                            <div class="var-input">
+                                <label>f<sub>c</sub></label>
+                                <input type="number" id="f_c_eq2" step="any" oninput="syncAllInstances('f_c_eq2'); markAsUser('f_c_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq6" step="any" oninput="syncAllInstances('F_eq6'); markAsUser('F_eq6'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>R<sub>c</sub></label>
+                                <input type="number" id="R_c_eq2" step="any" oninput="syncAllInstances('R_c_eq2'); markAsUser('R_c_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="self_locking_warning" class="warning" style="display: none;">
+                        ⚠️ <strong>Self-Locking:</strong> T<sub>d</sub> < 0, screw will not back-drive under load.
+                    </div>
+                </div>
+
+                <!-- Step 6: Efficiency -->
+                <div class="section">
+                    <h2>Step 6: Calculate Efficiency</h2>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$e = \frac{Fp}{2\pi T_u}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>e</label>
+                                <input type="number" id="e_eq" step="any" oninput="syncAllInstances('e_eq'); markAsUser('e_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq7" step="any" oninput="syncAllInstances('F_eq7'); markAsUser('F_eq7'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_eq2" step="any" oninput="syncAllInstances('p_eq2'); markAsUser('p_eq2'); calculate()">
+                            </div>
+                            <span>/ (2π ×</span>
+                            <div class="var-input">
+                                <label>T<sub>u</sub></label>
+                                <input type="number" id="T_u_eq2" step="any" oninput="syncAllInstances('T_u_eq2'); markAsUser('T_u_eq2'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Speed Calculations -->
+                <div class="section">
+                    <h2>Step 7: Calculate Maximum Speed (Given Input Power)</h2>
+
+                    <div class="input-row">
+                        <label>Input Power (P) [hp]:</label>
+                        <input type="number" id="P_input" step="any" oninput="syncAllInstances('P_input'); markAsUser('P_input'); calculate()">
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n = \frac{63000P}{T_u}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n</label>
+                                <input type="number" id="n_eq" step="any" oninput="syncAllInstances('n_eq'); markAsUser('n_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>63000 ×</span>
+                            <div class="var-input">
+                                <label>P</label>
+                                <input type="number" id="P_input_eq" step="any" oninput="syncAllInstances('P_input_eq'); markAsUser('P_input_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>T<sub>u</sub></label>
+                                <input type="number" id="T_u_eq3" step="any" oninput="syncAllInstances('T_u_eq3'); markAsUser('T_u_eq3'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V = \frac{np}{60}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_eq" step="any" oninput="syncAllInstances('V_eq'); markAsUser('V_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n</label>
+                                <input type="number" id="n_eq2" step="any" oninput="syncAllInstances('n_eq2'); markAsUser('n_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>p</label>
+                                <input type="number" id="p_eq3" step="any" oninput="syncAllInstances('p_eq3'); markAsUser('p_eq3'); calculate()">
+                            </div>
+                            <span>/ 60</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Color Key:</strong> White = User Input, Yellow = Table Lookup, Green = Calculated
+                </div>
+            </div>
+
+            <!-- EQUATIONS TAB -->
+            <div id="equations" class="tab-content">
+                <h2>General Equations Reference</h2>
+
+                <div class="section">
+                    <h3>Tensile Stress Area</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$A_t = \frac{F}{\sigma_d}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Shear Area and Nut Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$A_s = \frac{F}{\tau_d}$$</div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$h = \frac{A_{s,calc}}{A_{s,rated}}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Lead Angle</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\lambda = \tan^{-1}\left(\frac{p}{\pi D_p}\right)$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Torque Equations</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_u = \frac{FD_p}{2}\left[\frac{\cos\phi\tan\lambda + f}{\cos\phi - f\tan\lambda}\right] + f_cFR_c$$</div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_d = \frac{FD_p}{2}\left[\frac{f - \cos\phi\tan\lambda}{\cos\phi + f\tan\lambda}\right] + f_cFR_c$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Efficiency</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$e = \frac{Fp}{2\pi T_u}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Speed Calculations</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n = \frac{63000P}{T_u}$$</div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V = \frac{np}{60}$$</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VARIABLES TAB -->
+            <div id="variables" class="tab-content">
+                <h2>Variable Definitions</h2>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>F</td><td>Applied axial load</td><td>lbf</td></tr>
+                        <tr><td>σ<sub>d</sub></td><td>Maximum tensile stress</td><td>psi</td></tr>
+                        <tr><td>A<sub>t</sub></td><td>Tensile stress area</td><td>in²</td></tr>
+                        <tr><td>τ<sub>d</sub></td><td>Maximum shear stress</td><td>psi</td></tr>
+                        <tr><td>A<sub>s</sub></td><td>Shear area</td><td>in²</td></tr>
+                        <tr><td>D</td><td>Major diameter</td><td>in</td></tr>
+                        <tr><td>D<sub>p</sub></td><td>Pitch diameter</td><td>in</td></tr>
+                        <tr><td>p</td><td>Pitch (lead)</td><td>in</td></tr>
+                        <tr><td>h</td><td>Nut length</td><td>in</td></tr>
+                        <tr><td>λ</td><td>Lead angle</td><td>deg</td></tr>
+                        <tr><td>φ</td><td>Thread angle</td><td>deg</td></tr>
+                        <tr><td>f</td><td>Friction coefficient (thread)</td><td>-</td></tr>
+                        <tr><td>f<sub>c</sub></td><td>Friction coefficient (collar)</td><td>-</td></tr>
+                        <tr><td>R<sub>c</sub></td><td>Collar radius</td><td>in</td></tr>
+                        <tr><td>T<sub>u</sub></td><td>Raising torque</td><td>lbf·in</td></tr>
+                        <tr><td>T<sub>d</sub></td><td>Lowering torque</td><td>lbf·in</td></tr>
+                        <tr><td>e</td><td>Efficiency</td><td>-</td></tr>
+                        <tr><td>P</td><td>Input power</td><td>hp</td></tr>
+                        <tr><td>n</td><td>Rotational speed</td><td>rpm</td></tr>
+                        <tr><td>V</td><td>Linear speed</td><td>in/s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            userValues.add(baseVar);
+        }
+
+        const varInstanceMap = {
+            'F': ['F', 'F_eq1', 'F_eq2', 'F_eq3', 'F_eq4', 'F_eq5', 'F_eq6', 'F_eq7'],
+            'sigma_d': ['sigma_d', 'sigma_d_eq1'],
+            'A_t': ['A_t_eq'],
+            'tau_d': ['tau_d', 'tau_d_eq'],
+            'A_s': ['A_s_eq', 'A_s_calc_eq'],
+            'A_s_rated': ['A_s_rated', 'A_s_rated_eq'],
+            'D': ['D'],
+            'p': ['p', 'p_eq', 'p_eq2', 'p_eq3'],
+            'D_p': ['D_p', 'D_p_eq', 'D_p_eq2', 'D_p_eq3'],
+            'h': ['h_eq'],
+            'lambda': ['lambda_eq', 'lambda_eq2', 'lambda_eq3', 'lambda_eq4', 'lambda_eq5'],
+            'phi': ['phi_eq', 'phi_eq2', 'phi_eq3', 'phi_eq4'],
+            'f': ['f', 'f_eq', 'f_eq2', 'f_eq3', 'f_eq4'],
+            'f_c': ['f_c', 'f_c_eq', 'f_c_eq2'],
+            'R_c': ['R_c', 'R_c_eq', 'R_c_eq2'],
+            'T_u': ['T_u_eq', 'T_u_eq2', 'T_u_eq3'],
+            'T_d': ['T_d_eq'],
+            'e': ['e_eq'],
+            'P_input': ['P_input', 'P_input_eq'],
+            'n': ['n_eq', 'n_eq2'],
+            'V': ['V_eq']
+        };
+
+        function getBaseVariable(id) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(id)) {
+                    return baseVar;
+                }
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            const value = document.getElementById(changedId).value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId && !elem.hasAttribute('readonly')) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        let crosshairsEnabled = false;
+
+        function toggleCrosshairsFeature() {
+            crosshairsEnabled = !crosshairsEnabled;
+            const btn = document.getElementById('crosshair-toggle');
+            const overlay = document.getElementById('click-overlay');
+
+            if (crosshairsEnabled) {
+                btn.textContent = '❌ Disable Crosshairs';
+                btn.classList.add('active');
+                overlay.classList.add('active');
+            } else {
+                btn.textContent = '➕ Enable Crosshairs';
+                btn.classList.remove('active');
+                overlay.classList.remove('active');
+                document.getElementById('pdf-crosshairs').classList.remove('visible');
+            }
+        }
+
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const vLine = document.getElementById('crosshair-vertical');
+            const hLine = document.getElementById('crosshair-horizontal');
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                vLine.setAttribute('x1', x);
+                vLine.setAttribute('x2', x);
+                hLine.setAttribute('y1', y);
+                hLine.setAttribute('y2', y);
+
+                svg.classList.add('visible');
+            });
+        }
+
+        function calculate() {
+            const F = parseFloat(document.getElementById('F').value) || 0;
+            const sigma_d = parseFloat(document.getElementById('sigma_d').value) || 0;
+            const tau_d = parseFloat(document.getElementById('tau_d').value) || 0;
+            const p = parseFloat(document.getElementById('p').value) || 0;
+            const D_p = parseFloat(document.getElementById('D_p').value) || 0;
+            const A_s_rated = parseFloat(document.getElementById('A_s_rated').value) || 0;
+            const f = parseFloat(document.getElementById('f').value) || 0;
+            const P_input = parseFloat(document.getElementById('P_input').value) || 0;
+
+            const bearing_type = document.getElementById('bearing_type').value;
+            const f_c = bearing_type === 'roller' ? 0 : (parseFloat(document.getElementById('f_c').value) || 0);
+            const R_c = bearing_type === 'roller' ? 0 : (parseFloat(document.getElementById('R_c').value) || 0);
+
+            // Step 1: Tensile stress area
+            const A_t = sigma_d !== 0 ? F / sigma_d : 0;
+            document.getElementById('A_t_eq').value = A_t.toFixed(6);
+            syncAllInstances('A_t_eq');
+
+            // Step 3: Shear area and nut length
+            const A_s_calc = tau_d !== 0 ? F / tau_d : 0;
+            document.getElementById('A_s_eq').value = A_s_calc.toFixed(6);
+            syncAllInstances('A_s_eq');
+
+            const h_calc = A_s_rated !== 0 ? A_s_calc / A_s_rated : 0;
+            document.getElementById('h_eq').value = h_calc.toFixed(4);
+            syncAllInstances('h_eq');
+
+            const h_rounded = Math.ceil(h_calc * 4) / 4;
+            // No display for h_rounded anymore
+
+            // Step 4: Lead angle
+            const lambda_rad = D_p !== 0 ? Math.atan(p / (Math.PI * D_p)) : 0;
+            const lambda_deg = lambda_rad * (180 / Math.PI);
+            document.getElementById('lambda_eq').value = lambda_deg.toFixed(4);
+            syncAllInstances('lambda_eq');
+
+            // Step 5: Torques
+            const phi_deg = parseFloat(document.getElementById('phi_eq').value) || 0;
+            const phi_rad = phi_deg * (Math.PI / 180);
+
+            const cos_phi = Math.cos(phi_rad);
+            const tan_lambda = Math.tan(lambda_rad);
+
+            // Raising torque
+            const torque_base_u = (F * D_p / 2) * ((cos_phi * tan_lambda + f) / (cos_phi - f * tan_lambda));
+            const collar_torque = f_c * F * R_c;
+            const T_u = torque_base_u + collar_torque;
+            document.getElementById('T_u_eq').value = T_u.toFixed(4);
+            syncAllInstances('T_u_eq');
+
+            // Lowering torque
+            const torque_base_d = (F * D_p / 2) * ((f - cos_phi * tan_lambda) / (cos_phi + f * tan_lambda));
+            const T_d = torque_base_d + collar_torque;
+            document.getElementById('T_d_eq').value = T_d.toFixed(4);
+            syncAllInstances('T_d_eq');
+
+            // Show self-locking warning
+            const warning = document.getElementById('self_locking_warning');
+            if (T_d < 0) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+
+            // Step 6: Efficiency
+            const e = T_u !== 0 ? (F * p) / (2 * Math.PI * T_u) : 0;
+            document.getElementById('e_eq').value = e.toFixed(4);
+            syncAllInstances('e_eq');
+
+            // Step 7: Speed
+            const n = T_u !== 0 ? (63000 * P_input) / T_u : 0;
+            document.getElementById('n_eq').value = n.toFixed(2);
+            syncAllInstances('n_eq');
+
+            const V = (n * p) / 60;
+            document.getElementById('V_eq').value = V.toFixed(4);
+            syncAllInstances('V_eq');
+
+            saveSession();
+        }
+
+        function updateThreadAngle() {
+            const screw_type = document.getElementById('screw_type').value;
+            const phi_map = {
+                'square': 0,
+                'acme': 14.5,
+                'trapezoidal': 15
+            };
+            document.getElementById('phi_eq').value = phi_map[screw_type];
+            syncAllInstances('phi_eq');
+            calculate();
+        }
+
+        function toggleCollarFriction() {
+            const bearing_type = document.getElementById('bearing_type').value;
+            const inputs = document.getElementById('collar_friction_inputs');
+            if (bearing_type === 'plain') {
+                inputs.style.display = 'block';
+            } else {
+                inputs.style.display = 'none';
+                document.getElementById('f_c').value = '0';
+                document.getElementById('R_c').value = '0';
+                syncAllInstances('f_c');
+                syncAllInstances('R_c');
+            }
+            calculate();
+        }
+
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"], input[type="text"], select');
+            inputs.forEach(input => {
+                session[input.id] = input.value;
+            });
+            localStorage.setItem('powerScrewSession', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const sessionData = localStorage.getItem('powerScrewSession');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                Object.keys(session).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input && !input.classList.contains('computed')) {
+                        input.value = session[id];
+                    }
+                });
+                toggleCollarFriction();
+                updateThreadAngle();
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                document.getElementById('screw_type').value = 'acme';
+                document.getElementById('bearing_type').value = 'roller';
+                toggleCollarFriction();
+                updateThreadAngle();
+                userValues.clear();
+                localStorage.removeItem('powerScrewSession');
+                calculate();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
+            updateThreadAngle();
+            loadSession();
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>

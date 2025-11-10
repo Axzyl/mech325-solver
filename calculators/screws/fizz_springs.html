@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helical Compression Springs Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            gap: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .click-overlay.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .crosshairs-overlay.visible {
+            display: block;
+        }
+        .crosshair-line {
+            stroke: #00ff00;
+            stroke-width: 1;
+            opacity: 0.8;
+        }
+        .crosshair-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 15;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .crosshair-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .crosshair-btn.active {
+            background: #27ae60;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            padding: 25px 30px;
+            font-size: 1.8em;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            background: #34495e;
+            border-bottom: 2px solid #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-right: 1px solid #2c3e50;
+        }
+        .tab:hover {
+            background: #3d566e;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+            padding-left: 12px;
+            border-left: 5px solid #3498db;
+        }
+        h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: 1.05em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .input-row label {
+            min-width: 300px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95em;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95em;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .input-row .unit {
+            font-weight: 600;
+            color: #666;
+            min-width: 60px;
+            font-size: 0.9em;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-left: 8px;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 12px;
+            border-left: 4px solid #2196f3;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid #ffc107;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            padding: 12px;
+            border-left: 4px solid #28a745;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+        .equation-block {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .equation-latex {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 8px;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .equation-inputs > span {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #495057;
+            margin: 0 5px;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+        .subsection {
+            background: #ffffff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/screws/fizz_springs.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+            <button class="crosshair-btn" id="crosshair-toggle" onclick="toggleCrosshairsFeature()">
+                ➕ Enable Crosshairs
+            </button>
+        </div>
+
+        <div class="calculator-column">
+            <h1>Helical Compression Springs Calculator</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('procedure')">Procedure</button>
+                <button class="tab" onclick="switchTab('equations')">General Equations</button>
+                <button class="tab" onclick="switchTab('variables')">Variables</button>
+            </div>
+
+            <!-- PROCEDURE TAB -->
+            <div id="procedure" class="tab-content active">
+                <div class="button-group">
+                    <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                    <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                </div>
+
+                <!-- Basic Geometry -->
+                <div class="section">
+                    <h2>Spring Geometry</h2>
+
+                    <div class="input-row">
+                        <label>Wire Diameter (d):</label>
+                        <input type="number" id="d" step="any" oninput="syncAllInstances('d'); markAsUser('d'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <div class="note">
+                        📋 Select from <a href="#" onclick="goToPage(8)">Table A-28</a> (Standard Wire Gauges). Common sizes: 0.020", 0.032", 0.047", 0.063", 0.081", 0.105", 0.148", 0.192"
+                    </div>
+
+                    <div class="input-row">
+                        <label>Mean Diameter (D):</label>
+                        <input type="number" id="D" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+
+                    <h3>Basic Geometry Calculations</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C = \frac{D}{d}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq" step="any" oninput="syncAllInstances('C_eq'); markAsUser('C_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_eq1" step="any" oninput="syncAllInstances('D_eq1'); markAsUser('D_eq1'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq1" step="any" oninput="syncAllInstances('d_eq1'); markAsUser('d_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$OD = D + d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>OD</label>
+                                <input type="number" id="OD_eq" step="any" oninput="syncAllInstances('OD_eq'); markAsUser('OD_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_eq2" step="any" oninput="syncAllInstances('D_eq2'); markAsUser('D_eq2'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$ID = D - d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>ID</label>
+                                <input type="number" id="ID_eq" step="any" oninput="syncAllInstances('ID_eq'); markAsUser('ID_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_eq3" step="any" oninput="syncAllInstances('D_eq3'); markAsUser('D_eq3'); calculate()">
+                            </div>
+                            <span>-</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq3" step="any" oninput="syncAllInstances('d_eq3'); markAsUser('d_eq3'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="note" id="C_check">
+                        <!-- Dynamic check for C range -->
+                    </div>
+                </div>
+
+                <!-- Coil Counts -->
+                <div class="section">
+                    <h2>Coil Counts and End Condition</h2>
+
+                    <div class="input-row">
+                        <label>End Type:</label>
+                        <select id="end_type" onchange="calculate()">
+                            <option value="plain">Plain</option>
+                            <option value="plain_ground">Plain and Ground</option>
+                            <option value="squared">Squared or Closed</option>
+                            <option value="squared_ground">Squared and Ground</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Number of Active Coils (N<sub>a</sub>):</label>
+                        <input type="number" id="Na" step="any" oninput="syncAllInstances('Na'); markAsUser('Na'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+
+                    <h3>End Coils Calculation (depends on end type)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_e = \text{(0 for plain, 1 for plain+ground, 2 for squared/squared+ground)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>e</sub></label>
+                                <input type="number" id="Ne_eq" step="any" oninput="syncAllInstances('Ne_eq'); markAsUser('Ne_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Total Coils</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_t = N_a + N_e$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>t</sub></label>
+                                <input type="number" id="Nt_eq" step="any" oninput="syncAllInstances('Nt_eq'); markAsUser('Nt_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>N<sub>a</sub></label>
+                                <input type="number" id="Na_eq2" step="any" oninput="syncAllInstances('Na_eq2'); markAsUser('Na_eq2'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>N<sub>e</sub></label>
+                                <input type="number" id="Ne_eq2" step="any" oninput="syncAllInstances('Ne_eq2'); markAsUser('Ne_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning" id="Na_check" style="display:none;">
+                        ⚠️ Design guideline: 3 ≤ N<sub>a</sub> ≤ 15 for good spring design
+                    </div>
+                </div>
+
+                <!-- Stress Correction Factors -->
+                <div class="section">
+                    <h2>Stress Correction Factors</h2>
+
+                    <h3>Direct Shear Factor (K<sub>s</sub>)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$K_s = \frac{2C + 1}{2C}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>K<sub>s</sub></label>
+                                <input type="number" id="Ks_eq" step="any" oninput="syncAllInstances('Ks_eq'); markAsUser('Ks_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(2 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq2" step="any" oninput="syncAllInstances('C_eq2'); markAsUser('C_eq2'); calculate()">
+                            </div>
+                            <span>+ 1) / (2 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq3" step="any" oninput="syncAllInstances('C_eq3'); markAsUser('C_eq3'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <h3>Wahl Factor (K<sub>W</sub>)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$K_W = \frac{4C - 1}{4C - 4} + \frac{0.615}{C}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>K<sub>W</sub></label>
+                                <input type="number" id="KW_eq" step="any" oninput="syncAllInstances('KW_eq'); markAsUser('KW_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(4 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq4" step="any" oninput="syncAllInstances('C_eq4'); markAsUser('C_eq4'); calculate()">
+                            </div>
+                            <span>- 1) / (4 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq5" step="any" oninput="syncAllInstances('C_eq5'); markAsUser('C_eq5'); calculate()">
+                            </div>
+                            <span>- 4) + 0.615 /</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq6" step="any" oninput="syncAllInstances('C_eq6'); markAsUser('C_eq6'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Bergsträsser Factor (K<sub>B</sub>) - Preferred</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$K_B = \frac{4C + 2}{4C - 3}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>K<sub>B</sub></label>
+                                <input type="number" id="KB_eq" step="any" oninput="syncAllInstances('KB_eq'); markAsUser('KB_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(4 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq7" step="any" oninput="syncAllInstances('C_eq7'); markAsUser('C_eq7'); calculate()">
+                            </div>
+                            <span>+ 2) / (4 ×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_eq8" step="any" oninput="syncAllInstances('C_eq8'); markAsUser('C_eq8'); calculate()">
+                            </div>
+                            <span>- 3)</span>
+                        </div>
+                    </div>
+
+                    <h3>Curvature Factor (K<sub>C</sub>)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$K_C = \frac{K_B}{K_s}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>K<sub>C</sub></label>
+                                <input type="number" id="KC_eq" step="any" oninput="syncAllInstances('KC_eq'); markAsUser('KC_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>K<sub>B</sub></label>
+                                <input type="number" id="KB_eq2" step="any" oninput="syncAllInstances('KB_eq2'); markAsUser('KB_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>K<sub>s</sub></label>
+                                <input type="number" id="Ks_eq2" step="any" oninput="syncAllInstances('Ks_eq2'); markAsUser('Ks_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Loading and Stress -->
+                <div class="section">
+                    <h2>Loading and Stress Analysis</h2>
+
+                    <div class="subsection">
+                        <h3>Applied Loads</h3>
+                        <div class="input-row">
+                            <label>Maximum Load (F<sub>max</sub>):</label>
+                            <input type="number" id="Fmax" step="any" oninput="syncAllInstances('Fmax'); markAsUser('Fmax'); calculate()">
+                            <span class="unit">lbf</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Minimum Load (F<sub>min</sub>) [for fatigue]:</label>
+                            <input type="number" id="Fmin" step="any" oninput="syncAllInstances('Fmin'); markAsUser('Fmin'); calculate()">
+                            <span class="unit">lbf</span>
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Shear Stress Calculations</h3>
+                        <h4>Maximum Shear Stress</h4>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\tau_{max} = K_B \frac{8F_{max}D}{\pi d^3}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>τ<sub>max</sub></label>
+                                    <input type="number" id="tau_max_eq" step="any" oninput="syncAllInstances('tau_max_eq'); markAsUser('tau_max_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>K<sub>B</sub></label>
+                                    <input type="number" id="KB_eq3" step="any" oninput="syncAllInstances('KB_eq3'); markAsUser('KB_eq3'); calculate()">
+                                </div>
+                                <span>× 8 ×</span>
+                                <div class="var-input">
+                                    <label>F<sub>max</sub></label>
+                                    <input type="number" id="Fmax_eq2" step="any" oninput="syncAllInstances('Fmax_eq2'); markAsUser('Fmax_eq2'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_eq4" step="any" oninput="syncAllInstances('D_eq4'); markAsUser('D_eq4'); calculate()">
+                                </div>
+                                <span>/ π /</span>
+                                <div class="var-input">
+                                    <label>d³</label>
+                                    <input type="number" id="d_cubed_eq" step="any" oninput="syncAllInstances('d_cubed_eq'); markAsUser('d_cubed_eq'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4>Alternating Stress</h4>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\tau_a = \frac{\tau_{max} - \tau_{min}}{2}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>τ<sub>a</sub></label>
+                                    <input type="number" id="tau_a_eq2" step="any" oninput="syncAllInstances('tau_a_eq2'); markAsUser('tau_a_eq2'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>(</span>
+                                <div class="var-input">
+                                    <label>τ<sub>max</sub></label>
+                                    <input type="number" id="tau_max_eq2" step="any" oninput="syncAllInstances('tau_max_eq2'); markAsUser('tau_max_eq2'); calculate()">
+                                </div>
+                                <span>-</span>
+                                <div class="var-input">
+                                    <label>τ<sub>min</sub></label>
+                                    <input type="number" id="tau_min_eq" step="any" oninput="syncAllInstances('tau_min_eq'); markAsUser('tau_min_eq'); calculate()">
+                                </div>
+                                <span>) / 2</span>
+                            </div>
+                        </div>
+
+                        <h4>Mean Stress</h4>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\tau_m = \frac{\tau_{max} + \tau_{min}}{2}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>τ<sub>m</sub></label>
+                                    <input type="number" id="tau_m_eq2" step="any" oninput="syncAllInstances('tau_m_eq2'); markAsUser('tau_m_eq2'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>(</span>
+                                <div class="var-input">
+                                    <label>τ<sub>max</sub></label>
+                                    <input type="number" id="tau_max_eq3" step="any" oninput="syncAllInstances('tau_max_eq3'); markAsUser('tau_max_eq3'); calculate()">
+                                </div>
+                                <span>+</span>
+                                <div class="var-input">
+                                    <label>τ<sub>min</sub></label>
+                                    <input type="number" id="tau_min_eq2" step="any" oninput="syncAllInstances('tau_min_eq2'); markAsUser('tau_min_eq2'); calculate()">
+                                </div>
+                                <span>) / 2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Properties -->
+                <div class="section">
+                    <h2>Material Properties</h2>
+
+                    <div class="input-row">
+                        <label><strong>Ultimate Tensile (S<sub>ut</sub>):</strong></label>
+                        <input type="number" id="Sut" class="lookup" step="any" oninput="syncAllInstances('Sut'); markAsUser('Sut'); calculate()">
+                        <span class="unit">kpsi</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Shear Modulus (G):</strong></label>
+                        <input type="number" id="G" class="lookup" step="any" oninput="syncAllInstances('G'); markAsUser('G'); calculate()">
+                        <span class="unit">Mpsi</span>
+                    </div>
+                    <div class="note">
+                        📋 Look up from <a href="#" onclick="goToPage(5)">Tables 10-4</a> (S<sub>ut</sub> = A/d<sup>m</sup>) and <a href="#" onclick="goToPage(5)">10-5</a> (G). Typical for music wire: G ≈ 11.5 Mpsi
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$S_{su} = 0.67S_{ut}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>S<sub>su</sub></label>
+                                <input type="number" id="Ssu_eq" step="any" oninput="syncAllInstances('Ssu_eq'); markAsUser('Ssu_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>0.67 ×</span>
+                            <div class="var-input">
+                                <label>S<sub>ut</sub></label>
+                                <input type="number" id="Sut_eq" step="any" oninput="syncAllInstances('Sut_eq'); markAsUser('Sut_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label><strong>Torsional Yield (S<sub>sy</sub>):</strong></label>
+                        <input type="number" id="Ssy" class="lookup" step="any" oninput="syncAllInstances('Ssy'); markAsUser('Ssy'); calculate()">
+                        <span class="unit">kpsi</span>
+                    </div>
+                </div>
+
+                <!-- Deflection and Spring Rate -->
+                <div class="section">
+                    <h2>Deflection and Spring Rate</h2>
+
+                    <h3>Spring Rate</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$k = \frac{d^4G}{8D^3N_a}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>k</label>
+                                <input type="number" id="k_eq" step="any" oninput="syncAllInstances('k_eq'); markAsUser('k_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d⁴</label>
+                                <input type="number" id="d_4th_eq" step="any" oninput="syncAllInstances('d_4th_eq'); markAsUser('d_4th_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>G</label>
+                                <input type="number" id="G_eq" step="any" oninput="syncAllInstances('G_eq'); markAsUser('G_eq'); calculate()">
+                            </div>
+                            <span>/ (8 ×</span>
+                            <div class="var-input">
+                                <label>D³</label>
+                                <input type="number" id="D_cubed_eq" step="any" oninput="syncAllInstances('D_cubed_eq'); markAsUser('D_cubed_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N<sub>a</sub></label>
+                                <input type="number" id="Na_eq" step="any" oninput="syncAllInstances('Na_eq'); markAsUser('Na_eq'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <h3>Deflection</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$y = \frac{F}{k}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>y</label>
+                                <input type="number" id="y_eq" step="any" oninput="syncAllInstances('y_eq'); markAsUser('y_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq2" step="any" oninput="syncAllInstances('F_eq2'); markAsUser('F_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>k</label>
+                                <input type="number" id="k_eq2" step="any" oninput="syncAllInstances('k_eq2'); markAsUser('k_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Lengths -->
+                <div class="section">
+                    <h2>Spring Lengths</h2>
+
+                    <div class="input-row">
+                        <label>Free Length (L<sub>0</sub>):</label>
+                        <input type="number" id="L0" step="any" oninput="syncAllInstances('L0'); markAsUser('L0'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Pitch (p):</label>
+                        <input type="number" id="p" step="any" oninput="syncAllInstances('p'); markAsUser('p'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+
+                    <div class="note">
+                        Pitch = Distance between adjacent coils. Related to L<sub>0</sub> by end type formulas (Table 10-1)
+                    </div>
+
+                    <h3>Solid Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_s = d \cdot N_t \text{ (most end types)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>s</sub></label>
+                                <input type="number" id="Ls_eq" step="any" oninput="syncAllInstances('Ls_eq'); markAsUser('Ls_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq4" step="any" oninput="syncAllInstances('d_eq4'); markAsUser('d_eq4'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N<sub>t</sub></label>
+                                <input type="number" id="Nt_eq2" step="any" oninput="syncAllInstances('Nt_eq2'); markAsUser('Nt_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Loaded Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_{loaded} = L_0 - y$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>loaded</sub></label>
+                                <input type="number" id="L_loaded_eq" step="any" oninput="syncAllInstances('L_loaded_eq'); markAsUser('L_loaded_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>L<sub>0</sub></label>
+                                <input type="number" id="L0_eq" step="any" oninput="syncAllInstances('L0_eq'); markAsUser('L0_eq'); calculate()">
+                            </div>
+                            <span>-</span>
+                            <div class="var-input">
+                                <label>y</label>
+                                <input type="number" id="y_eq2" step="any" oninput="syncAllInstances('y_eq2'); markAsUser('y_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Factors -->
+                <div class="section">
+                    <h2>Safety Factor Analysis</h2>
+
+                    <div class="subsection">
+                        <h3>Clash Allowance and Solid Height Check</h3>
+                        <div class="input-row">
+                            <label>Fractional Overrun (ξ):</label>
+                            <input type="number" id="xi" value="0.15" step="any" oninput="syncAllInstances('xi'); markAsUser('xi'); calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="note">
+                            ξ ≥ 0.15 typically recommended for clash allowance
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$F_s = (1 + \xi)F_{max}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>s</sub></label>
+                                    <input type="number" id="Fs_eq" step="any" oninput="syncAllInstances('Fs_eq'); markAsUser('Fs_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>(1 +</span>
+                                <div class="var-input">
+                                    <label>ξ</label>
+                                    <input type="number" id="xi_eq" step="any" oninput="syncAllInstances('xi_eq'); markAsUser('xi_eq'); calculate()">
+                                </div>
+                                <span>) ×</span>
+                                <div class="var-input">
+                                    <label>F<sub>max</sub></label>
+                                    <input type="number" id="Fmax_eq" step="any" oninput="syncAllInstances('Fmax_eq'); markAsUser('Fmax_eq'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Shear Stress at Solid</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\tau_s = K_B \frac{8F_sD}{\pi d^3}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>τ<sub>s</sub></label>
+                                    <input type="number" id="tau_s_eq" step="any" oninput="syncAllInstances('tau_s_eq'); markAsUser('tau_s_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>K<sub>B</sub></label>
+                                    <input type="number" id="KB_eq4" step="any" oninput="syncAllInstances('KB_eq4'); markAsUser('KB_eq4'); calculate()">
+                                </div>
+                                <span>× 8 ×</span>
+                                <div class="var-input">
+                                    <label>F<sub>s</sub></label>
+                                    <input type="number" id="Fs_eq2" step="any" oninput="syncAllInstances('Fs_eq2'); markAsUser('Fs_eq2'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_eq5" step="any" oninput="syncAllInstances('D_eq5'); markAsUser('D_eq5'); calculate()">
+                                </div>
+                                <span>/ π /</span>
+                                <div class="var-input">
+                                    <label>d³</label>
+                                    <input type="number" id="d_cubed_eq2" step="any" oninput="syncAllInstances('d_cubed_eq2'); markAsUser('d_cubed_eq2'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Safety Factor at Solid</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$n_s = \frac{S_{sy}}{\tau_s}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>n<sub>s</sub></label>
+                                    <input type="number" id="ns_eq" step="any" oninput="syncAllInstances('ns_eq'); markAsUser('ns_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>S<sub>sy</sub></label>
+                                    <input type="number" id="Ssy_eq" step="any" oninput="syncAllInstances('Ssy_eq'); markAsUser('Ssy_eq'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>τ<sub>s</sub></label>
+                                    <input type="number" id="tau_s_eq2" step="any" oninput="syncAllInstances('tau_s_eq2'); markAsUser('tau_s_eq2'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="ns_check" style="display:none;">
+                            <!-- Dynamic safety factor check -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fatigue Analysis -->
+                <div class="section">
+                    <h2>Fatigue Analysis (Goodman Criterion)</h2>
+
+                    <div class="input-row">
+                        <label><strong>Alternating Shear Strength (S<sub>sa</sub>):</strong></label>
+                        <input type="number" id="Ssa" class="lookup" step="any" oninput="syncAllInstances('Ssa'); markAsUser('Ssa'); calculate()">
+                        <span class="unit">kpsi</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Mean Shear Strength (S<sub>sm</sub>):</strong></label>
+                        <input type="number" id="Ssm" class="lookup" step="any" oninput="syncAllInstances('Ssm'); markAsUser('Ssm'); calculate()">
+                        <span class="unit">kpsi</span>
+                    </div>
+                    <div class="note">
+                        📋 From <a href="#" onclick="goToPage(8)">page 8</a>: Unpeened: S<sub>sa</sub> = 35 kpsi, S<sub>sm</sub> = 55 kpsi<br>
+                        Peened: S<sub>sa</sub> = 57.5 kpsi, S<sub>sm</sub> = 77.5 kpsi
+                    </div>
+
+                    <h3>Endurance Strength</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$S_{se} = \frac{S_{sa}}{1 - \frac{S_{sm}}{S_{su}}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>S<sub>se</sub></label>
+                                <input type="number" id="Sse_eq" step="any" oninput="syncAllInstances('Sse_eq'); markAsUser('Sse_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>S<sub>sa</sub></label>
+                                <input type="number" id="Ssa_eq" step="any" oninput="syncAllInstances('Ssa_eq'); markAsUser('Ssa_eq'); calculate()">
+                            </div>
+                            <span>/ (1 -</span>
+                            <div class="var-input">
+                                <label>S<sub>sm</sub></label>
+                                <input type="number" id="Ssm_eq" step="any" oninput="syncAllInstances('Ssm_eq'); markAsUser('Ssm_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>S<sub>su</sub></label>
+                                <input type="number" id="Ssu_eq2" step="any" oninput="syncAllInstances('Ssu_eq2'); markAsUser('Ssu_eq2'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <h3>Fatigue Safety Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_f = \frac{S_{se}}{\tau_a + \frac{S_{se}}{S_{su}}\tau_m}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n<sub>f</sub></label>
+                                <input type="number" id="nf_eq" step="any" oninput="syncAllInstances('nf_eq'); markAsUser('nf_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>S<sub>se</sub></label>
+                                <input type="number" id="Sse_eq2" step="any" oninput="syncAllInstances('Sse_eq2'); markAsUser('Sse_eq2'); calculate()">
+                            </div>
+                            <span>/ (</span>
+                            <div class="var-input">
+                                <label>τ<sub>a</sub></label>
+                                <input type="number" id="tau_a_eq" step="any" oninput="syncAllInstances('tau_a_eq'); markAsUser('tau_a_eq'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>S<sub>se</sub></label>
+                                <input type="number" id="Sse_eq3" step="any" oninput="syncAllInstances('Sse_eq3'); markAsUser('Sse_eq3'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>S<sub>su</sub></label>
+                                <input type="number" id="Ssu_eq3" step="any" oninput="syncAllInstances('Ssu_eq3'); markAsUser('Ssu_eq3'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>τ<sub>m</sub></label>
+                                <input type="number" id="tau_m_eq" step="any" oninput="syncAllInstances('tau_m_eq'); markAsUser('tau_m_eq'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <div id="nf_check" style="display:none;">
+                        <!-- Dynamic fatigue check -->
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Note:</strong> Yellow inputs require manual lookup from tables. White inputs in equation blocks are editable - all variables can be solved bidirectionally. Recommended: C between 4-12, N<sub>a</sub> between 3-15, n<sub>s</sub> ≥ 1.2.
+                </div>
+            </div>
+
+            <!-- EQUATIONS TAB -->
+            <div id="equations" class="tab-content">
+                <div class="section">
+                    <h2>General Equations for Compression Springs</h2>
+
+                    <h3>Spring Geometry</h3>
+                    <div class="equation-latex">
+                        $$C = \frac{D}{d} \quad OD = D + d \quad ID = D - d$$
+                    </div>
+
+                    <h3>Stress Correction Factors</h3>
+                    <div class="equation-latex">
+                        $$K_s = \frac{2C + 1}{2C}$$
+                        $$K_W = \frac{4C - 1}{4C - 4} + \frac{0.615}{C}$$
+                        $$K_B = \frac{4C + 2}{4C - 3}$$
+                        $$K_C = \frac{K_B}{K_s}$$
+                    </div>
+
+                    <h3>Shear Stress</h3>
+                    <div class="equation-latex">
+                        $$\tau = K_B \frac{8FD}{\pi d^3}$$
+                        $$\tau_a = \frac{\tau_{max} - \tau_{min}}{2}$$
+                        $$\tau_m = \frac{\tau_{max} + \tau_{min}}{2}$$
+                    </div>
+
+                    <h3>Material Properties</h3>
+                    <div class="equation-latex">
+                        $$S_{sy} = 0.577S_y$$
+                        $$S_{su} = 0.67S_{ut}$$
+                    </div>
+
+                    <h3>Spring Rate and Deflection</h3>
+                    <div class="equation-latex">
+                        $$k = \frac{d^4G}{8D^3N_a}$$
+                        $$y = \frac{F}{k}$$
+                    </div>
+
+                    <h3>Lengths</h3>
+                    <div class="equation-latex">
+                        $$L_s = d \cdot N_t \quad \text{(for most end types)}$$
+                        $$L_{loaded} = L_0 - y$$
+                    </div>
+
+                    <h3>Safety Factors</h3>
+                    <div class="equation-latex">
+                        $$F_s = (1 + \xi)F_{max}$$
+                        $$n_s = \frac{S_{sy}}{\tau_s}$$
+                    </div>
+
+                    <h3>Fatigue (Goodman Criterion)</h3>
+                    <div class="equation-latex">
+                        $$S_{se} = \frac{S_{sa}}{1 - \frac{S_{sm}}{S_{su}}}$$
+                        $$n_f = \frac{S_{se}}{\tau_a + \frac{S_{se}}{S_{su}}\tau_m}$$
+                    </div>
+                </div>
+            </div>
+
+            <!-- VARIABLES TAB -->
+            <div id="variables" class="tab-content">
+                <div class="section">
+                    <h2>Variable Reference</h2>
+                    <table class="variables-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Description</th>
+                                <th>Units</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>d</td>
+                                <td>Wire diameter</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>D</td>
+                                <td>Mean diameter</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>C</td>
+                                <td>Spring index</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>OD</td>
+                                <td>Outer diameter</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>ID</td>
+                                <td>Inner diameter</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>N<sub>a</sub></td>
+                                <td>Number of active coils</td>
+                                <td>-</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>N<sub>e</sub></td>
+                                <td>End coils</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>N<sub>t</sub></td>
+                                <td>Total coils</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>K<sub>s</sub></td>
+                                <td>Direct shear factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>K<sub>W</sub></td>
+                                <td>Wahl factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>K<sub>B</sub></td>
+                                <td>Bergsträsser factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>K<sub>C</sub></td>
+                                <td>Curvature factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>max</sub></td>
+                                <td>Maximum load</td>
+                                <td>lbf</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>min</sub></td>
+                                <td>Minimum load</td>
+                                <td>lbf</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>τ<sub>max</sub></td>
+                                <td>Maximum shear stress</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>τ<sub>a</sub></td>
+                                <td>Alternating stress</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>τ<sub>m</sub></td>
+                                <td>Mean stress</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>ut</sub></td>
+                                <td>Ultimate tensile strength</td>
+                                <td>kpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>sy</sub></td>
+                                <td>Torsional yield strength</td>
+                                <td>kpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>su</sub></td>
+                                <td>Ultimate shear strength</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>G</td>
+                                <td>Shear modulus</td>
+                                <td>Mpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>k</td>
+                                <td>Spring rate</td>
+                                <td>lbf/in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>y</td>
+                                <td>Deflection</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>L<sub>0</sub></td>
+                                <td>Free length</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>L<sub>s</sub></td>
+                                <td>Solid length</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>F<sub>s</sub></td>
+                                <td>Force at solid</td>
+                                <td>lbf</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>s</sub></td>
+                                <td>Safety factor at solid</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>sa</sub></td>
+                                <td>Alternating shear strength</td>
+                                <td>kpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>sm</sub></td>
+                                <td>Mean shear strength</td>
+                                <td>kpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>S<sub>se</sub></td>
+                                <td>Endurance strength</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>f</sub></td>
+                                <td>Fatigue safety factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable instance mapping for synchronization
+        const varInstanceMap = {
+            'd': ['d', 'd_eq1', 'd_eq2', 'd_eq3', 'd_eq4'],
+            'D': ['D', 'D_eq1', 'D_eq2', 'D_eq3', 'D_eq4', 'D_eq5'],
+            'C': ['C_eq', 'C_eq2', 'C_eq3', 'C_eq4', 'C_eq5', 'C_eq6', 'C_eq7', 'C_eq8'],
+            'OD': ['OD_eq'],
+            'ID': ['ID_eq'],
+            'Na': ['Na', 'Na_eq', 'Na_eq2'],
+            'Ne': ['Ne_eq', 'Ne_eq2'],
+            'Nt': ['Nt_eq', 'Nt_eq2'],
+            'Ks': ['Ks_eq', 'Ks_eq2'],
+            'KW': ['KW_eq'],
+            'KB': ['KB_eq', 'KB_eq2', 'KB_eq3', 'KB_eq4'],
+            'KC': ['KC_eq'],
+            'Fmax': ['Fmax', 'Fmax_eq', 'Fmax_eq2'],
+            'Fmin': ['Fmin'],
+            'tau_max': ['tau_max_eq', 'tau_max_eq2', 'tau_max_eq3'],
+            'tau_min': ['tau_min_eq', 'tau_min_eq2'],
+            'tau_a': ['tau_a_eq', 'tau_a_eq2'],
+            'tau_m': ['tau_m_eq', 'tau_m_eq2'],
+            'Sut': ['Sut', 'Sut_eq'],
+            'Ssu': ['Ssu_eq', 'Ssu_eq2', 'Ssu_eq3'],
+            'Ssy': ['Ssy', 'Ssy_eq'],
+            'G': ['G', 'G_eq'],
+            'k': ['k_eq', 'k_eq2'],
+            'y': ['y_eq', 'y_eq2'],
+            'L0': ['L0', 'L0_eq'],
+            'Ls': ['Ls_eq'],
+            'L_loaded': ['L_loaded_eq'],
+            'p': ['p'],
+            'xi': ['xi', 'xi_eq'],
+            'Fs': ['Fs_eq', 'Fs_eq2'],
+            'tau_s': ['tau_s_eq', 'tau_s_eq2'],
+            'ns': ['ns_eq'],
+            'Ssa': ['Ssa', 'Ssa_eq'],
+            'Ssm': ['Ssm', 'Ssm_eq'],
+            'Sse': ['Sse_eq', 'Sse_eq2', 'Sse_eq3'],
+            'nf': ['nf_eq'],
+            'd_cubed': ['d_cubed_eq', 'd_cubed_eq2'],
+            'd_4th': ['d_4th_eq'],
+            'D_cubed': ['D_cubed_eq']
+        };
+
+        // Track user-modified values
+        const userValues = new Set();
+
+        // Crosshairs state
+        let crosshairsEnabled = false;
+        let crosshairActive = false;
+
+        // Sync all instances of a variable
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const element = document.getElementById(changedId);
+            if (!element) return;
+
+            const value = element.value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        // Get base variable name from any instance ID
+        function getBaseVariable(instanceId) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(instanceId)) {
+                    return baseVar;
+                }
+            }
+            return instanceId.replace(/_eq\d*$/, '');
+        }
+
+        // Mark value as user-modified
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userValues.add(baseVar);
+            }
+        }
+
+        // Calculate all values
+        function calculate() {
+            const d = parseFloat(document.getElementById('d').value) || 0;
+            const D = parseFloat(document.getElementById('D').value) || 0;
+
+            // Spring index and diameters
+            const C = d !== 0 ? D / d : 0;
+            const OD = D + d;
+            const ID = D - d;
+
+            // Sync to equation instances
+            setValue('C_eq', C);
+            setValue('OD_eq', OD);
+            setValue('ID_eq', ID);
+
+            // Check C range
+            const C_check = document.getElementById('C_check');
+            if (C >= 4 && C <= 12) {
+                C_check.className = 'success';
+                C_check.innerHTML = '✅ <strong>GOOD:</strong> Spring index C is within recommended range (4 ≤ C ≤ 12)';
+            } else if (C > 0) {
+                C_check.className = 'warning';
+                C_check.innerHTML = '⚠️ <strong>WARNING:</strong> Spring index C outside recommended range. Best: 4 ≤ C ≤ 12';
+            } else {
+                C_check.className = 'note';
+                C_check.innerHTML = 'Spring index C = D/d will be calculated when D and d are entered';
+            }
+
+            // End condition and coil counts
+            const endType = document.getElementById('end_type').value;
+            const Na = parseFloat(document.getElementById('Na').value) || 0;
+
+            let Ne, Nt;
+            if (endType === 'plain') {
+                Ne = 0;
+                Nt = Na;
+            } else if (endType === 'plain_ground') {
+                Ne = 1;
+                Nt = Na + 1;
+            } else {
+                Ne = 2;
+                Nt = Na + 2;
+            }
+
+            setValue('Ne_eq', Ne);
+            setValue('Nt_eq', Nt);
+
+            // Check Na range
+            const Na_check = document.getElementById('Na_check');
+            if (Na >= 3 && Na <= 15) {
+                Na_check.style.display = 'none';
+            } else if (Na > 0) {
+                Na_check.style.display = 'block';
+            }
+
+            // Stress correction factors
+            const Ks = C !== 0 ? (2*C + 1) / (2*C) : 0;
+            const KW = C !== 0 ? (4*C - 1)/(4*C - 4) + 0.615/C : 0;
+            const KB = C !== 0 ? (4*C + 2) / (4*C - 3) : 0;
+            const KC = Ks !== 0 ? KB / Ks : 0;
+
+            // Sync to equation instances
+            setValue('Ks_eq', Ks);
+            setValue('KW_eq', KW);
+            setValue('KB_eq', KB);
+            setValue('KC_eq', KC);
+
+            // Loading and stress
+            const Fmax = parseFloat(document.getElementById('Fmax').value) || 0;
+            const Fmin = parseFloat(document.getElementById('Fmin').value) || 0;
+
+            const tau_max = (d !== 0 && D !== 0) ? KB * 8 * Fmax * D / (Math.PI * d * d * d) / 1000 : 0;
+            const Fmin_val = parseFloat(document.getElementById('Fmin').value) || 0;
+            const tau_min = (d !== 0 && D !== 0) ? KB * 8 * Fmin_val * D / (Math.PI * d * d * d) / 1000 : 0;
+            const tau_a = (tau_max - tau_min) / 2;
+            const tau_m = (tau_max + tau_min) / 2;
+
+            setValue('tau_max_eq', tau_max);
+            setValue('tau_min_eq', tau_min);
+            setValue('tau_a_eq', tau_a);
+            setValue('tau_m_eq', tau_m);
+
+            // Material properties
+            const Sut = parseFloat(document.getElementById('Sut').value) || 0;
+            const Ssu = 0.67 * Sut;
+            setValue('Ssu_eq', Ssu);
+
+            // Spring rate and deflection
+            const G = parseFloat(document.getElementById('G').value) || 0;
+            const k = (d !== 0 && D !== 0 && Na !== 0) ? (d * d * d * d * G * 1e6) / (8 * D * D * D * Na) : 0;
+            const y = k !== 0 ? Fmax / k : 0;
+
+            setValue('k_eq', k);
+            setValue('y_eq', y);
+
+            // Lengths
+            const L0 = parseFloat(document.getElementById('L0').value) || 0;
+            let Ls;
+
+            if (endType === 'plain') {
+                Ls = d * (Nt + 1);
+            } else {
+                Ls = d * Nt;
+            }
+
+            const L_loaded = L0 - y;
+
+            setValue('Ls_eq', Ls);
+            setValue('L_loaded_eq', L_loaded);
+
+            // Safety factors - solid height
+            const xi = parseFloat(document.getElementById('xi').value) || 0.15;
+            const Fs = (1 + xi) * Fmax;
+            const tau_s = (d !== 0 && D !== 0) ? KB * 8 * Fs * D / (Math.PI * d * d * d) / 1000 : 0;
+            const Ssy = parseFloat(document.getElementById('Ssy').value) || 0;
+            const ns = tau_s !== 0 ? Ssy / tau_s : 0;
+
+            setValue('Fs_eq', Fs);
+            setValue('tau_s_eq', tau_s);
+            setValue('ns_eq', ns);
+
+            const ns_check = document.getElementById('ns_check');
+            if (ns > 0) {
+                ns_check.style.display = 'block';
+                if (ns >= 1.2) {
+                    ns_check.className = 'success';
+                    ns_check.innerHTML = `✅ <strong>PASS:</strong> n<sub>s</sub> = ${ns.toFixed(2)} ≥ 1.2 (recommended minimum)`;
+                } else {
+                    ns_check.className = 'warning';
+                    ns_check.innerHTML = `⚠️ <strong>WARNING:</strong> n<sub>s</sub> = ${ns.toFixed(2)} < 1.2 (recommended minimum)`;
+                }
+            } else {
+                ns_check.style.display = 'none';
+            }
+
+            // Fatigue analysis
+            const Ssa = parseFloat(document.getElementById('Ssa').value) || 0;
+            const Ssm = parseFloat(document.getElementById('Ssm').value) || 0;
+
+            const Sse_denom = Ssu !== 0 ? (1 - Ssm / Ssu) : 0;
+            const Sse = Sse_denom !== 0 ? Ssa / Sse_denom : 0;
+
+            const nf_denom = Ssu !== 0 ? (tau_a + (Sse / Ssu) * tau_m) : 0;
+            const nf = nf_denom !== 0 ? Sse / nf_denom : 0;
+
+            setValue('Sse_eq', Sse);
+            setValue('nf_eq', nf);
+
+            const nf_check = document.getElementById('nf_check');
+            if (nf > 0) {
+                nf_check.style.display = 'block';
+                if (nf >= 1.0) {
+                    nf_check.className = 'success';
+                    nf_check.innerHTML = `✅ <strong>PASS:</strong> n<sub>f</sub> = ${nf.toFixed(2)} ≥ 1.0 (safe against fatigue)`;
+                } else {
+                    nf_check.className = 'warning';
+                    nf_check.innerHTML = `⚠️ <strong>WARNING:</strong> n<sub>f</sub> = ${nf.toFixed(2)} < 1.0 (fatigue risk!)`;
+                }
+            } else {
+                nf_check.style.display = 'none';
+            }
+
+            // Auto-save
+            saveSession();
+        }
+
+        // Helper to set computed values and sync all instances
+        function setValue(id, value) {
+            const elem = document.getElementById(id);
+            if (elem) {
+                elem.value = value.toFixed(4);
+                syncAllInstances(id);
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        }
+
+        // Session management
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"], select');
+            inputs.forEach(input => {
+                if (!input.readOnly) {
+                    session[input.id] = input.value;
+                }
+            });
+            localStorage.setItem('springSession', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const sessionData = localStorage.getItem('springSession');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                Object.keys(session).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = session[id];
+                    }
+                });
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.value = '';
+                });
+                document.getElementById('end_type').value = 'plain';
+                document.getElementById('xi').value = '0.15';
+                localStorage.removeItem('springSession');
+                calculate();
+            }
+        }
+
+        // PDF page navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        // Crosshairs feature
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const vLine = document.getElementById('crosshair-vertical');
+            const hLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !svg) return;
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (!crosshairActive) {
+                    vLine.setAttribute('x1', x);
+                    vLine.setAttribute('x2', x);
+                    vLine.setAttribute('y2', rect.height);
+                    hLine.setAttribute('y1', y);
+                    hLine.setAttribute('y2', y);
+                    hLine.setAttribute('x2', rect.width);
+                    svg.classList.add('visible');
+                    crosshairActive = true;
+                } else {
+                    svg.classList.remove('visible');
+                    crosshairActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const overlay = document.getElementById('click-overlay');
+            const btn = document.getElementById('crosshair-toggle');
+
+            crosshairsEnabled = !crosshairsEnabled;
+
+            if (crosshairsEnabled) {
+                overlay.classList.add('active');
+                btn.classList.add('active');
+                btn.textContent = '➖ Disable Crosshairs';
+            } else {
+                overlay.classList.remove('active');
+                btn.classList.remove('active');
+                btn.textContent = '➕ Enable Crosshairs';
+                const svg = document.getElementById('pdf-crosshairs');
+                svg.classList.remove('visible');
+                crosshairActive = false;
+            }
+        }
+
+        // Load session on page load
+        window.addEventListener('load', () => {
+            initCrosshairs();
+            loadSession();
+            // Trigger MathJax rendering
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>

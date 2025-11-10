@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Screw Calculator (Fizz Guide)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .info-box a, .warning-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .info-box a:hover, .warning-box a:hover {
+            color: #004499;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 250px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+            display: none;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/screws/fizz_ball.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+        </div>
+        <div class="calculator-column">
+            <h1>Ball Screw Design Calculator</h1>
+            <div class="info-box">
+                ⚙️ Following Fizz Guide 4-step methodology for ball screw selection with travel life calculations, graph-based selection, driving torque, and power requirements.
+            </div>
+
+            <!-- Session Controls -->
+            <div class="controls">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetCalculator()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Travel Life -->
+                <div class="section">
+                    <h2>Step 1: Calculate Travel Life</h2>
+                    <div class="input-row">
+                        <label>Distance per Cycle [in]:</label>
+                        <input type="number" id="distance_per_cycle" step="any" oninput="syncAllInstances('distance_per_cycle'); markAsUser('distance_per_cycle'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Cycles per Hour [cycles/hr]:</label>
+                        <input type="number" id="cycles_per_hour" step="any" oninput="syncAllInstances('cycles_per_hour'); markAsUser('cycles_per_hour'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Hours per Day [hr/day]:</label>
+                        <input type="number" id="hours_per_day" step="any" oninput="syncAllInstances('hours_per_day'); markAsUser('hours_per_day'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Days per Year [day/yr]:</label>
+                        <input type="number" id="days_per_year" step="any" oninput="syncAllInstances('days_per_year'); markAsUser('days_per_year'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Expected Lifetime [years]:</label>
+                        <input type="number" id="years_lifetime" step="any" oninput="syncAllInstances('years_lifetime'); markAsUser('years_lifetime'); calculate()">
+                    </div>
+
+                    <h3>Travel Life Calculation</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\text{Travel Life} = \left(\frac{\text{dist}}{\text{cycle}}\right) \times \left(\frac{\text{cycles}}{\text{hr}}\right) \times \left(\frac{\text{hr}}{\text{day}}\right) \times \left(\frac{\text{day}}{\text{yr}}\right) \times \text{years}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>Travel Life (in)</label>
+                                <input type="number" id="travel_life" step="any" oninput="syncAllInstances('travel_life'); markAsUser('travel_life'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>dist/cycle</label>
+                                <input type="number" id="distance_per_cycle_eq" step="any" oninput="syncAllInstances('distance_per_cycle_eq'); markAsUser('distance_per_cycle_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>cycles/hr</label>
+                                <input type="number" id="cycles_per_hour_eq" step="any" oninput="syncAllInstances('cycles_per_hour_eq'); markAsUser('cycles_per_hour_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>hr/day</label>
+                                <input type="number" id="hours_per_day_eq" step="any" oninput="syncAllInstances('hours_per_day_eq'); markAsUser('hours_per_day_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>day/yr</label>
+                                <input type="number" id="days_per_year_eq" step="any" oninput="syncAllInstances('days_per_year_eq'); markAsUser('days_per_year_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>years</label>
+                                <input type="number" id="years_lifetime_eq" step="any" oninput="syncAllInstances('years_lifetime_eq'); markAsUser('years_lifetime_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Screw Selection from Graph -->
+                <div class="section">
+                    <h2>Step 2: Select Ball Screw from Graph</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Use the graph on <a href="#" onclick="goToPage(2)">page 2</a> to select a ball screw. Locate the intersection of your Travel Life (x-axis) and Applied Load (y-axis), then select the screw curve above this point.
+                    </div>
+                    <div class="input-row">
+                        <label>Applied Load (F) [lbf]:</label>
+                        <input type="number" id="F" step="any" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Nominal Diameter (from graph) [in]:</label>
+                        <input type="number" id="nominal_diameter" class="lookup" step="any" oninput="syncAllInstances('nominal_diameter'); markAsUser('nominal_diameter'); calculate()">
+                        <span class="hint">From graph</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Threads per Inch (from graph) [tpi]:</label>
+                        <input type="number" id="threads_per_inch" class="lookup" step="any" oninput="syncAllInstances('threads_per_inch'); markAsUser('threads_per_inch'); calculate()">
+                        <span class="hint">From graph</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Lead (L) (from graph) [in]:</label>
+                        <input type="number" id="L" class="lookup" step="any" oninput="syncAllInstances('L'); markAsUser('L'); calculate()">
+                        <span class="hint">From graph</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Driving Torque -->
+                <div class="section">
+                    <h2>Step 3: Calculate Driving Torque</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_u = 0.177 \times F \times L$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T<sub>u</sub> (lbf·in)</label>
+                                <input type="number" id="T_u" step="any" oninput="syncAllInstances('T_u'); markAsUser('T_u'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>0.177 ×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq" step="any" oninput="syncAllInstances('F_eq'); markAsUser('F_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>L</label>
+                                <input type="number" id="L_eq" step="any" oninput="syncAllInstances('L_eq'); markAsUser('L_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Power Required -->
+                <div class="section">
+                    <h2>Step 4: Calculate Required Power</h2>
+                    <div class="input-row">
+                        <label>Travel Speed (V) [in/s]:</label>
+                        <input type="number" id="V" step="any" oninput="syncAllInstances('V'); markAsUser('V'); calculate()">
+                    </div>
+
+                    <h3>Rotational Speed</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n = \frac{60 \times V}{L}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n (rpm)</label>
+                                <input type="number" id="n" step="any" oninput="syncAllInstances('n'); markAsUser('n'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>60 ×</span>
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_eq" step="any" oninput="syncAllInstances('V_eq'); markAsUser('V_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>L</label>
+                                <input type="number" id="L_eq2" step="any" oninput="syncAllInstances('L_eq2'); markAsUser('L_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Required Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P = \frac{T_u \times n}{63000}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P (hp)</label>
+                                <input type="number" id="P" step="any" oninput="syncAllInstances('P'); markAsUser('P'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>T<sub>u</sub></label>
+                                <input type="number" id="T_u_eq" step="any" oninput="syncAllInstances('T_u_eq'); markAsUser('T_u_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n</label>
+                                <input type="number" id="n_eq" step="any" oninput="syncAllInstances('n_eq'); markAsUser('n_eq'); calculate()">
+                            </div>
+                            <span>/ 63000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="section">
+                    <h2>General Equations for Ball Screws</h2>
+
+                    <h3>1. Travel Life</h3>
+                    <div class="equation-latex">
+                        $$\text{Travel Life} = \left(\frac{\text{dist}}{\text{cycle}}\right) \times \left(\frac{\text{cycles}}{\text{hr}}\right) \times \left(\frac{\text{hr}}{\text{day}}\right) \times \left(\frac{\text{day}}{\text{yr}}\right) \times \text{years}$$
+                    </div>
+
+                    <h3>2. Driving Torque</h3>
+                    <div class="equation-latex">
+                        $$T_u = 0.177 \times F \times L$$
+                    </div>
+
+                    <h3>3. Rotational Speed</h3>
+                    <div class="equation-latex">
+                        $$n = \frac{60 \times V}{L} \quad \text{[rpm]}$$
+                    </div>
+
+                    <h3>4. Required Power</h3>
+                    <div class="equation-latex">
+                        $$P = \frac{T_u \times n}{63000} \quad \text{[hp]}$$
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>Variable Reference</h2>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #3498db; color: white;">
+                                <th style="padding: 12px; text-align: left;">Symbol</th>
+                                <th style="padding: 12px; text-align: left;">Description</th>
+                                <th style="padding: 12px; text-align: left;">Units</th>
+                                <th style="padding: 12px; text-align: left;">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">Travel Life</td>
+                                <td style="padding: 10px;">Total travel distance over lifetime</td>
+                                <td style="padding: 10px;">in</td>
+                                <td style="padding: 10px;">Computed</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">F</td>
+                                <td style="padding: 10px;">Applied load</td>
+                                <td style="padding: 10px;">lbf</td>
+                                <td style="padding: 10px;">Input</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">L</td>
+                                <td style="padding: 10px;">Lead (from graph)</td>
+                                <td style="padding: 10px;">in</td>
+                                <td style="padding: 10px;">Lookup</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">T<sub>u</sub></td>
+                                <td style="padding: 10px;">Driving torque</td>
+                                <td style="padding: 10px;">lbf·in</td>
+                                <td style="padding: 10px;">Computed</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">V</td>
+                                <td style="padding: 10px;">Travel speed</td>
+                                <td style="padding: 10px;">in/s</td>
+                                <td style="padding: 10px;">Input</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">n</td>
+                                <td style="padding: 10px;">Rotational speed</td>
+                                <td style="padding: 10px;">rpm</td>
+                                <td style="padding: 10px;">Computed</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 10px;">P</td>
+                                <td style="padding: 10px;">Required power</td>
+                                <td style="padding: 10px;">hp</td>
+                                <td style="padding: 10px;">Computed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable instance mapping for synchronization
+        const varInstanceMap = {
+            'distance_per_cycle': ['distance_per_cycle', 'distance_per_cycle_eq'],
+            'cycles_per_hour': ['cycles_per_hour', 'cycles_per_hour_eq'],
+            'hours_per_day': ['hours_per_day', 'hours_per_day_eq'],
+            'days_per_year': ['days_per_year', 'days_per_year_eq'],
+            'years_lifetime': ['years_lifetime', 'years_lifetime_eq'],
+            'travel_life': ['travel_life'],
+            'F': ['F', 'F_eq'],
+            'nominal_diameter': ['nominal_diameter'],
+            'threads_per_inch': ['threads_per_inch'],
+            'L': ['L', 'L_eq', 'L_eq2'],
+            'T_u': ['T_u', 'T_u_eq'],
+            'V': ['V', 'V_eq'],
+            'n': ['n', 'n_eq'],
+            'P': ['P']
+        };
+
+        // Track user-modified values
+        const userValues = new Set();
+
+        // Crosshairs state
+        let crosshairsFeatureEnabled = false;
+        let crosshairsActive = false;
+
+        // Sync all instances of a variable
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const element = document.getElementById(changedId);
+            if (!element) return;
+
+            const value = element.value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        // Get base variable name from any instance ID
+        function getBaseVariable(instanceId) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(instanceId)) {
+                    return baseVar;
+                }
+            }
+            return instanceId.replace(/_eq\d*$/, '');
+        }
+
+        // Mark value as user-modified
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userValues.add(baseVar);
+            }
+        }
+
+        // Calculate all values
+        function calculate() {
+            // Get inputs
+            const distance_per_cycle = parseFloat(document.getElementById('distance_per_cycle').value) || 0;
+            const cycles_per_hour = parseFloat(document.getElementById('cycles_per_hour').value) || 0;
+            const hours_per_day = parseFloat(document.getElementById('hours_per_day').value) || 0;
+            const days_per_year = parseFloat(document.getElementById('days_per_year').value) || 0;
+            const years_lifetime = parseFloat(document.getElementById('years_lifetime').value) || 0;
+            const F = parseFloat(document.getElementById('F').value) || 0;
+            const L = parseFloat(document.getElementById('L').value) || 0;
+            const V = parseFloat(document.getElementById('V').value) || 0;
+
+            // Step 1: Calculate Travel Life
+            const travel_life = distance_per_cycle * cycles_per_hour * hours_per_day * days_per_year * years_lifetime;
+            document.getElementById('travel_life').value = travel_life.toFixed(2);
+
+            // Step 3: Calculate Driving Torque
+            const T_u = 0.177 * F * L;
+            setValue('T_u', T_u);
+            setValue('T_u_eq', T_u);
+
+            // Step 4a: Calculate Rotational Speed
+            const n = L !== 0 ? (60 * V) / L : 0;
+            setValue('n', n);
+            setValue('n_eq', n);
+
+            // Step 4b: Calculate Required Power
+            const P = (T_u * n) / 63000;
+            document.getElementById('P').value = P.toFixed(6);
+
+            // Auto-save session
+            saveSession();
+        }
+
+        // Helper to set computed values and sync all instances
+        function setValue(id, value) {
+            const elem = document.getElementById(id);
+            if (elem) {
+                elem.value = value.toFixed(4);
+                syncAllInstances(id);
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        }
+
+        // Session management
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                if (input.value && !input.readOnly) {
+                    session[input.id] = input.value;
+                }
+            });
+            localStorage.setItem('ballScrewSession', JSON.stringify(session));
+        }
+
+        function resetCalculator() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+                userValues.clear();
+                localStorage.removeItem('ballScrewSession');
+                calculate();
+            }
+        }
+
+        // PDF page navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        // Crosshairs feature
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !verticalLine || !horizontalLine) return;
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsFeatureEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (!crosshairsActive) {
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // Auto-load session on page load
+        window.addEventListener('load', () => {
+            initCrosshairs();
+            const savedData = localStorage.getItem('ballScrewSession');
+            if (savedData) {
+                try {
+                    const session = JSON.parse(savedData);
+                    Object.keys(session).forEach(id => {
+                        const input = document.getElementById(id);
+                        if (input && !input.readOnly) {
+                            input.value = session[id];
+                            markAsUser(id);
+                        }
+                    });
+                    calculate();
+                } catch (e) {
+                    console.log('Failed to load session:', e);
+                }
+            }
+
+            // Initial MathJax render
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>

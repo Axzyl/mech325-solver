@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball and Cylindrical Roller Bearings Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+            display: none;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 150px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 300px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+            background: white;
+        }
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .input-row .unit {
+            font-weight: 500;
+            color: #666;
+            min-width: 60px;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .note a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .note a:hover {
+            color: #004499;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .success {
+            background: #d4edda;
+            padding: 10px;
+            border-left: 4px solid #28a745;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .subsection {
+            background: #ffffff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        .subsection h3 {
+            color: #6c757d;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        .mode-selector {
+            background: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px solid #3498db;
+        }
+        .mode-selector label {
+            margin-right: 20px;
+            font-weight: 600;
+        }
+        .hidden {
+            display: none;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/bearings/fizz_ball_cyl.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+        </div>
+        <div class="calculator-column">
+            <h1>Ball and Cylindrical Roller Bearings Calculator</h1>
+
+            <!-- Session Controls -->
+            <div class="controls">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Mode Selection -->
+                <div class="mode-selector">
+                    <h2>Select Design Procedure</h2>
+                    <label>
+                        <input type="radio" name="procedure" value="radial_only" checked onchange="updateProcedure()">
+                        Radial Load Only (9 Steps - No Iteration)
+                    </label>
+                    <label>
+                        <input type="radio" name="procedure" value="combined" onchange="updateProcedure()">
+                        Radial and Thrust Loads (14 Steps - Iterative)
+                    </label>
+                </div>
+
+                <!-- Bearing Configuration -->
+                <div class="section">
+                    <h2>Bearing Configuration</h2>
+                    <div class="input-row">
+                        <label>Bearing Type:</label>
+                        <select id="bearing_type" onchange="calculate()">
+                            <option value="deep_groove">Deep-Groove Ball Bearing</option>
+                            <option value="angular_contact">Angular-Contact Ball Bearing</option>
+                            <option value="cylindrical">Cylindrical Roller Bearing</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label>Manufacturer:</label>
+                        <select id="manufacturer" onchange="updateWeibull()">
+                            <option value="timken">Timken (Mfr 1)</option>
+                            <option value="skf">SKF (Mfr 2)</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="note">
+                        Load-Life Exponent: a = 3 for ball bearings, a = 10/3 for roller bearings
+                    </div>
+                </div>
+
+                <!-- Step 1: Angular Speed -->
+                <div class="section">
+                    <h2>Step 1: Determine Angular Speed</h2>
+                    <div class="subsection">
+                        <h3>Option A: From Torque and Horsepower</h3>
+                        <div class="input-row">
+                            <label>Design Horsepower (H):</label>
+                            <input type="number" id="H" step="any" oninput="calculate()">
+                            <span class="unit">hp</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Transmitted Torque (T):</label>
+                            <input type="number" id="T" step="any" oninput="calculate()">
+                            <span class="unit">lbf·in</span>
+                        </div>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$n_D = \frac{63025 H}{T}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>n<sub>D</sub></label>
+                                    <input type="number" id="nD_eq" step="any" oninput="syncAllInstances('nD_eq'); markAsUser('nD_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>63025 ×</span>
+                                <div class="var-input">
+                                    <label>H</label>
+                                    <input type="number" id="H_eq" step="any" oninput="syncAllInstances('H_eq'); markAsUser('H_eq'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>T</label>
+                                    <input type="number" id="T_eq" step="any" oninput="syncAllInstances('T_eq'); markAsUser('T_eq'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="subsection">
+                        <h3>Option B: Direct Input</h3>
+                        <div class="input-row">
+                            <label><strong>Angular Speed (n<sub>D</sub>):</strong></label>
+                            <input type="number" id="nD" step="any" oninput="syncAllInstances('nD'); markAsUser('nD'); calculate()">
+                            <span class="unit">rpm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Radial Load -->
+                <div class="section">
+                    <h2>Step 2: Calculate Radial Load</h2>
+                    <div class="input-row">
+                        <label>Force X-Component (F<sub>x</sub>):</label>
+                        <input type="number" id="Fx" step="any" oninput="syncAllInstances('Fx'); markAsUser('Fx'); calculate()">
+                        <span class="unit">lbf</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Force Y-Component (F<sub>y</sub>):</label>
+                        <input type="number" id="Fy" step="any" oninput="syncAllInstances('Fy'); markAsUser('Fy'); calculate()">
+                        <span class="unit">lbf</span>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_R = \sqrt{F_x^2 + F_y^2}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>R</sub></label>
+                                <input type="number" id="FR_eq" step="any" oninput="syncAllInstances('FR_eq'); markAsUser('FR_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>√(</span>
+                            <div class="var-input">
+                                <label>F<sub>x</sub></label>
+                                <input type="number" id="Fx_eq" step="any" oninput="syncAllInstances('Fx_eq'); markAsUser('Fx_eq'); calculate()">
+                            </div>
+                            <span>² +</span>
+                            <div class="var-input">
+                                <label>F<sub>y</sub></label>
+                                <input type="number" id="Fy_eq" step="any" oninput="syncAllInstances('Fy_eq'); markAsUser('Fy_eq'); calculate()">
+                            </div>
+                            <span>²)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Loading: Axial Load -->
+                <div class="section combined-only hidden">
+                    <h2>Axial (Thrust) Load</h2>
+                    <div class="input-row">
+                        <label>Axial Load (F<sub>a</sub>):</label>
+                        <input type="number" id="Fa" step="any" oninput="syncAllInstances('Fa'); markAsUser('Fa'); calculate()">
+                        <span class="unit">lbf</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Ring Rotation:</label>
+                        <select id="ring_rotation" onchange="calculate()">
+                            <option value="1">Inner ring rotates (V = 1)</option>
+                            <option value="1.2">Outer ring rotates (V = 1.2)</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Bearing Reliability -->
+                <div class="section">
+                    <h2>Step 3: Calculate Individual Bearing Reliability</h2>
+                    <div class="input-row">
+                        <label>Total Assembly Reliability (R<sub>tot</sub>):</label>
+                        <input type="number" id="Rtot" step="any" min="0" max="1" oninput="syncAllInstances('Rtot'); markAsUser('Rtot'); calculate()">
+                        <span class="unit">decimal</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Number of Bearings:</label>
+                        <input type="number" id="n_bearings" step="1" oninput="syncAllInstances('n_bearings'); markAsUser('n_bearings'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$R_i = \sqrt[n]{R_{tot}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>R<sub>i</sub></label>
+                                <input type="number" id="Ri_eq" step="any" oninput="syncAllInstances('Ri_eq'); markAsUser('Ri_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>R<sub>tot</sub></label>
+                                <input type="number" id="Rtot_eq" step="any" oninput="syncAllInstances('Rtot_eq'); markAsUser('Rtot_eq'); calculate()">
+                            </div>
+                            <span>^(1/</span>
+                            <div class="var-input">
+                                <label>n</label>
+                                <input type="number" id="n_bearings_eq" step="any" oninput="syncAllInstances('n_bearings_eq'); markAsUser('n_bearings_eq'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+                    <div class="note">
+                        Enter reliability as decimal (e.g., 0.99 for 99% reliability)
+                    </div>
+                </div>
+
+                <!-- Step 4: Design Life -->
+                <div class="section">
+                    <h2>Step 4: Determine Design Life</h2>
+                    <div class="input-row">
+                        <label>Application Type:</label>
+                        <select id="application_type" onchange="calculate()">
+                            <option value="">-- Select Application --</option>
+                            <option value="0.5">Instruments, infrequent use</option>
+                            <option value="1">Aircraft engines</option>
+                            <option value="6">Machines, short/intermittent, minor</option>
+                            <option value="11">Machines, intermittent, reliable</option>
+                            <option value="17">8-h service, not fully utilized</option>
+                            <option value="25">8-h service, fully utilized</option>
+                            <option value="55">24-h continuous service</option>
+                            <option value="150">24-h continuous, extreme reliability</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Design Life (𝓛<sub>D</sub>):</strong></label>
+                        <input type="number" id="LD_hours" class="lookup" step="any" oninput="syncAllInstances('LD_hours'); markAsUser('LD_hours'); calculate()">
+                        <span class="unit">kh</span>
+                    </div>
+                    <div class="note">
+                        📋 See <a href="#" onclick="goToPage(3)">Table 11-4</a> for design life values. Yellow input can be edited if needed.
+                    </div>
+                </div>
+
+                <!-- Step 5: Multiple of Rating Life -->
+                <div class="section">
+                    <h2>Step 5: Calculate Multiple of Rating Life</h2>
+                    <div class="subsection">
+                        <h3>Weibull Parameters (Auto-Filled from Manufacturer)</h3>
+                        <div class="input-row">
+                            <label><strong>L<sub>10</sub> (Rating Life):</strong></label>
+                            <input type="number" id="L10" class="lookup" step="any" oninput="syncAllInstances('L10'); markAsUser('L10'); calculate()">
+                            <span class="unit">10⁶ rev</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>x<sub>0</sub> (Weibull):</strong></label>
+                            <input type="number" id="x0" class="lookup" step="any" oninput="calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>θ (Theta):</strong></label>
+                            <input type="number" id="theta" class="lookup" step="any" oninput="calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>b (Weibull):</strong></label>
+                            <input type="number" id="b" class="lookup" step="any" oninput="calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_D = 60 \times \mathcal{L}_D \times n_D$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>D</sub></label>
+                                <input type="number" id="LD_rev_eq" step="any" oninput="syncAllInstances('LD_rev_eq'); markAsUser('LD_rev_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>60 ×</span>
+                            <div class="var-input">
+                                <label>𝓛<sub>D</sub></label>
+                                <input type="number" id="LD_hours_eq" step="any" oninput="syncAllInstances('LD_hours_eq'); markAsUser('LD_hours_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>D</sub></label>
+                                <input type="number" id="nD_eq2" step="any" oninput="syncAllInstances('nD_eq2'); markAsUser('nD_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$x_D = \frac{L_D}{L_{10}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>x<sub>D</sub></label>
+                                <input type="number" id="xD_eq" step="any" oninput="syncAllInstances('xD_eq'); markAsUser('xD_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>L<sub>D</sub></label>
+                                <input type="number" id="LD_rev_eq2" step="any" oninput="syncAllInstances('LD_rev_eq2'); markAsUser('LD_rev_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>L<sub>10</sub></label>
+                                <input type="number" id="L10_eq" step="any" oninput="syncAllInstances('L10_eq'); markAsUser('L10_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Application Factor -->
+                <div class="section">
+                    <h2>Step 6: Get Application Factor</h2>
+                    <div class="input-row">
+                        <label>Application Class:</label>
+                        <select id="application_class" onchange="calculate()">
+                            <option value="">-- Select Class --</option>
+                            <option value="1.05">Precision gearing</option>
+                            <option value="1.2">Commercial gearing</option>
+                            <option value="1.2b">Poor bearing seals</option>
+                            <option value="1.1">No impact</option>
+                            <option value="1.35">Light impact</option>
+                            <option value="2.25">Moderate impact</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Application Factor (a<sub>f</sub>):</strong></label>
+                        <input type="number" id="af" class="lookup" step="any" oninput="syncAllInstances('af'); markAsUser('af'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        📋 See <a href="#" onclick="goToPage(3)">Table 11-5</a> for application factors. Typical range: 1.0 to 3.0.
+                    </div>
+                </div>
+
+                <!-- Step 7: Calculate C10 (Radial Only) -->
+                <div class="section radial-only">
+                    <h2>Step 7: Calculate Required Load Rating C<sub>10</sub></h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_D = a_f F_R$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>D</sub></label>
+                                <input type="number" id="FD_radial_eq" step="any" oninput="syncAllInstances('FD_radial_eq'); markAsUser('FD_radial_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>a<sub>f</sub></label>
+                                <input type="number" id="af_eq" step="any" oninput="syncAllInstances('af_eq'); markAsUser('af_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F<sub>R</sub></label>
+                                <input type="number" id="FR_eq2" step="any" oninput="syncAllInstances('FR_eq2'); markAsUser('FR_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
+                        <div class="note">
+                            This complex equation contains all variables from the Weibull formula. All inputs are editable in the equation blocks above.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Loading: Equivalent Load Calculation -->
+                <div class="section combined-only hidden">
+                    <h2>Combined Loading: Equivalent Radial Load</h2>
+                    <div class="note">
+                        <strong>Initial Assumptions (First Iteration):</strong><br>
+                        Assume F<sub>a</sub>/(VF<sub>r</sub>) > e, use X₂ = 0.56, Y₂ = 1.63
+                    </div>
+                    <div class="input-row">
+                        <label>Radial Factor (X<sub>i</sub>):</label>
+                        <input type="number" id="Xi" value="0.56" step="any" oninput="syncAllInstances('Xi'); markAsUser('Xi'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Thrust Factor (Y<sub>i</sub>):</label>
+                        <input type="number" id="Yi" value="1.63" step="any" oninput="syncAllInstances('Yi'); markAsUser('Yi'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_e = X_i V F_r + Y_i F_a$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>e</sub></label>
+                                <input type="number" id="Fe_eq" step="any" oninput="syncAllInstances('Fe_eq'); markAsUser('Fe_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>X<sub>i</sub></label>
+                                <input type="number" id="Xi_eq" step="any" oninput="syncAllInstances('Xi_eq'); markAsUser('Xi_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_eq" step="any" oninput="syncAllInstances('V_eq'); markAsUser('V_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F<sub>r</sub></label>
+                                <input type="number" id="Fr_eq" step="any" oninput="syncAllInstances('Fr_eq'); markAsUser('Fr_eq'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>Y<sub>i</sub></label>
+                                <input type="number" id="Yi_eq" step="any" oninput="syncAllInstances('Yi_eq'); markAsUser('Yi_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F<sub>a</sub></label>
+                                <input type="number" id="Fa_eq" step="any" oninput="syncAllInstances('Fa_eq'); markAsUser('Fa_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_D = a_f F_e$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>F<sub>D</sub></label>
+                                <input type="number" id="FD_combined_eq" step="any" oninput="syncAllInstances('FD_combined_eq'); markAsUser('FD_combined_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>a<sub>f</sub></label>
+                                <input type="number" id="af_eq2" step="any" oninput="syncAllInstances('af_eq2'); markAsUser('af_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F<sub>e</sub></label>
+                                <input type="number" id="Fe_eq2" step="any" oninput="syncAllInstances('Fe_eq2'); markAsUser('Fe_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
+                        <div class="note">
+                            For combined loading, use this Weibull formula with F<sub>D</sub> from above. All variables are editable in equation blocks.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 8: Bearing Selection -->
+                <div class="section">
+                    <h2>Step 8: Select Bearing from Tables</h2>
+                    <div class="note">
+                        📋 Use <a href="#" onclick="goToPage(5)">Table 11-2 (Ball Bearings)</a> or <a href="#" onclick="goToPage(6)">Table 11-3 (Cylindrical Roller)</a> to select bearing with C<sub>10,table</sub> ≥ C<sub>10,calculated</sub>.
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Bore Diameter:</strong></label>
+                        <input type="number" id="bore" class="lookup" step="any" oninput="syncAllInstances('bore'); markAsUser('bore'); calculate()">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Outer Diameter (OD):</strong></label>
+                        <input type="number" id="OD" class="lookup" step="any" oninput="syncAllInstances('OD'); markAsUser('OD'); calculate()">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Width:</strong></label>
+                        <input type="number" id="width" class="lookup" step="any" oninput="syncAllInstances('width'); markAsUser('width'); calculate()">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>C<sub>10</sub> from Table:</strong></label>
+                        <input type="number" id="C10_table" class="lookup" step="any" oninput="syncAllInstances('C10_table'); markAsUser('C10_table'); calculate()">
+                        <span class="unit">kN</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>C<sub>0</sub> from Table:</strong></label>
+                        <input type="number" id="C0_table" class="lookup" step="any" oninput="syncAllInstances('C0_table'); markAsUser('C0_table'); calculate()">
+                        <span class="unit">kN</span>
+                    </div>
+                    <div id="selection_check" class="hidden"></div>
+                </div>
+
+                <!-- Combined Loading: Iteration Instructions -->
+                <div class="section combined-only hidden">
+                    <h2>Iteration Procedure (Combined Loading Only)</h2>
+                    <div class="warning">
+                        <strong>⚠️ ITERATIVE PROCEDURE REQUIRED</strong><br>
+                        Follow Steps 6-14 on pages 4-5 of PDF:
+                        <ol>
+                            <li>Calculate F<sub>a</sub>/C<sub>0</sub> ratio</li>
+                            <li>Look up e from <a href="#" onclick="goToPage(5)">Table 11-1</a></li>
+                            <li>Check if F<sub>a</sub>/(VF<sub>r</sub>) > e</li>
+                            <li>If true: Interpolate Y₂ from Table 11-1, set X₂ = 0.56</li>
+                            <li>If false: Use X₁, Y₁ from Table 11-1</li>
+                            <li>Recalculate F<sub>e</sub> with new X<sub>i</sub>, Y<sub>i</sub></li>
+                            <li>Calculate new C<sub>10</sub> = (new F<sub>e</sub> / old F<sub>e</sub>) × old C<sub>10</sub></li>
+                            <li>Select bearing with new C<sub>10</sub></li>
+                            <li>If same bearing: CONVERGED! Done!</li>
+                            <li>If different bearing: Repeat from step 1</li>
+                        </ol>
+                    </div>
+                    <div class="subsection">
+                        <h3>Iteration Helper Calculations</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\frac{F_a}{C_0}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>a</sub>/C<sub>0</sub></label>
+                                    <input type="number" id="Fa_C0_eq" step="any" oninput="calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>F<sub>a</sub></label>
+                                    <input type="number" id="Fa_eq2" step="any" oninput="syncAllInstances('Fa_eq2'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>C<sub>0</sub></label>
+                                    <input type="number" id="C0_table_eq" step="any" oninput="syncAllInstances('C0_table_eq'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\frac{F_a}{V F_r}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>a</sub>/(VF<sub>r</sub>)</label>
+                                    <input type="number" id="Fa_VFr_eq" step="any" oninput="calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>F<sub>a</sub></label>
+                                    <input type="number" id="Fa_eq3" step="any" oninput="syncAllInstances('Fa_eq3'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <span>(</span>
+                                <div class="var-input">
+                                    <label>V</label>
+                                    <input type="number" id="V_eq2" step="any" oninput="syncAllInstances('V_eq2'); calculate()">
+                                </div>
+                                <span>×</span>
+                                <div class="var-input">
+                                    <label>F<sub>r</sub></label>
+                                    <input type="number" id="Fr_eq2" step="any" oninput="syncAllInstances('Fr_eq2'); calculate()">
+                                </div>
+                                <span>)</span>
+                            </div>
+                        </div>
+                        <div class="note">
+                            Use these ratios to look up e, X, Y from <a href="#" onclick="goToPage(5)">Table 11-1</a>.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Note:</strong> Yellow inputs require manual lookup from tables/graphs. All variables in equation blocks are editable. Combined loading requires iteration until convergence.
+                </div>
+            </div>
+
+            <!-- Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="section">
+                    <h2>General Equations Reference</h2>
+
+                    <h3>Angular Speed from Power</h3>
+                    <div class="equation-latex">$$n_D = \frac{63025 H}{T}$$</div>
+
+                    <h3>Radial Load</h3>
+                    <div class="equation-latex">$$F_R = \sqrt{F_x^2 + F_y^2}$$</div>
+
+                    <h3>Individual Bearing Reliability</h3>
+                    <div class="equation-latex">$$R_i = \sqrt[n]{R_{tot}}$$</div>
+
+                    <h3>Design Life in Revolutions</h3>
+                    <div class="equation-latex">$$L_D = 60 \times \mathcal{L}_D \times n_D$$</div>
+                    <div class="note">Where 𝓛<sub>D</sub> is in kilohours, n<sub>D</sub> in rpm, result in revolutions</div>
+
+                    <h3>Multiple of Rating Life</h3>
+                    <div class="equation-latex">$$x_D = \frac{L_D}{L_{10}}$$</div>
+                    <div class="note">Where L<sub>10</sub> is in 10⁶ revolutions</div>
+
+                    <h3>Design Load (Radial Only)</h3>
+                    <div class="equation-latex">$$F_D = a_f F_R$$</div>
+
+                    <h3>Catalog Rating (Radial Only)</h3>
+                    <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
+
+                    <h3>Equivalent Radial Load (Combined)</h3>
+                    <div class="equation-latex">$$F_e = X_i V F_r + Y_i F_a$$</div>
+
+                    <h3>Design Load (Combined)</h3>
+                    <div class="equation-latex">$$F_D = a_f F_e$$</div>
+                </div>
+            </div>
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>Variable Reference</h2>
+                    <table class="variables-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Description</th>
+                                <th>Units</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>H</td><td>Design horsepower</td><td>hp</td><td>Input</td></tr>
+                            <tr><td>T</td><td>Transmitted torque</td><td>lbf·in</td><td>Input</td></tr>
+                            <tr><td>n<sub>D</sub></td><td>Angular speed</td><td>rpm</td><td>Input/Computed</td></tr>
+                            <tr><td>F<sub>x</sub></td><td>Force X-component</td><td>lbf</td><td>Input</td></tr>
+                            <tr><td>F<sub>y</sub></td><td>Force Y-component</td><td>lbf</td><td>Input</td></tr>
+                            <tr><td>F<sub>R</sub></td><td>Radial load</td><td>lbf</td><td>Computed</td></tr>
+                            <tr><td>F<sub>a</sub></td><td>Axial (thrust) load</td><td>lbf</td><td>Input</td></tr>
+                            <tr><td>V</td><td>Rotation factor</td><td>-</td><td>Selected (1 or 1.2)</td></tr>
+                            <tr><td>R<sub>tot</sub></td><td>Total assembly reliability</td><td>decimal</td><td>Input</td></tr>
+                            <tr><td>n</td><td>Number of bearings</td><td>-</td><td>Input</td></tr>
+                            <tr><td>R<sub>i</sub></td><td>Individual bearing reliability</td><td>decimal</td><td>Computed</td></tr>
+                            <tr><td>𝓛<sub>D</sub></td><td>Design life</td><td>kh</td><td>Lookup (Table 11-4)</td></tr>
+                            <tr><td>L<sub>10</sub></td><td>Rating life</td><td>10⁶ rev</td><td>Manufacturer data</td></tr>
+                            <tr><td>x<sub>0</sub></td><td>Weibull parameter</td><td>-</td><td>Manufacturer data</td></tr>
+                            <tr><td>θ</td><td>Weibull parameter (theta)</td><td>-</td><td>Manufacturer data</td></tr>
+                            <tr><td>b</td><td>Weibull parameter</td><td>-</td><td>Manufacturer data</td></tr>
+                            <tr><td>L<sub>D</sub></td><td>Design life in revolutions</td><td>rev</td><td>Computed</td></tr>
+                            <tr><td>x<sub>D</sub></td><td>Multiple of rating life</td><td>-</td><td>Computed</td></tr>
+                            <tr><td>a<sub>f</sub></td><td>Application factor</td><td>-</td><td>Lookup (Table 11-5)</td></tr>
+                            <tr><td>a</td><td>Load-life exponent</td><td>-</td><td>Bearing type (3 or 10/3)</td></tr>
+                            <tr><td>F<sub>D</sub></td><td>Design load</td><td>lbf</td><td>Computed</td></tr>
+                            <tr><td>C<sub>10</sub></td><td>Required catalog rating</td><td>lbf or kN</td><td>Computed</td></tr>
+                            <tr><td>X<sub>i</sub></td><td>Radial factor (combined)</td><td>-</td><td>Lookup (Table 11-1)</td></tr>
+                            <tr><td>Y<sub>i</sub></td><td>Thrust factor (combined)</td><td>-</td><td>Lookup (Table 11-1)</td></tr>
+                            <tr><td>F<sub>e</sub></td><td>Equivalent radial load</td><td>lbf</td><td>Computed</td></tr>
+                            <tr><td>C<sub>0</sub></td><td>Static load rating</td><td>kN</td><td>Table lookup</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable instance mapping for synchronization
+        const varInstanceMap = {
+            'H': ['H', 'H_eq'],
+            'T': ['T', 'T_eq'],
+            'nD': ['nD', 'nD_eq', 'nD_eq2'],
+            'Fx': ['Fx', 'Fx_eq'],
+            'Fy': ['Fy', 'Fy_eq'],
+            'FR': ['FR', 'FR_eq', 'FR_eq2'],
+            'Fa': ['Fa', 'Fa_eq', 'Fa_eq2', 'Fa_eq3'],
+            'V': ['V', 'V_eq', 'V_eq2'],
+            'Rtot': ['Rtot', 'Rtot_eq'],
+            'n_bearings': ['n_bearings', 'n_bearings_eq'],
+            'Ri': ['Ri', 'Ri_eq'],
+            'LD_hours': ['LD_hours', 'LD_hours_eq'],
+            'L10': ['L10', 'L10_eq'],
+            'LD_rev': ['LD_rev', 'LD_rev_eq', 'LD_rev_eq2'],
+            'xD': ['xD', 'xD_eq'],
+            'af': ['af', 'af_eq', 'af_eq2'],
+            'FD_radial': ['FD_radial', 'FD_radial_eq'],
+            'Fe': ['Fe', 'Fe_eq', 'Fe_eq2'],
+            'FD_combined': ['FD_combined', 'FD_combined_eq'],
+            'Xi': ['Xi', 'Xi_eq'],
+            'Yi': ['Yi', 'Yi_eq'],
+            'Fr': ['Fr', 'Fr_eq', 'Fr_eq2'],
+            'bore': ['bore'],
+            'OD': ['OD'],
+            'width': ['width'],
+            'C10_table': ['C10_table'],
+            'C0_table': ['C0_table', 'C0_table_eq']
+        };
+
+        // Track user-modified values
+        const userValues = new Set();
+
+        // Crosshairs state
+        let crosshairsFeatureEnabled = false;
+        let crosshairsActive = false;
+
+        // Get base variable name from any instance ID
+        function getBaseVariable(instanceId) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(instanceId)) {
+                    return baseVar;
+                }
+            }
+            return instanceId.replace(/_eq\d*$/, '');
+        }
+
+        // Sync all instances of a variable
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const element = document.getElementById(changedId);
+            if (!element) return;
+
+            const value = element.value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        // Mark value as user-modified
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userValues.add(baseVar);
+            }
+        }
+
+        function updateProcedure() {
+            const procedure = document.querySelector('input[name="procedure"]:checked').value;
+            const radialOnly = document.querySelectorAll('.radial-only');
+            const combinedOnly = document.querySelectorAll('.combined-only');
+
+            if (procedure === 'radial_only') {
+                radialOnly.forEach(el => el.classList.remove('hidden'));
+                combinedOnly.forEach(el => el.classList.add('hidden'));
+            } else {
+                radialOnly.forEach(el => el.classList.add('hidden'));
+                combinedOnly.forEach(el => el.classList.remove('hidden'));
+            }
+
+            calculate();
+        }
+
+        function updateWeibull() {
+            const manufacturer = document.getElementById('manufacturer').value;
+            const L10 = document.getElementById('L10');
+            const x0 = document.getElementById('x0');
+            const theta = document.getElementById('theta');
+            const b = document.getElementById('b');
+
+            if (manufacturer === 'timken') {
+                L10.value = '90';
+                x0.value = '0';
+                theta.value = '4.48';
+                b.value = '1.5';
+            } else { // SKF
+                L10.value = '1';
+                x0.value = '0.02';
+                theta.value = '4.459';
+                b.value = '1.483';
+            }
+
+            calculate();
+        }
+
+        function calculate() {
+            const procedure = document.querySelector('input[name="procedure"]:checked').value;
+            const bearingType = document.getElementById('bearing_type').value;
+
+            // Set load-life exponent based on bearing type
+            let a;
+            if (bearingType === 'cylindrical') {
+                a = 10/3;
+            } else {
+                a = 3;
+            }
+
+            // Step 1: Angular speed
+            const H = parseFloat(document.getElementById('H').value) || 0;
+            const T = parseFloat(document.getElementById('T').value) || 0;
+            let nD = parseFloat(document.getElementById('nD').value) || 0;
+
+            if (H > 0 && T > 0 && nD === 0) {
+                nD = 63025 * H / T;
+                const nD_eq = document.getElementById('nD_eq');
+                if (nD_eq) {
+                    nD_eq.value = nD.toFixed(2);
+                    syncAllInstances('nD_eq');
+                }
+            }
+
+            // Step 2: Radial load
+            const Fx = parseFloat(document.getElementById('Fx').value) || 0;
+            const Fy = parseFloat(document.getElementById('Fy').value) || 0;
+            const FR = Math.sqrt(Fx * Fx + Fy * Fy);
+            const FR_eq = document.getElementById('FR_eq');
+            if (FR_eq) {
+                FR_eq.value = FR.toFixed(2);
+                syncAllInstances('FR_eq');
+            }
+
+            // Combined loading: rotation factor
+            const V = parseFloat(document.getElementById('ring_rotation').value) || 1;
+
+            // Step 3: Individual bearing reliability
+            const Rtot = parseFloat(document.getElementById('Rtot').value) || 0;
+            const n_bearings = parseFloat(document.getElementById('n_bearings').value) || 1;
+            const Ri = n_bearings > 0 ? Math.pow(Rtot, 1/n_bearings) : 0;
+            const Ri_eq = document.getElementById('Ri_eq');
+            if (Ri_eq) {
+                Ri_eq.value = Ri.toFixed(6);
+                syncAllInstances('Ri_eq');
+            }
+
+            // Step 4: Design life
+            const appType = document.getElementById('application_type').value;
+            if (appType) {
+                document.getElementById('LD_hours').value = appType;
+                syncAllInstances('LD_hours');
+            }
+            const LD_hours = parseFloat(document.getElementById('LD_hours').value) || 0;
+
+            // Step 5: Multiple of rating life
+            const L10 = parseFloat(document.getElementById('L10').value) || 1;
+            const x0 = parseFloat(document.getElementById('x0').value) || 0;
+            const theta = parseFloat(document.getElementById('theta').value) || 1;
+            const b = parseFloat(document.getElementById('b').value) || 1;
+
+            const LD_rev = 60 * LD_hours * 1000 * nD; // LD_hours is in kilohours
+            const xD = LD_rev / (L10 * 1e6); // L10 is in 10^6 revolutions
+
+            const LD_rev_eq = document.getElementById('LD_rev_eq');
+            if (LD_rev_eq) {
+                LD_rev_eq.value = LD_rev.toExponential(3);
+                syncAllInstances('LD_rev_eq');
+            }
+
+            const xD_eq = document.getElementById('xD_eq');
+            if (xD_eq) {
+                xD_eq.value = xD.toFixed(4);
+                syncAllInstances('xD_eq');
+            }
+
+            // Step 6: Application factor
+            const appClass = document.getElementById('application_class').value;
+            if (appClass) {
+                document.getElementById('af').value = appClass;
+                syncAllInstances('af');
+            }
+            const af = parseFloat(document.getElementById('af').value) || 1;
+
+            // Step 7: Calculate C10
+            if (procedure === 'radial_only') {
+                // Radial only procedure
+                const FD = af * FR;
+                const FD_radial_eq = document.getElementById('FD_radial_eq');
+                if (FD_radial_eq) {
+                    FD_radial_eq.value = FD.toFixed(2);
+                    syncAllInstances('FD_radial_eq');
+                }
+            } else {
+                // Combined loading procedure
+                const Fa = parseFloat(document.getElementById('Fa').value) || 0;
+                const Xi = parseFloat(document.getElementById('Xi').value) || 0.56;
+                const Yi = parseFloat(document.getElementById('Yi').value) || 1.63;
+
+                const Fe = Xi * V * FR + Yi * Fa;
+                const FD = af * Fe;
+
+                const Fe_eq = document.getElementById('Fe_eq');
+                if (Fe_eq) {
+                    Fe_eq.value = Fe.toFixed(2);
+                    syncAllInstances('Fe_eq');
+                }
+
+                const FD_combined_eq = document.getElementById('FD_combined_eq');
+                if (FD_combined_eq) {
+                    FD_combined_eq.value = FD.toFixed(2);
+                    syncAllInstances('FD_combined_eq');
+                }
+
+                // Iteration helper calculations
+                const C0_table = parseFloat(document.getElementById('C0_table').value) || 1;
+                const Fa_C0 = Fa / (C0_table / 0.004448); // Convert C0 from kN to lbf
+                const Fa_VFr = (V * FR) !== 0 ? Fa / (V * FR) : 0;
+
+                const Fa_C0_eq = document.getElementById('Fa_C0_eq');
+                if (Fa_C0_eq) {
+                    Fa_C0_eq.value = Fa_C0.toFixed(6);
+                }
+
+                const Fa_VFr_eq = document.getElementById('Fa_VFr_eq');
+                if (Fa_VFr_eq) {
+                    Fa_VFr_eq.value = Fa_VFr.toFixed(4);
+                }
+            }
+
+            // Check bearing selection (Note: C10 calculation now done manually in equation blocks)
+            const C10_table = parseFloat(document.getElementById('C10_table').value) || 0;
+
+            // User can manually calculate C10 using the Weibull formula shown in equation blocks
+
+            // Auto-save after calculation
+            saveSession();
+        }
+
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"], select, input[type="radio"]:checked');
+            inputs.forEach(input => {
+                if (input.type === 'radio') {
+                    session['procedure'] = input.value;
+                } else {
+                    session[input.id] = input.value;
+                }
+            });
+            localStorage.setItem('bearingSession', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const sessionData = localStorage.getItem('bearingSession');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                Object.keys(session).forEach(id => {
+                    if (id === 'procedure') {
+                        const radio = document.querySelector(`input[name="procedure"][value="${session[id]}"]`);
+                        if (radio) radio.checked = true;
+                        updateProcedure();
+                    } else {
+                        const input = document.getElementById(id);
+                        if (input) {
+                            input.value = session[id];
+                        }
+                    }
+                });
+                updateWeibull();
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.value = '';
+                });
+                // Reset to defaults
+                document.querySelector('input[name="procedure"][value="radial_only"]').checked = true;
+                document.getElementById('bearing_type').value = 'deep_groove';
+                document.getElementById('manufacturer').value = 'timken';
+                document.getElementById('ring_rotation').value = '1';
+                document.getElementById('application_type').value = '';
+                document.getElementById('application_class').value = '';
+                document.getElementById('Xi').value = '0.56';
+                document.getElementById('Yi').value = '1.63';
+                localStorage.removeItem('bearingSession');
+                userValues.clear();
+                updateProcedure();
+                updateWeibull();
+                calculate();
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        }
+
+        // PDF page navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        // Crosshairs feature
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !verticalLine || !horizontalLine) return;
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsFeatureEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (!crosshairsActive) {
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // Load session on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
+            updateWeibull();
+            loadSession();
+            updateProcedure();
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>

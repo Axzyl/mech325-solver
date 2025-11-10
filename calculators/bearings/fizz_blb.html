@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boundary-Lubricated Bearing Calculator (Fizz Guide)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        .pdf-column embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 95vh;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+        }
+        h3 {
+            color: #2c3e50;
+            margin: 15px 0 10px;
+            font-size: 1em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .info-box a, .warning-box a {
+            color: #0066cc;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .info-box a:hover, .warning-box a:hover {
+            color: #004499;
+        }
+        .equation-block {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .equation-latex {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input select {
+            width: auto;
+            min-width: 150px;
+        }
+        .var-input input:focus, .var-input select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .input-row label {
+            min-width: 200px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 20px;
+            gap: 5px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+            padding: 15px 0;
+            margin-top: -15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .save-btn {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            background: #218838;
+        }
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            background: #c82333;
+        }
+        .toggle-crosshairs-btn {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .toggle-crosshairs-btn:hover {
+            background: #5a6268;
+        }
+        .toggle-crosshairs-btn.active {
+            background: #28a745;
+        }
+        .toggle-crosshairs-btn.active:hover {
+            background: #218838;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 120px;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        /* PDF Crosshairs Feature */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            cursor: crosshair;
+            display: none;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .crosshair-line {
+            stroke: #ff0000;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .crosshair-line.active {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/bearings/fizz_blb.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+        </div>
+        <div class="calculator-column">
+            <h1>Boundary-Lubricated Bearing (Bushing) Calculator</h1>
+            <div class="info-box">
+                ⚙️ Following Fizz Guide 11-step methodology for boundary-lubricated bearing (bushing) design. Includes thermal analysis, PV limit validation, pressure checks, and frictional power calculations.
+            </div>
+
+            <!-- Session Controls -->
+            <div class="controls">
+                <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                <button class="reset-btn" onclick="resetCalculator()">🔄 Reset All</button>
+                <button class="toggle-crosshairs-btn" id="toggle-crosshairs-btn" onclick="toggleCrosshairsFeature()">🎯 Enable Crosshairs</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('procedure')">Procedure</button>
+                <button class="tab-button" onclick="showTab('equations')">General Equations</button>
+                <button class="tab-button" onclick="showTab('variables')">Variables</button>
+            </div>
+
+            <!-- Procedure Tab -->
+            <div id="procedure-tab" class="tab-content active">
+                <!-- Step 1: Wear Factor and Material Properties -->
+                <div class="section">
+                    <h2>Step 1: Determine Wear Factor and Material Properties</h2>
+                    <div class="info-box">
+                        💡 Select appropriate wear factor based on application. Common values: Steady load = 1.5-2, Variable load = 2-3, Shock load = 3-4
+                    </div>
+                    <div class="input-row">
+                        <label>Design Factor (n<sub>d</sub>):</label>
+                        <input type="number" id="n_d" step="any" oninput="syncAllInstances('n_d'); markAsUser('n_d'); calculate()">
+                    </div>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Look up coefficient of friction from <a href="#" onclick="goToPage(2)">Table 12-10</a> based on your bearing material selection
+                    </div>
+                    <div class="input-row">
+                        <label>Coefficient of Friction (f<sub>s</sub>):</label>
+                        <input type="number" id="f_s" class="lookup" step="any" oninput="syncAllInstances('f_s'); markAsUser('f_s'); calculate()">
+                        <span class="hint">From Table 12-10</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Radial Load -->
+                <div class="section">
+                    <h2>Step 2: Determine Radial Load</h2>
+                    <div class="input-row">
+                        <label>Radial Load (F) [lbf]:</label>
+                        <input type="number" id="F" step="any" oninput="syncAllInstances('F'); markAsUser('F'); calculate()">
+                    </div>
+                </div>
+
+                <!-- Step 3: Material Selection -->
+                <div class="section">
+                    <h2>Step 3: Select Bearing Material and Get Properties</h2>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Look up material properties from <a href="#" onclick="goToPage(3)">Table 12-12</a> based on your bearing material selection
+                    </div>
+                    <div class="input-row">
+                        <label>Shaft Diameter (d) [in]:</label>
+                        <input type="number" id="d" step="any" oninput="syncAllInstances('d'); markAsUser('d'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Max Allowable Pressure (P<sub>max,allow</sub>) [psi]:</label>
+                        <input type="number" id="P_max_allow" class="lookup" step="any" oninput="syncAllInstances('P_max_allow'); markAsUser('P_max_allow'); calculate()">
+                        <span class="hint">From Table 12-12</span>
+                    </div>
+                    <div class="warning-box">
+                        📊 <strong>MANUAL LOOKUP REQUIRED</strong> - Look up max PV limit from <a href="#" onclick="goToPage(2)">Table 12-9</a> based on your bearing material selection
+                    </div>
+                    <div class="input-row">
+                        <label>Max PV Limit (PV<sub>max</sub>) [psi·ft/min]:</label>
+                        <input type="number" id="PV_max" class="lookup" step="any" oninput="syncAllInstances('PV_max'); markAsUser('PV_max'); calculate()">
+                        <span class="hint">From Table 12-9</span>
+                    </div>
+                </div>
+
+                <!-- Step 4-5: Required Length -->
+                <div class="section">
+                    <h2>Step 4-5: Calculate Required Bearing Length</h2>
+                    <div class="input-row">
+                        <label>Shaft Speed (N) [rpm]:</label>
+                        <input type="number" id="N" step="any" oninput="syncAllInstances('N'); markAsUser('N'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Heat Transfer Coefficient (h̄) [Btu/(hr·ft²·°F)]:</label>
+                        <input type="number" id="h_bar" step="any" oninput="syncAllInstances('h_bar'); markAsUser('h_bar'); calculate()">
+                        <span class="hint">Typical: 30</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Thermal Conductivity Ratio (C<sub>R</sub>):</label>
+                        <input type="number" id="C_R" step="any" oninput="syncAllInstances('C_R'); markAsUser('C_R'); calculate()">
+                        <span class="hint">Typical: 1</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Mechanical Equivalent (J) [lbf·in/(Btu)]:</label>
+                        <input type="number" id="J" step="any" oninput="syncAllInstances('J'); markAsUser('J'); calculate()">
+                        <span class="hint">Standard: 9336</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Film Temperature (T<sub>f</sub>) [°F]:</label>
+                        <input type="number" id="T_f" step="any" oninput="syncAllInstances('T_f'); markAsUser('T_f'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Ambient Temperature (T<sub>∞</sub>) [°F]:</label>
+                        <input type="number" id="T_inf" step="any" oninput="syncAllInstances('T_inf'); markAsUser('T_inf'); calculate()">
+                    </div>
+
+                    <h3>Minimum Required Length (Thermal Constraint)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_{min} \geq \frac{720 f_s n_d F N}{J \bar{h} C_R (T_f - T_\infty)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>min</sub></label>
+                                <input type="number" id="L_min" step="any" oninput="syncAllInstances('L_min'); markAsUser('L_min'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>720 ×</span>
+                            <div class="var-input">
+                                <label>f<sub>s</sub></label>
+                                <input type="number" id="f_s_eq" step="any" oninput="syncAllInstances('f_s_eq'); markAsUser('f_s_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="n_d_eq" step="any" oninput="syncAllInstances('n_d_eq'); markAsUser('n_d_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq" step="any" oninput="syncAllInstances('F_eq'); markAsUser('F_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N</label>
+                                <input type="number" id="N_eq" step="any" oninput="syncAllInstances('N_eq'); markAsUser('N_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>J</label>
+                                <input type="number" id="J_eq" step="any" oninput="syncAllInstances('J_eq'); markAsUser('J_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>h̄</label>
+                                <input type="number" id="h_bar_eq" step="any" oninput="syncAllInstances('h_bar_eq'); markAsUser('h_bar_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>C<sub>R</sub></label>
+                                <input type="number" id="C_R_eq" step="any" oninput="syncAllInstances('C_R_eq'); markAsUser('C_R_eq'); calculate()">
+                            </div>
+                            <span>/ (</span>
+                            <div class="var-input">
+                                <label>T<sub>f</sub></label>
+                                <input type="number" id="T_f_eq" step="any" oninput="syncAllInstances('T_f_eq'); markAsUser('T_f_eq'); calculate()">
+                            </div>
+                            <span>-</span>
+                            <div class="var-input">
+                                <label>T<sub>∞</sub></label>
+                                <input type="number" id="T_inf_eq" step="any" oninput="syncAllInstances('T_inf_eq'); markAsUser('T_inf_eq'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Selected Bearing Length (L) [in]:</label>
+                        <input type="number" id="L" class="lookup" step="any" oninput="syncAllInstances('L'); markAsUser('L'); calculate()">
+                        <span class="hint">L ≥ L<sub>min</sub></span>
+                    </div>
+                </div>
+
+                <!-- Step 6: Bearing Diameter -->
+                <div class="section">
+                    <h2>Step 6: Determine Bearing Inside Diameter</h2>
+                    <div class="input-row">
+                        <label>Diametral Clearance (c<sub>d</sub>) [in]:</label>
+                        <input type="number" id="c_d" value="0.001" step="any" oninput="syncAllInstances('c_d'); markAsUser('c_d'); calculate()">
+                        <span class="hint">Typical: 0.001</span>
+                    </div>
+
+                    <h3>Bearing Inside Diameter</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D = d + c_d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D" step="any" oninput="syncAllInstances('D'); markAsUser('D'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq1" step="any" oninput="syncAllInstances('d_eq1'); markAsUser('d_eq1'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>c<sub>d</sub></label>
+                                <input type="number" id="c_d_eq1" step="any" oninput="syncAllInstances('c_d_eq1'); markAsUser('c_d_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7-8: Pressure Calculation -->
+                <div class="section">
+                    <h2>Step 7-8: Calculate Pressure and Check Limits</h2>
+
+                    <h3>Projected Area</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$A_p = D \times L$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>A<sub>p</sub></label>
+                                <input type="number" id="A_p" step="any" oninput="syncAllInstances('A_p'); markAsUser('A_p'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_eq1" step="any" oninput="syncAllInstances('D_eq1'); markAsUser('D_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>L</label>
+                                <input type="number" id="L_eq1" step="any" oninput="syncAllInstances('L_eq1'); markAsUser('L_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Nominal Bearing Pressure</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P = \frac{n_d F}{A_p}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P</label>
+                                <input type="number" id="P" step="any" oninput="syncAllInstances('P'); markAsUser('P'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="n_d_eq2" step="any" oninput="syncAllInstances('n_d_eq2'); markAsUser('n_d_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq2" step="any" oninput="syncAllInstances('F_eq2'); markAsUser('F_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>A<sub>p</sub></label>
+                                <input type="number" id="A_p_eq1" step="any" oninput="syncAllInstances('A_p_eq1'); markAsUser('A_p_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pressure_check" class="info-box"></div>
+                </div>
+
+                <!-- Step 9: Maximum Bearing Pressure -->
+                <div class="section">
+                    <h2>Step 9: Calculate Maximum Bearing Pressure</h2>
+                    <div class="info-box">
+                        💡 Maximum pressure at bearing center (accounts for load distribution)
+                    </div>
+
+                    <h3>Maximum Bearing Pressure</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$P_{max} = \frac{4 n_d F}{\pi D L}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>P<sub>max</sub></label>
+                                <input type="number" id="P_max" step="any" oninput="syncAllInstances('P_max'); markAsUser('P_max'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>4 ×</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="n_d_eq3" step="any" oninput="syncAllInstances('n_d_eq3'); markAsUser('n_d_eq3'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq3" step="any" oninput="syncAllInstances('F_eq3'); markAsUser('F_eq3'); calculate()">
+                            </div>
+                            <span>/ π /</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_eq2" step="any" oninput="syncAllInstances('D_eq2'); markAsUser('D_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>L</label>
+                                <input type="number" id="L_eq2" step="any" oninput="syncAllInstances('L_eq2'); markAsUser('L_eq2'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pmax_check" class="info-box"></div>
+                </div>
+
+                <!-- Step 10: PV Factor -->
+                <div class="section">
+                    <h2>Step 10: Calculate Velocity and PV Factor</h2>
+
+                    <h3>Surface Velocity</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$V = \frac{\pi d N}{12}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V" step="any" oninput="syncAllInstances('V'); markAsUser('V'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>π ×</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N</label>
+                                <input type="number" id="N_eq2" step="any" oninput="syncAllInstances('N_eq2'); markAsUser('N_eq2'); calculate()">
+                            </div>
+                            <span>/ 12</span>
+                        </div>
+                    </div>
+
+                    <h3>PV Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$PV = P \times V$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>PV</label>
+                                <input type="number" id="PV" step="any" oninput="syncAllInstances('PV'); markAsUser('PV'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>P</label>
+                                <input type="number" id="P_eq1" step="any" oninput="syncAllInstances('P_eq1'); markAsUser('P_eq1'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_eq1" step="any" oninput="syncAllInstances('V_eq1'); markAsUser('V_eq1'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pv_check" class="info-box"></div>
+                </div>
+
+                <!-- Step 11: Frictional Power Loss -->
+                <div class="section">
+                    <h2>Step 11: Calculate Frictional Power Loss</h2>
+
+                    <h3>Frictional Torque</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T_{friction} = \frac{f_s n_d F d}{2}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T<sub>friction</sub></label>
+                                <input type="number" id="T_friction" step="any" oninput="syncAllInstances('T_friction'); markAsUser('T_friction'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>f<sub>s</sub></label>
+                                <input type="number" id="f_s_eq2" step="any" oninput="syncAllInstances('f_s_eq2'); markAsUser('f_s_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>n<sub>d</sub></label>
+                                <input type="number" id="n_d_eq4" step="any" oninput="syncAllInstances('n_d_eq4'); markAsUser('n_d_eq4'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>F</label>
+                                <input type="number" id="F_eq4" step="any" oninput="syncAllInstances('F_eq4'); markAsUser('F_eq4'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq3" step="any" oninput="syncAllInstances('d_eq3'); markAsUser('d_eq3'); calculate()">
+                            </div>
+                            <span>/ 2</span>
+                        </div>
+                    </div>
+
+                    <h3>Frictional Power Loss</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$H_f = \frac{2\pi T_{friction} N}{12 \times 33000}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>H<sub>f</sub></label>
+                                <input type="number" id="H_f" step="any" oninput="syncAllInstances('H_f'); markAsUser('H_f'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>2π ×</span>
+                            <div class="var-input">
+                                <label>T<sub>friction</sub></label>
+                                <input type="number" id="T_friction_eq" step="any" oninput="syncAllInstances('T_friction_eq'); markAsUser('T_friction_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N</label>
+                                <input type="number" id="N_eq3" step="any" oninput="syncAllInstances('N_eq3'); markAsUser('N_eq3'); calculate()">
+                            </div>
+                            <span>/ 12 / 33000</span>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        💡 <strong>Power Loss:</strong> <span id="power_loss_display">-</span> hp
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equations Tab -->
+            <div id="equations-tab" class="tab-content">
+                <div class="section">
+                    <h2>General Equations for Boundary-Lubricated Bearings</h2>
+
+                    <h3>1. Thermal Length Constraint</h3>
+                    <div class="equation-latex">
+                        $$L_{min} \geq \frac{720 f_s n_d F N}{J \bar{h} C_R (T_f - T_\infty)}$$
+                    </div>
+
+                    <h3>2. Bearing Diameter</h3>
+                    <div class="equation-latex">
+                        $$D = d + c_d$$
+                    </div>
+
+                    <h3>3. Projected Area</h3>
+                    <div class="equation-latex">
+                        $$A_p = D \times L$$
+                    </div>
+
+                    <h3>4. Nominal Bearing Pressure</h3>
+                    <div class="equation-latex">
+                        $$P = \frac{n_d F}{A_p} = \frac{n_d F}{D L}$$
+                    </div>
+
+                    <h3>5. Maximum Bearing Pressure</h3>
+                    <div class="equation-latex">
+                        $$P_{max} = \frac{4 n_d F}{\pi D L}$$
+                    </div>
+
+                    <h3>6. Surface Velocity</h3>
+                    <div class="equation-latex">
+                        $$V = \frac{\pi d N}{12} \quad \text{[ft/min]}$$
+                    </div>
+
+                    <h3>7. PV Factor</h3>
+                    <div class="equation-latex">
+                        $$PV = P \times V \quad \text{[psi·ft/min]}$$
+                    </div>
+
+                    <h3>8. Frictional Torque</h3>
+                    <div class="equation-latex">
+                        $$T_f = \frac{f_s n_d F d}{2} \quad \text{[lbf·in]}$$
+                    </div>
+
+                    <h3>9. Frictional Power Loss</h3>
+                    <div class="equation-latex">
+                        $$H_f = \frac{2\pi T_f N}{12 \times 33000} = \frac{T_f N}{63025} \quad \text{[hp]}$$
+                    </div>
+
+                    <h3>Design Constraints</h3>
+                    <div class="equation-latex">
+                        $$P \leq P_{max,allow}$$
+                        $$P_{max} \leq P_{max,allow}$$
+                        $$PV \leq PV_{max}$$
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variables Tab -->
+            <div id="variables-tab" class="tab-content">
+                <div class="section">
+                    <h2>Variable Reference</h2>
+                    <table class="variables-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Description</th>
+                                <th>Units</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>d</td>
+                                <td>Shaft diameter</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>F</td>
+                                <td>Radial load</td>
+                                <td>lbf</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>d</sub></td>
+                                <td>Design factor</td>
+                                <td>-</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>max,allow</sub></td>
+                                <td>Max allowable pressure (from Table 12-12)</td>
+                                <td>psi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>PV<sub>max</sub></td>
+                                <td>Max PV limit (from Table 12-12)</td>
+                                <td>psi·ft/min</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>f<sub>s</sub></td>
+                                <td>Coefficient of friction (from Table 12-12)</td>
+                                <td>-</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>N</td>
+                                <td>Shaft speed</td>
+                                <td>rpm</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>h̄</td>
+                                <td>Heat transfer coefficient</td>
+                                <td>Btu/(hr·ft²·°F)</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>C<sub>R</sub></td>
+                                <td>Thermal conductivity ratio</td>
+                                <td>-</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>J</td>
+                                <td>Mechanical equivalent of heat</td>
+                                <td>lbf·in/(Btu)</td>
+                                <td>Constant</td>
+                            </tr>
+                            <tr>
+                                <td>T<sub>f</sub> - T<sub>∞</sub></td>
+                                <td>Operating temperature rise</td>
+                                <td>°F</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>c<sub>d</sub></td>
+                                <td>Diametral clearance</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>L</td>
+                                <td>Bearing length</td>
+                                <td>in</td>
+                                <td>Selected</td>
+                            </tr>
+                            <tr>
+                                <td>L<sub>min</sub></td>
+                                <td>Minimum required length</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>D</td>
+                                <td>Bearing inside diameter</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>A<sub>p</sub></td>
+                                <td>Projected area</td>
+                                <td>in²</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>P</td>
+                                <td>Nominal bearing pressure</td>
+                                <td>psi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>P<sub>max</sub></td>
+                                <td>Maximum bearing pressure</td>
+                                <td>psi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>V</td>
+                                <td>Surface velocity</td>
+                                <td>ft/min</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>PV</td>
+                                <td>PV factor</td>
+                                <td>psi·ft/min</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>T<sub>f</sub></td>
+                                <td>Frictional torque</td>
+                                <td>lbf·in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>H<sub>f</sub></td>
+                                <td>Frictional power loss</td>
+                                <td>hp</td>
+                                <td>Computed</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable instance mapping for synchronization
+        const varInstanceMap = {
+            'd': ['d', 'd_eq1', 'd_eq2', 'd_eq3'],
+            'F': ['F', 'F_eq', 'F_eq2', 'F_eq3', 'F_eq4'],
+            'n_d': ['n_d', 'n_d_eq', 'n_d_eq2', 'n_d_eq3', 'n_d_eq4'],
+            'P_max_allow': ['P_max_allow'],
+            'PV_max': ['PV_max'],
+            'f_s': ['f_s', 'f_s_eq', 'f_s_eq2'],
+            'N': ['N', 'N_eq', 'N_eq2', 'N_eq3'],
+            'h_bar': ['h_bar', 'h_bar_eq'],
+            'C_R': ['C_R', 'C_R_eq'],
+            'J': ['J', 'J_eq'],
+            'T_f': ['T_f', 'T_f_eq'],
+            'T_inf': ['T_inf', 'T_inf_eq'],
+            'T_friction': ['T_friction', 'T_friction_eq'],
+            'c_d': ['c_d', 'c_d_eq1'],
+            'L': ['L', 'L_eq1', 'L_eq2'],
+            'L_min': ['L_min'],
+            'D': ['D', 'D_eq1', 'D_eq2'],
+            'A_p': ['A_p', 'A_p_eq1'],
+            'P': ['P', 'P_eq1'],
+            'P_max': ['P_max'],
+            'V': ['V', 'V_eq1'],
+            'PV': ['PV'],
+            'H_f': ['H_f']
+        };
+
+        // Track user-modified values
+        const userValues = new Set();
+
+        // Crosshairs state
+        let crosshairsFeatureEnabled = false;
+        let crosshairsActive = false;
+
+        // Sync all instances of a variable
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            if (!baseVar) return;
+
+            const element = document.getElementById(changedId);
+            if (!element) return;
+
+            const value = element.value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        // Get base variable name from any instance ID
+        function getBaseVariable(instanceId) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(instanceId)) {
+                    return baseVar;
+                }
+            }
+            // If not in map, the ID itself is the base variable
+            return instanceId.replace(/_eq\d+$/, '');
+        }
+
+        // Mark value as user-modified
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            if (baseVar) {
+                userValues.add(baseVar);
+            }
+        }
+
+        // Calculate all values
+        function calculate() {
+            // Get inputs
+            const d = parseFloat(document.getElementById('d').value) || 0;
+            const F = parseFloat(document.getElementById('F').value) || 0;
+            const n_d = parseFloat(document.getElementById('n_d').value) || 0;
+            const P_max_allow = parseFloat(document.getElementById('P_max_allow').value) || 0;
+            const PV_max = parseFloat(document.getElementById('PV_max').value) || 0;
+            const f_s = parseFloat(document.getElementById('f_s').value) || 0;
+            const N = parseFloat(document.getElementById('N').value) || 0;
+            const h_bar = parseFloat(document.getElementById('h_bar').value) || 0;
+            const C_R = parseFloat(document.getElementById('C_R').value) || 0;
+            const J = parseFloat(document.getElementById('J').value) || 0;
+            const T_f = parseFloat(document.getElementById('T_f').value) || 0;
+            const T_inf = parseFloat(document.getElementById('T_inf').value) || 0;
+            const c_d = parseFloat(document.getElementById('c_d').value) || 0;
+            const L = parseFloat(document.getElementById('L').value) || 0;
+
+            // Step 4-5: Minimum length from thermal constraint
+            const T_rise = T_f - T_inf;
+            const denominator = J * h_bar * C_R * T_rise;
+            const L_min = denominator !== 0 ? (720 * f_s * n_d * F * N) / denominator : 0;
+            document.getElementById('L_min').value = L_min.toFixed(4);
+
+            // Step 6: Bearing diameter
+            const D = d + c_d;
+            setValue('D', D);
+            setValue('D_eq1', D);
+
+            // Step 7: Projected area
+            const A_p = D * L;
+            setValue('A_p', A_p);
+            setValue('A_p_eq1', A_p);
+
+            // Step 8: Nominal pressure
+            const ndF = n_d * F;
+            document.getElementById('ndF').value = ndF.toFixed(2);
+            const P = A_p !== 0 ? ndF / A_p : 0;
+            setValue('P', P);
+            setValue('P_eq1', P);
+
+            // Pressure check
+            const pressureCheck = document.getElementById('pressure_check');
+            if (P_max_allow > 0) {
+                if (P <= P_max_allow) {
+                    pressureCheck.className = 'success-box';
+                    pressureCheck.innerHTML = `✅ <strong>PASS:</strong> Nominal pressure P = ${P.toFixed(2)} psi ≤ P<sub>max,allow</sub> = ${P_max_allow} psi`;
+                } else {
+                    pressureCheck.className = 'warning-box';
+                    pressureCheck.innerHTML = `⚠️ <strong>WARNING:</strong> Nominal pressure P = ${P.toFixed(2)} psi > P<sub>max,allow</sub> = ${P_max_allow} psi. Increase bearing length or diameter.`;
+                }
+            } else {
+                pressureCheck.className = 'info-box';
+                pressureCheck.innerHTML = '💡 Enter P<sub>max,allow</sub> to check nominal pressure.';
+            }
+
+            // Step 9: Maximum bearing pressure
+            const P_max = (D * L !== 0) ? (4 * n_d * F) / (Math.PI * D * L) : 0;
+            document.getElementById('P_max').value = P_max.toFixed(2);
+
+            // P_max check
+            const pmaxCheck = document.getElementById('pmax_check');
+            if (P_max_allow > 0) {
+                if (P_max <= P_max_allow) {
+                    pmaxCheck.className = 'success-box';
+                    pmaxCheck.innerHTML = `✅ <strong>PASS:</strong> Maximum pressure P<sub>max</sub> = ${P_max.toFixed(2)} psi ≤ P<sub>max,allow</sub> = ${P_max_allow} psi`;
+                } else {
+                    pmaxCheck.className = 'warning-box';
+                    pmaxCheck.innerHTML = `⚠️ <strong>WARNING:</strong> Maximum pressure P<sub>max</sub> = ${P_max.toFixed(2)} psi > P<sub>max,allow</sub> = ${P_max_allow} psi. Increase bearing length or diameter.`;
+                }
+            } else {
+                pmaxCheck.className = 'info-box';
+                pmaxCheck.innerHTML = '💡 Enter P<sub>max,allow</sub> to check maximum pressure.';
+            }
+
+            // Step 10: Velocity
+            const V = (Math.PI * d * N) / 12;
+            setValue('V', V);
+            setValue('V_eq1', V);
+
+            // PV Factor
+            const PV = P * V;
+            document.getElementById('PV').value = PV.toFixed(2);
+
+            // PV check
+            const pvCheck = document.getElementById('pv_check');
+            if (PV_max > 0) {
+                if (PV <= PV_max) {
+                    pvCheck.className = 'success-box';
+                    pvCheck.innerHTML = `✅ <strong>PASS:</strong> PV factor = ${PV.toFixed(2)} psi·ft/min ≤ PV<sub>max</sub> = ${PV_max} psi·ft/min`;
+                } else {
+                    pvCheck.className = 'warning-box';
+                    pvCheck.innerHTML = `⚠️ <strong>WARNING:</strong> PV factor = ${PV.toFixed(2)} psi·ft/min > PV<sub>max</sub> = ${PV_max} psi·ft/min. Reduce pressure or velocity.`;
+                }
+            } else {
+                pvCheck.className = 'info-box';
+                pvCheck.innerHTML = '💡 Enter PV<sub>max</sub> to check PV factor.';
+            }
+
+            // Step 11: Frictional torque and power loss
+            const T_friction = (f_s * n_d * F * d) / 2;
+            document.getElementById('T_friction').value = T_friction.toFixed(4);
+
+            const H_f = (T_friction * N) / 63025;
+            document.getElementById('H_f').value = H_f.toFixed(6);
+            document.getElementById('power_loss_display').textContent = H_f.toFixed(6);
+
+            // Auto-save session
+            saveSession();
+        }
+
+        // Helper to set computed values and sync all instances
+        function setValue(id, value) {
+            const elem = document.getElementById(id);
+            if (elem) {
+                elem.value = value.toFixed(4);
+                // Sync to all instances of this variable
+                syncAllInstances(id);
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Re-render MathJax
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        }
+
+        // Session management
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                if (input.value && !input.classList.contains('computed') && !input.readOnly) {
+                    session[input.id] = input.value;
+                }
+            });
+            localStorage.setItem('blbBearingSession', JSON.stringify(session));
+        }
+
+        function resetCalculator() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                });
+
+                userValues.clear();
+                localStorage.removeItem('blbBearingSession');
+                calculate();
+            }
+        }
+
+        // PDF page navigation
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+
+            // Force complete reload by clearing and resetting with delay
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        // Crosshairs feature
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !verticalLine || !horizontalLine) return;
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsFeatureEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (!crosshairsActive) {
+                    // Show crosshairs
+                    verticalLine.setAttribute('x1', x);
+                    verticalLine.setAttribute('x2', x);
+                    horizontalLine.setAttribute('y1', y);
+                    horizontalLine.setAttribute('y2', y);
+                    verticalLine.classList.add('active');
+                    horizontalLine.classList.add('active');
+                    crosshairsActive = true;
+                } else {
+                    // Hide crosshairs
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            });
+        }
+
+        function toggleCrosshairsFeature() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const toggleBtn = document.getElementById('toggle-crosshairs-btn');
+            const verticalLine = document.getElementById('crosshair-vertical');
+            const horizontalLine = document.getElementById('crosshair-horizontal');
+
+            if (!clickOverlay || !toggleBtn) return;
+
+            crosshairsFeatureEnabled = !crosshairsFeatureEnabled;
+
+            if (crosshairsFeatureEnabled) {
+                clickOverlay.style.display = 'block';
+                toggleBtn.textContent = '🎯 Disable Crosshairs';
+                toggleBtn.classList.add('active');
+            } else {
+                clickOverlay.style.display = 'none';
+                toggleBtn.textContent = '🎯 Enable Crosshairs';
+                toggleBtn.classList.remove('active');
+
+                if (crosshairsActive) {
+                    verticalLine.classList.remove('active');
+                    horizontalLine.classList.remove('active');
+                    crosshairsActive = false;
+                }
+            }
+        }
+
+        // Auto-load session on page load
+        window.addEventListener('load', () => {
+            initCrosshairs();
+            const savedData = localStorage.getItem('blbBearingSession');
+            if (savedData) {
+                try {
+                    const session = JSON.parse(savedData);
+                    Object.keys(session).forEach(id => {
+                        const input = document.getElementById(id);
+                        if (input && !input.classList.contains('computed') && !input.readOnly) {
+                            input.value = session[id];
+                            markAsUser(id);
+                        }
+                    });
+                    calculate();
+                } catch (e) {
+                    console.log('Failed to load session:', e);
+                }
+            }
+
+            // Initial MathJax render
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>

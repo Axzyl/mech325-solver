@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shafts and Keys Design Calculator (Fizz)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            gap: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .click-overlay.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .crosshairs-overlay.visible {
+            display: block;
+        }
+        .crosshair-line {
+            stroke: #00ff00;
+            stroke-width: 1;
+            opacity: 0.8;
+        }
+        .crosshair-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 15;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .crosshair-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .crosshair-btn.active {
+            background: #27ae60;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            padding: 25px 30px;
+            font-size: 1.8em;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            background: #34495e;
+            border-bottom: 2px solid #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-right: 1px solid #2c3e50;
+        }
+        .tab:hover {
+            background: #3d566e;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+            padding-left: 12px;
+            border-left: 5px solid #3498db;
+        }
+        h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: 1.05em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .input-row label {
+            min-width: 320px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95em;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95em;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .input-row .unit {
+            font-weight: 600;
+            color: #666;
+            min-width: 60px;
+            font-size: 0.9em;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-left: 8px;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 12px;
+            border-left: 4px solid #2196f3;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid #ffc107;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+        .equation-block {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .equation-latex {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 8px;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .equation-inputs > span {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #495057;
+            margin: 0 5px;
+        }
+        .subsection {
+            background: #ffffff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        .subsection h3 {
+            color: #6c757d;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        .hidden {
+            display: none;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/bearings/fizz_shafts_keys.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+            <button class="crosshair-btn" id="crosshair-toggle" onclick="toggleCrosshairsFeature()">
+                + Enable Crosshairs
+            </button>
+        </div>
+
+        <div class="calculator-column">
+            <h1>Shafts and Keys Design Calculator</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('procedure')">Procedure</button>
+                <button class="tab" onclick="switchTab('equations')">General Equations</button>
+                <button class="tab" onclick="switchTab('variables')">Variables</button>
+            </div>
+
+            <!-- PROCEDURE TAB -->
+            <div id="procedure" class="tab-content active">
+                <div class="button-group">
+                    <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
+                    <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ COMPREHENSIVE DESIGN PROCEDURE:</strong> This is a 31-step shaft design procedure. This calculator covers core steps. For complete analysis, follow all steps in the PDF including shear/moment diagrams, stress concentration factors, and iterative sizing.
+                </div>
+
+                <!-- Step 1: Torque Calculation -->
+                <div class="section">
+                    <h2>Step 1: Calculate Torque at Each Component</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$T = \frac{63000 P}{n}$$
+                        </div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>T</label>
+                                <input type="number" id="T_eq" step="any" oninput="syncAllInstances('T_eq'); markAsUser('T_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>63000 ×</span>
+                            <div class="var-input">
+                                <label>P</label>
+                                <input type="number" id="P_eq" step="any" oninput="syncAllInstances('P_eq'); markAsUser('P_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>n</label>
+                                <input type="number" id="n_eq" step="any" oninput="syncAllInstances('n_eq'); markAsUser('n_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <label>Power (P):</label>
+                        <input type="number" id="P" step="any" oninput="syncAllInstances('P'); markAsUser('P'); calculate()">
+                        <span class="unit">hp</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Angular Speed (n):</label>
+                        <input type="number" id="n" step="any" oninput="syncAllInstances('n'); markAsUser('n'); calculate()">
+                        <span class="unit">rpm</span>
+                    </div>
+                    <div class="note">
+                        Sum of all torques on shaft must equal zero (ΣT = 0)
+                    </div>
+                </div>
+
+                <!-- Step 2: Force Calculations -->
+                <div class="section">
+                    <h2>Step 2: Calculate Forces from Components</h2>
+
+                    <div class="input-row">
+                        <label>Component Type:</label>
+                        <select id="component_type" onchange="updateForceInputs()">
+                            <option value="spur">Spur Gear</option>
+                            <option value="helical">Helical Gear</option>
+                            <option value="bevel">Bevel Gear</option>
+                            <option value="chain">Chain Sprocket</option>
+                            <option value="vbelt">V-Belt Sheave</option>
+                            <option value="flatbelt">Flat Belt Pulley</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Pitch Diameter (D):</label>
+                        <input type="number" id="D_pitch" step="any" oninput="syncAllInstances('D_pitch'); markAsUser('D_pitch'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$W_t = \frac{2T}{D}$$
+                        </div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>W<sub>t</sub></label>
+                                <input type="number" id="Wt_eq" step="any" oninput="syncAllInstances('Wt_eq'); markAsUser('Wt_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>2 ×</span>
+                            <div class="var-input">
+                                <label>T</label>
+                                <input type="number" id="T_eq2" step="any" oninput="syncAllInstances('T_eq2'); markAsUser('T_eq2'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_pitch_eq" step="any" oninput="syncAllInstances('D_pitch_eq'); markAsUser('D_pitch_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subsection spur-inputs">
+                        <h3>Spur Gear Forces</h3>
+                        <div class="input-row">
+                            <label>Pressure Angle (φ):</label>
+                            <input type="number" id="phi" value="20" step="any" oninput="syncAllInstances('phi'); markAsUser('phi'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <div class="equation-block">
+                            <div class="equation-latex">
+                                $$W_r = W_t \tan(\phi)$$
+                            </div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>W<sub>r</sub></label>
+                                    <input type="number" id="Wr_eq" step="any" oninput="syncAllInstances('Wr_eq'); markAsUser('Wr_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>W<sub>t</sub></label>
+                                    <input type="number" id="Wt_eq2" step="any" oninput="syncAllInstances('Wt_eq2'); markAsUser('Wt_eq2'); calculate()">
+                                </div>
+                                <span>× tan(</span>
+                                <div class="var-input">
+                                    <label>φ</label>
+                                    <input type="number" id="phi_eq" step="any" oninput="syncAllInstances('phi_eq'); markAsUser('phi_eq'); calculate()">
+                                </div>
+                                <span>)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subsection helical-inputs hidden">
+                        <h3>Helical Gear Forces</h3>
+                        <div class="input-row">
+                            <label>Normal Pressure Angle (φ<sub>n</sub>):</label>
+                            <input type="number" id="phi_n" value="20" step="any" oninput="syncAllInstances('phi_n'); markAsUser('phi_n'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Helix Angle (ψ):</label>
+                            <input type="number" id="psi" step="any" oninput="syncAllInstances('psi'); markAsUser('psi'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                    </div>
+
+                    <div class="subsection bevel-inputs hidden">
+                        <h3>Bevel Gear Forces</h3>
+                        <div class="input-row">
+                            <label>Pressure Angle (φ):</label>
+                            <input type="number" id="phi_bevel" value="20" step="any" oninput="syncAllInstances('phi_bevel'); markAsUser('phi_bevel'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Cone Angle (γ or Γ):</label>
+                            <input type="number" id="gamma" step="any" oninput="syncAllInstances('gamma'); markAsUser('gamma'); calculate()">
+                            <span class="unit">deg</span>
+                        </div>
+                    </div>
+
+                    <div class="subsection belt-inputs hidden">
+                        <h3>Belt Forces</h3>
+                        <div class="input-row">
+                            <label>Tension Ratio (k = F₁/F₂):</label>
+                            <input type="number" id="k_belt" value="5" step="any" oninput="syncAllInstances('k_belt'); markAsUser('k_belt'); calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="note">
+                            Default: k = 5 for V-belts, k = 3 for flat belts
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shaft Diameter Calculation -->
+                <div class="section">
+                    <h2>Shaft Diameter Calculation (ASME Code - Simplified)</h2>
+                    <div class="warning">
+                        This is a simplified calculation using ASME code. For complete design, follow all 31 steps in PDF including shear/moment diagrams, stress concentrations, and iterative sizing.
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Material Properties</h3>
+                        <div class="input-row">
+                            <label><strong>Ultimate Strength (S<sub>u</sub>):</strong></label>
+                            <input type="number" id="Su" class="lookup" step="any" oninput="syncAllInstances('Su'); markAsUser('Su'); calculate()">
+                            <span class="unit">ksi</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>Yield Strength (S<sub>y</sub>):</strong></label>
+                            <input type="number" id="Sy" class="lookup" step="any" oninput="syncAllInstances('Sy'); markAsUser('Sy'); calculate()">
+                            <span class="unit">ksi</span>
+                        </div>
+                        <div class="note">
+                            📋 Look up from material tables. Common: AISI 1045 cold drawn: S<sub>u</sub> = 91 ksi, S<sub>y</sub> = 77 ksi
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Critical Location</h3>
+                        <div class="input-row">
+                            <label>Bending Moment (M):</label>
+                            <input type="number" id="M" step="any" oninput="syncAllInstances('M'); markAsUser('M'); calculate()">
+                            <span class="unit">lbf·in</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Torque at Location (T<sub>loc</sub>):</label>
+                            <input type="number" id="T_loc" step="any" oninput="syncAllInstances('T_loc'); markAsUser('T_loc'); calculate()">
+                            <span class="unit">lbf·in</span>
+                        </div>
+                        <div class="note">
+                            Determine from shear/moment diagrams (Steps 5-7 in PDF)
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Design Factors</h3>
+                        <div class="input-row">
+                            <label>Safety Factor (N):</label>
+                            <input type="number" id="N_design" value="3" step="any" oninput="syncAllInstances('N_design'); markAsUser('N_design'); calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Stress Concentration (K<sub>t</sub>):</label>
+                            <input type="number" id="Kt" value="1.5" step="any" oninput="syncAllInstances('Kt'); markAsUser('Kt'); calculate()">
+                            <span class="unit">-</span>
+                        </div>
+                        <div class="note">
+                            📋 Look up K<sub>t</sub> from stress concentration tables based on shaft features (steps, keyseats, etc.)
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$D_{min} = \left[\frac{16N}{\pi}\sqrt{\left(K_t\frac{M}{S_y}\right)^2 + \frac{3}{4}\left(\frac{T}{S_y}\right)^2}\right]^{1/3}$$
+                        </div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D<sub>min</sub></label>
+                                <input type="number" id="D_min_eq" step="any" oninput="syncAllInstances('D_min_eq'); markAsUser('D_min_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>[(16 ×</span>
+                            <div class="var-input">
+                                <label>N</label>
+                                <input type="number" id="N_design_eq" step="any" oninput="syncAllInstances('N_design_eq'); markAsUser('N_design_eq'); calculate()">
+                            </div>
+                            <span>/ π) × √((</span>
+                            <div class="var-input">
+                                <label>K<sub>t</sub></label>
+                                <input type="number" id="Kt_eq" step="any" oninput="syncAllInstances('Kt_eq'); markAsUser('Kt_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>M</label>
+                                <input type="number" id="M_eq" step="any" oninput="syncAllInstances('M_eq'); markAsUser('M_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>S<sub>y</sub></label>
+                                <input type="number" id="Sy_eq" step="any" oninput="syncAllInstances('Sy_eq'); markAsUser('Sy_eq'); calculate()">
+                            </div>
+                            <span>)² + 0.75 × (</span>
+                            <div class="var-input">
+                                <label>T</label>
+                                <input type="number" id="T_loc_eq" step="any" oninput="syncAllInstances('T_loc_eq'); markAsUser('T_loc_eq'); calculate()">
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>S<sub>y</sub></label>
+                                <input type="number" id="Sy_eq2" step="any" oninput="syncAllInstances('Sy_eq2'); markAsUser('Sy_eq2'); calculate()">
+                            </div>
+                            <span>)²)]^(1/3)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label><strong>Standard Diameter (D<sub>std</sub>):</strong></label>
+                        <input type="number" id="D_std" class="lookup" step="any" oninput="syncAllInstances('D_std'); markAsUser('D_std'); calculate()">
+                        <span class="unit">in</span>
+                    </div>
+                    <div class="note">
+                        Round up D<sub>min</sub> to nearest standard size from Table A2-1
+                    </div>
+                </div>
+
+                <!-- Bearing Selection -->
+                <div class="section">
+                    <h2>Bearing Selection (Simplified)</h2>
+                    <div class="input-row">
+                        <label>Radial Reaction Force (R):</label>
+                        <input type="number" id="R_bearing" step="any" oninput="syncAllInstances('R_bearing'); markAsUser('R_bearing'); calculate()">
+                        <span class="unit">lbf</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Design Life (L<sub>D</sub>):</label>
+                        <input type="number" id="LD_bearing" step="any" oninput="syncAllInstances('LD_bearing'); markAsUser('LD_bearing'); calculate()">
+                        <span class="unit">10⁶ rev</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Load-Life Exponent (k):</label>
+                        <input type="number" id="k_bearing" value="3" step="any" oninput="syncAllInstances('k_bearing'); markAsUser('k_bearing'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        k = 3 for ball bearings, k = 10/3 for roller bearings
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$C = R \left(\frac{L_D}{L_1}\right)^{1/k}$$
+                        </div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="C_bearing_eq" step="any" oninput="syncAllInstances('C_bearing_eq'); markAsUser('C_bearing_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>R</label>
+                                <input type="number" id="R_bearing_eq" step="any" oninput="syncAllInstances('R_bearing_eq'); markAsUser('R_bearing_eq'); calculate()">
+                            </div>
+                            <span>× (</span>
+                            <div class="var-input">
+                                <label>L<sub>D</sub></label>
+                                <input type="number" id="LD_bearing_eq" step="any" oninput="syncAllInstances('LD_bearing_eq'); markAsUser('LD_bearing_eq'); calculate()">
+                            </div>
+                            <span>/ 1)^(1 /</span>
+                            <div class="var-input">
+                                <label>k</label>
+                                <input type="number" id="k_bearing_eq" step="any" oninput="syncAllInstances('k_bearing_eq'); markAsUser('k_bearing_eq'); calculate()">
+                            </div>
+                            <span>)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label><strong>Bearing Bore:</strong></label>
+                        <input type="number" id="bearing_bore" class="lookup" step="any" oninput="syncAllInstances('bearing_bore'); markAsUser('bearing_bore'); calculate()">
+                        <span class="unit">mm</span>
+                    </div>
+                    <div class="note">
+                        📋 Select bearing from Table 14-3 with C<sub>10</sub> ≥ C calculated and bore ≥ D<sub>std</sub>
+                    </div>
+                </div>
+
+                <!-- Key Design -->
+                <div class="section">
+                    <h2>Key Design</h2>
+
+                    <div class="subsection">
+                        <h3>Key Dimensions</h3>
+                        <div class="input-row">
+                            <label>Shaft Diameter for Key (D):</label>
+                            <input type="number" id="D_key" step="any" oninput="syncAllInstances('D_key'); markAsUser('D_key'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>Key Width (W):</strong></label>
+                            <input type="number" id="W_key" class="lookup" step="any" oninput="syncAllInstances('W_key'); markAsUser('W_key'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <div class="input-row">
+                            <label><strong>Key Height (H):</strong></label>
+                            <input type="number" id="H_key" class="lookup" step="any" oninput="syncAllInstances('H_key'); markAsUser('H_key'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <div class="note">
+                            📋 Look up W and H from Table 11-1 based on shaft diameter D
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Key Length Calculation</h3>
+                        <div class="input-row">
+                            <label>Torque for Key (T<sub>key</sub>):</label>
+                            <input type="number" id="T_key" step="any" oninput="syncAllInstances('T_key'); markAsUser('T_key'); calculate()">
+                            <span class="unit">lbf·in</span>
+                        </div>
+                        <div class="input-row">
+                            <label>Key Material Yield (S<sub>y,key</sub>):</label>
+                            <input type="number" id="Sy_key" value="51" step="any" oninput="syncAllInstances('Sy_key'); markAsUser('Sy_key'); calculate()">
+                            <span class="unit">ksi</span>
+                        </div>
+                        <div class="note">
+                            Default: SAE 1018 cold drawn: S<sub>y</sub> = 51 ksi
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">
+                                $$L_{min} = \frac{4T}{S_y \cdot W \cdot D}$$
+                            </div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>L<sub>min</sub></label>
+                                    <input type="number" id="L_min_key_eq" step="any" oninput="syncAllInstances('L_min_key_eq'); markAsUser('L_min_key_eq'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <span>4 ×</span>
+                                <div class="var-input">
+                                    <label>T</label>
+                                    <input type="number" id="T_key_eq" step="any" oninput="syncAllInstances('T_key_eq'); markAsUser('T_key_eq'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>S<sub>y</sub></label>
+                                    <input type="number" id="Sy_key_eq" step="any" oninput="syncAllInstances('Sy_key_eq'); markAsUser('Sy_key_eq'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>W</label>
+                                    <input type="number" id="W_key_eq" step="any" oninput="syncAllInstances('W_key_eq'); markAsUser('W_key_eq'); calculate()">
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="D_key_eq" step="any" oninput="syncAllInstances('D_key_eq'); markAsUser('D_key_eq'); calculate()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <label><strong>Standard Key Length (L<sub>key</sub>):</strong></label>
+                            <input type="number" id="L_key" class="lookup" step="any" oninput="syncAllInstances('L_key'); markAsUser('L_key'); calculate()">
+                            <span class="unit">in</span>
+                        </div>
+                        <div class="note">
+                            Round up L<sub>min</sub> to nearest standard size
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Color Key:</strong> White = User Input, Yellow = Table Lookup, Green = Calculated
+                </div>
+            </div>
+
+            <!-- EQUATIONS TAB -->
+            <div id="equations" class="tab-content">
+                <h2>General Equations Reference</h2>
+
+                <div class="section">
+                    <h3>Torque from Power</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$T = \frac{63000 P}{n}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Tangential Force</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$W_t = \frac{2T}{D}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Gear Forces</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$W_r = W_t \tan(\phi)$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>ASME Shaft Diameter</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$D_{min} = \left[\frac{16N}{\pi}\sqrt{\left(K_t\frac{M}{S_y}\right)^2 + \frac{3}{4}\left(\frac{T}{S_y}\right)^2}\right]^{1/3}$$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Bearing Load Rating</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C = R \left(\frac{L_D}{L_1}\right)^{1/k}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Key Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_{min} = \frac{4T}{S_y \cdot W \cdot D}$$</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VARIABLES TAB -->
+            <div id="variables" class="tab-content">
+                <h2>Variable Definitions</h2>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>P</td><td>Power transmitted</td><td>hp</td></tr>
+                        <tr><td>n</td><td>Rotational speed</td><td>rpm</td></tr>
+                        <tr><td>T</td><td>Torque</td><td>lbf·in</td></tr>
+                        <tr><td>D</td><td>Pitch diameter</td><td>in</td></tr>
+                        <tr><td>W<sub>t</sub></td><td>Tangential force</td><td>lbf</td></tr>
+                        <tr><td>W<sub>r</sub></td><td>Radial force</td><td>lbf</td></tr>
+                        <tr><td>φ</td><td>Pressure angle</td><td>deg</td></tr>
+                        <tr><td>M</td><td>Bending moment</td><td>lbf·in</td></tr>
+                        <tr><td>S<sub>u</sub></td><td>Ultimate strength</td><td>ksi</td></tr>
+                        <tr><td>S<sub>y</sub></td><td>Yield strength</td><td>ksi</td></tr>
+                        <tr><td>N</td><td>Safety factor</td><td>-</td></tr>
+                        <tr><td>K<sub>t</sub></td><td>Stress concentration</td><td>-</td></tr>
+                        <tr><td>D<sub>min</sub></td><td>Minimum shaft diameter</td><td>in</td></tr>
+                        <tr><td>R</td><td>Bearing radial load</td><td>lbf</td></tr>
+                        <tr><td>L<sub>D</sub></td><td>Design life</td><td>10⁶ rev</td></tr>
+                        <tr><td>k</td><td>Load-life exponent</td><td>-</td></tr>
+                        <tr><td>C</td><td>Load rating</td><td>lbf</td></tr>
+                        <tr><td>W</td><td>Key width</td><td>in</td></tr>
+                        <tr><td>H</td><td>Key height</td><td>in</td></tr>
+                        <tr><td>L</td><td>Key length</td><td>in</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+        let crosshairsEnabled = false;
+
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            userValues.add(baseVar);
+        }
+
+        const varInstanceMap = {
+            'P': ['P', 'P_eq'],
+            'n': ['n', 'n_eq'],
+            'T': ['T_eq', 'T_eq2'],
+            'D_pitch': ['D_pitch', 'D_pitch_eq'],
+            'Wt': ['Wt_eq', 'Wt_eq2'],
+            'Wr': ['Wr_eq'],
+            'phi': ['phi', 'phi_eq'],
+            'phi_n': ['phi_n'],
+            'psi': ['psi'],
+            'phi_bevel': ['phi_bevel'],
+            'gamma': ['gamma'],
+            'k_belt': ['k_belt'],
+            'Su': ['Su'],
+            'Sy': ['Sy', 'Sy_eq', 'Sy_eq2'],
+            'M': ['M', 'M_eq'],
+            'T_loc': ['T_loc', 'T_loc_eq'],
+            'N_design': ['N_design', 'N_design_eq'],
+            'Kt': ['Kt', 'Kt_eq'],
+            'D_min': ['D_min_eq'],
+            'D_std': ['D_std'],
+            'R_bearing': ['R_bearing', 'R_bearing_eq'],
+            'LD_bearing': ['LD_bearing', 'LD_bearing_eq'],
+            'k_bearing': ['k_bearing', 'k_bearing_eq'],
+            'C_bearing': ['C_bearing_eq'],
+            'bearing_bore': ['bearing_bore'],
+            'D_key': ['D_key', 'D_key_eq'],
+            'W_key': ['W_key', 'W_key_eq'],
+            'H_key': ['H_key'],
+            'T_key': ['T_key', 'T_key_eq'],
+            'Sy_key': ['Sy_key', 'Sy_key_eq'],
+            'L_min_key': ['L_min_key_eq'],
+            'L_key': ['L_key']
+        };
+
+        function getBaseVariable(id) {
+            for (const [baseVar, instances] of Object.entries(varInstanceMap)) {
+                if (instances.includes(id)) {
+                    return baseVar;
+                }
+            }
+            return id;
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            const value = document.getElementById(changedId).value;
+            const instances = varInstanceMap[baseVar];
+
+            if (instances) {
+                instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem && id !== changedId && !elem.hasAttribute('readonly')) {
+                        elem.value = value;
+                    }
+                });
+            }
+        }
+
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function toggleCrosshairsFeature() {
+            crosshairsEnabled = !crosshairsEnabled;
+            const btn = document.getElementById('crosshair-toggle');
+            const overlay = document.getElementById('click-overlay');
+
+            if (crosshairsEnabled) {
+                btn.textContent = '✖ Disable Crosshairs';
+                btn.classList.add('active');
+                overlay.classList.add('active');
+            } else {
+                btn.textContent = '+ Enable Crosshairs';
+                btn.classList.remove('active');
+                overlay.classList.remove('active');
+                document.getElementById('pdf-crosshairs').classList.remove('visible');
+            }
+        }
+
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const vLine = document.getElementById('crosshair-vertical');
+            const hLine = document.getElementById('crosshair-horizontal');
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                vLine.setAttribute('x1', x);
+                vLine.setAttribute('x2', x);
+                hLine.setAttribute('y1', y);
+                hLine.setAttribute('y2', y);
+
+                svg.classList.add('visible');
+            });
+        }
+
+        function updateForceInputs() {
+            const compType = document.getElementById('component_type').value;
+
+            // Hide all inputs initially
+            document.querySelectorAll('.spur-inputs, .helical-inputs, .bevel-inputs, .belt-inputs').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Show relevant inputs
+            if (compType === 'spur') {
+                document.querySelectorAll('.spur-inputs').forEach(el => el.classList.remove('hidden'));
+            } else if (compType === 'helical') {
+                document.querySelectorAll('.helical-inputs').forEach(el => el.classList.remove('hidden'));
+            } else if (compType === 'bevel') {
+                document.querySelectorAll('.bevel-inputs').forEach(el => el.classList.remove('hidden'));
+            } else if (compType === 'vbelt' || compType === 'flatbelt') {
+                document.querySelectorAll('.belt-inputs').forEach(el => el.classList.remove('hidden'));
+                if (compType === 'flatbelt') {
+                    document.getElementById('k_belt').value = '3';
+                } else {
+                    document.getElementById('k_belt').value = '5';
+                }
+            }
+
+            calculate();
+        }
+
+        function calculate() {
+            // Step 1: Torque
+            const P = parseFloat(document.getElementById('P').value) || 0;
+            const n = parseFloat(document.getElementById('n').value) || 0;
+            const T = n !== 0 ? 63000 * P / n : 0;
+
+            // Set in equation instances
+            document.getElementById('T_eq').value = T.toFixed(2);
+            syncAllInstances('T_eq');
+
+            // Step 2: Forces
+            const compType = document.getElementById('component_type').value;
+            const D_pitch = parseFloat(document.getElementById('D_pitch').value) || 0;
+            const Wt = D_pitch !== 0 ? 2 * T / D_pitch : 0;
+            document.getElementById('Wt_eq').value = Wt.toFixed(2);
+            syncAllInstances('Wt_eq');
+
+            let Wr = 0;
+
+            if (compType === 'spur') {
+                const phi = parseFloat(document.getElementById('phi').value) || 20;
+                const phi_rad = phi * Math.PI / 180;
+                Wr = Wt * Math.tan(phi_rad);
+            } else if (compType === 'helical') {
+                const phi_n = parseFloat(document.getElementById('phi_n').value) || 20;
+                const psi = parseFloat(document.getElementById('psi').value) || 0;
+                const phi_n_rad = phi_n * Math.PI / 180;
+                const psi_rad = psi * Math.PI / 180;
+                Wr = Math.cos(psi_rad) !== 0 ? Wt * Math.tan(phi_n_rad) / Math.cos(psi_rad) : 0;
+            } else if (compType === 'bevel') {
+                const phi_bevel = parseFloat(document.getElementById('phi_bevel').value) || 20;
+                const gamma = parseFloat(document.getElementById('gamma').value) || 0;
+                const phi_rad = phi_bevel * Math.PI / 180;
+                const gamma_rad = gamma * Math.PI / 180;
+                Wr = Wt * Math.tan(phi_rad) * Math.cos(gamma_rad);
+            }
+
+            document.getElementById('Wr_eq').value = Wr.toFixed(2);
+            syncAllInstances('Wr_eq');
+
+            // Shaft diameter calculation (simplified ASME)
+            const M = parseFloat(document.getElementById('M').value) || 0;
+            const T_loc = parseFloat(document.getElementById('T_loc').value) || 0;
+            const N_design = parseFloat(document.getElementById('N_design').value) || 3;
+            const Kt = parseFloat(document.getElementById('Kt').value) || 1.5;
+            const Sy = parseFloat(document.getElementById('Sy').value) || 0;
+
+            let D_min = 0;
+            if (Sy > 0) {
+                const term1 = Kt * M / (Sy * 1000);
+                const term2 = T_loc / (Sy * 1000);
+                const inside_sqrt = term1 * term1 + 0.75 * term2 * term2;
+                D_min = Math.pow((16 * N_design / Math.PI) * Math.sqrt(inside_sqrt), 1/3);
+            }
+            document.getElementById('D_min_eq').value = D_min.toFixed(4);
+            syncAllInstances('D_min_eq');
+
+            // Bearing load rating
+            const R_bearing = parseFloat(document.getElementById('R_bearing').value) || 0;
+            const LD_bearing = parseFloat(document.getElementById('LD_bearing').value) || 0;
+            const k_bearing = parseFloat(document.getElementById('k_bearing').value) || 3;
+            const L1 = 1;
+
+            const C_bearing = k_bearing !== 0 ? R_bearing * Math.pow(LD_bearing / L1, 1/k_bearing) : 0;
+            document.getElementById('C_bearing_eq').value = C_bearing.toFixed(2);
+            syncAllInstances('C_bearing_eq');
+
+            // Key length
+            const D_key = parseFloat(document.getElementById('D_key').value) || 0;
+            const W_key = parseFloat(document.getElementById('W_key').value) || 0;
+            const T_key = parseFloat(document.getElementById('T_key').value) || 0;
+            const Sy_key = parseFloat(document.getElementById('Sy_key').value) || 51;
+
+            const L_min_key = (Sy_key * 1000 * W_key * D_key) !== 0 ? (4 * T_key) / (Sy_key * 1000 * W_key * D_key) : 0;
+            document.getElementById('L_min_key_eq').value = L_min_key.toFixed(4);
+            syncAllInstances('L_min_key_eq');
+
+            // Auto-save
+            saveSession();
+        }
+
+        function saveSession() {
+            const session = {};
+            const inputs = document.querySelectorAll('input[type="number"], select');
+            inputs.forEach(input => {
+                session[input.id] = input.value;
+            });
+            localStorage.setItem('shaftSession', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const sessionData = localStorage.getItem('shaftSession');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                Object.keys(session).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input && !input.classList.contains('computed')) {
+                        input.value = session[id];
+                    }
+                });
+                updateForceInputs();
+                calculate();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.value = '';
+                });
+                document.getElementById('component_type').value = 'spur';
+                document.getElementById('phi').value = '20';
+                document.getElementById('phi_n').value = '20';
+                document.getElementById('phi_bevel').value = '20';
+                document.getElementById('k_belt').value = '5';
+                document.getElementById('N_design').value = '3';
+                document.getElementById('Kt').value = '1.5';
+                document.getElementById('k_bearing').value = '3';
+                document.getElementById('Sy_key').value = '51';
+                localStorage.removeItem('shaftSession');
+                updateForceInputs();
+                calculate();
+            }
+        }
+
+        // Load session on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
+            loadSession();
+            updateForceInputs();
+            // Trigger MathJax rendering
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));
+            }
+        });
+    </script>
+</body>
+</html>
