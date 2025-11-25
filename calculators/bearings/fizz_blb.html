@@ -428,14 +428,9 @@
                         <input type="number" id="N" step="any" oninput="syncAllInstances('N'); markAsUser('N'); calculate()">
                     </div>
                     <div class="input-row">
-                        <label>Heat Transfer Coefficient (h̄) [Btu/(hr·ft²·°F)]:</label>
-                        <input type="number" id="h_bar" step="any" oninput="syncAllInstances('h_bar'); markAsUser('h_bar'); calculate()">
-                        <span class="hint">Typical: 30</span>
-                    </div>
-                    <div class="input-row">
-                        <label>Thermal Conductivity Ratio (C<sub>R</sub>):</label>
-                        <input type="number" id="C_R" step="any" oninput="syncAllInstances('C_R'); markAsUser('C_R'); calculate()">
-                        <span class="hint">Typical: 1</span>
+                        <label>Combined Heat Transfer (h̄C<sub>R</sub>) [Btu/(hr·ft²·°F)]:</label>
+                        <input type="number" id="h_CR" step="any" oninput="syncAllInstances('h_CR'); markAsUser('h_CR'); calculate()">
+                        <span class="hint">Typical: 2.7 (See Table 12-11 or use 30×C_R)</span>
                     </div>
                     <div class="input-row">
                         <label>Mechanical Equivalent (J) [lbf·in/(Btu)]:</label>
@@ -453,7 +448,7 @@
 
                     <h3>Minimum Required Length (Thermal Constraint)</h3>
                     <div class="equation-block">
-                        <div class="equation-latex">$$L_{min} \geq \frac{720 f_s n_d F N}{J \bar{h} C_R (T_f - T_\infty)}$$</div>
+                        <div class="equation-latex">$$L_{min} \geq \frac{720 f_s n_d F N}{J (\bar{h}C_R) (T_f - T_\infty)}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
                                 <label>L<sub>min</sub></label>
@@ -487,13 +482,8 @@
                             </div>
                             <span>/</span>
                             <div class="var-input">
-                                <label>h̄</label>
-                                <input type="number" id="h_bar_eq" step="any" oninput="syncAllInstances('h_bar_eq'); markAsUser('h_bar_eq'); calculate()">
-                            </div>
-                            <span>/</span>
-                            <div class="var-input">
-                                <label>C<sub>R</sub></label>
-                                <input type="number" id="C_R_eq" step="any" oninput="syncAllInstances('C_R_eq'); markAsUser('C_R_eq'); calculate()">
+                                <label>h̄C<sub>R</sub></label>
+                                <input type="number" id="h_CR_eq" step="any" oninput="syncAllInstances('h_CR_eq'); markAsUser('h_CR_eq'); calculate()">
                             </div>
                             <span>/ (</span>
                             <div class="var-input">
@@ -766,7 +756,7 @@
 
                     <h3>1. Thermal Length Constraint</h3>
                     <div class="equation-latex">
-                        $$L_{min} \geq \frac{720 f_s n_d F N}{J \bar{h} C_R (T_f - T_\infty)}$$
+                        $$L_{min} \geq \frac{720 f_s n_d F N}{J (\bar{h}C_R) (T_f - T_\infty)}$$
                     </div>
 
                     <h3>2. Bearing Diameter</h3>
@@ -875,16 +865,10 @@
                                 <td>Input</td>
                             </tr>
                             <tr>
-                                <td>h̄</td>
-                                <td>Heat transfer coefficient</td>
+                                <td>h̄C<sub>R</sub></td>
+                                <td>Combined heat transfer coefficient (h̄ × C<sub>R</sub>)</td>
                                 <td>Btu/(hr·ft²·°F)</td>
-                                <td>Input</td>
-                            </tr>
-                            <tr>
-                                <td>C<sub>R</sub></td>
-                                <td>Thermal conductivity ratio</td>
-                                <td>-</td>
-                                <td>Input</td>
+                                <td>Lookup</td>
                             </tr>
                             <tr>
                                 <td>J</td>
@@ -981,8 +965,7 @@
             'PV_max': ['PV_max'],
             'f_s': ['f_s', 'f_s_eq', 'f_s_eq2'],
             'N': ['N', 'N_eq', 'N_eq2', 'N_eq3'],
-            'h_bar': ['h_bar', 'h_bar_eq'],
-            'C_R': ['C_R', 'C_R_eq'],
+            'h_CR': ['h_CR', 'h_CR_eq'],
             'J': ['J', 'J_eq'],
             'T_f': ['T_f', 'T_f_eq'],
             'T_inf': ['T_inf', 'T_inf_eq'],
@@ -1056,8 +1039,7 @@
             const PV_max = parseFloat(document.getElementById('PV_max').value) || 0;
             const f_s = parseFloat(document.getElementById('f_s').value) || 0;
             const N = parseFloat(document.getElementById('N').value) || 0;
-            const h_bar = parseFloat(document.getElementById('h_bar').value) || 0;
-            const C_R = parseFloat(document.getElementById('C_R').value) || 0;
+            const h_CR = parseFloat(document.getElementById('h_CR').value) || 0;
             const J = parseFloat(document.getElementById('J').value) || 0;
             const T_f = parseFloat(document.getElementById('T_f').value) || 0;
             const T_inf = parseFloat(document.getElementById('T_inf').value) || 0;
@@ -1066,9 +1048,9 @@
 
             // Step 4-5: Minimum length from thermal constraint
             const T_rise = T_f - T_inf;
-            const denominator = J * h_bar * C_R * T_rise;
+            const denominator = J * h_CR * T_rise;
             const L_min = denominator !== 0 ? (720 * f_s * n_d * F * N) / denominator : 0;
-            document.getElementById('L_min').value = L_min.toFixed(4);
+            setValue('L_min', L_min);
 
             // Step 6: Bearing diameter
             const D = d + c_d;
@@ -1081,9 +1063,7 @@
             setValue('A_p_eq1', A_p);
 
             // Step 8: Nominal pressure
-            const ndF = n_d * F;
-            document.getElementById('ndF').value = ndF.toFixed(2);
-            const P = A_p !== 0 ? ndF / A_p : 0;
+            const P = A_p !== 0 ? (n_d * F) / A_p : 0;
             setValue('P', P);
             setValue('P_eq1', P);
 
@@ -1104,7 +1084,7 @@
 
             // Step 9: Maximum bearing pressure
             const P_max = (D * L !== 0) ? (4 * n_d * F) / (Math.PI * D * L) : 0;
-            document.getElementById('P_max').value = P_max.toFixed(2);
+            setValue('P_max', P_max);
 
             // P_max check
             const pmaxCheck = document.getElementById('pmax_check');
@@ -1128,7 +1108,7 @@
 
             // PV Factor
             const PV = P * V;
-            document.getElementById('PV').value = PV.toFixed(2);
+            setValue('PV', PV);
 
             // PV check
             const pvCheck = document.getElementById('pv_check');
@@ -1147,10 +1127,11 @@
 
             // Step 11: Frictional torque and power loss
             const T_friction = (f_s * n_d * F * d) / 2;
-            document.getElementById('T_friction').value = T_friction.toFixed(4);
+            setValue('T_friction', T_friction);
+            setValue('T_friction_eq', T_friction);
 
             const H_f = (T_friction * N) / 63025;
-            document.getElementById('H_f').value = H_f.toFixed(6);
+            setValue('H_f', H_f);
             document.getElementById('power_loss_display').textContent = H_f.toFixed(6);
 
             // Auto-save session

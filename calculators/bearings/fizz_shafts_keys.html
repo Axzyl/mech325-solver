@@ -971,7 +971,10 @@
 
         function syncAllInstances(changedId) {
             const baseVar = getBaseVariable(changedId);
-            const value = document.getElementById(changedId).value;
+            const element = document.getElementById(changedId);
+            if (!element) return;
+
+            const value = element.value;
             const instances = varInstanceMap[baseVar];
 
             if (instances) {
@@ -1068,26 +1071,41 @@
         }
 
         function calculate() {
+            // Helper to sync value only if user hasn't manually edited it
+            const syncValue = (id, value, decimals = 4) => {
+                const elem = document.getElementById(id);
+                const baseVar = getBaseVariable(id);
+                if (elem && !userValues.has(baseVar)) {
+                    elem.value = typeof value === 'number' ? value.toFixed(decimals) : value;
+                }
+            };
+
             // Step 1: Torque
             const P = parseFloat(document.getElementById('P').value) || 0;
             const n = parseFloat(document.getElementById('n').value) || 0;
             const T = n !== 0 ? 63000 * P / n : 0;
 
-            // Set in equation instances
-            document.getElementById('T_eq').value = T.toFixed(2);
+            // Sync to torque equation boxes
+            syncValue('P_eq', P, 2);
+            syncValue('n_eq', n, 2);
+            syncValue('T_eq', T, 2);
             syncAllInstances('T_eq');
 
             // Step 2: Forces
             const compType = document.getElementById('component_type').value;
             const D_pitch = parseFloat(document.getElementById('D_pitch').value) || 0;
             const Wt = D_pitch !== 0 ? 2 * T / D_pitch : 0;
-            document.getElementById('Wt_eq').value = Wt.toFixed(2);
+
+            // Sync to Wt equation boxes
+            syncValue('T_eq2', T, 2);
+            syncValue('D_pitch_eq', D_pitch, 4);
+            syncValue('Wt_eq', Wt, 2);
             syncAllInstances('Wt_eq');
 
             let Wr = 0;
+            const phi = parseFloat(document.getElementById('phi').value) || 20;
 
             if (compType === 'spur') {
-                const phi = parseFloat(document.getElementById('phi').value) || 20;
                 const phi_rad = phi * Math.PI / 180;
                 Wr = Wt * Math.tan(phi_rad);
             } else if (compType === 'helical') {
@@ -1104,7 +1122,10 @@
                 Wr = Wt * Math.tan(phi_rad) * Math.cos(gamma_rad);
             }
 
-            document.getElementById('Wr_eq').value = Wr.toFixed(2);
+            // Sync to Wr equation boxes
+            syncValue('Wt_eq2', Wt, 2);
+            syncValue('phi_eq', phi, 2);
+            syncValue('Wr_eq', Wr, 2);
             syncAllInstances('Wr_eq');
 
             // Shaft diameter calculation (simplified ASME)
@@ -1121,7 +1142,15 @@
                 const inside_sqrt = term1 * term1 + 0.75 * term2 * term2;
                 D_min = Math.pow((16 * N_design / Math.PI) * Math.sqrt(inside_sqrt), 1/3);
             }
-            document.getElementById('D_min_eq').value = D_min.toFixed(4);
+
+            // Sync to D_min equation boxes
+            syncValue('N_design_eq', N_design, 2);
+            syncValue('Kt_eq', Kt, 2);
+            syncValue('M_eq', M, 2);
+            syncValue('Sy_eq', Sy, 2);
+            syncValue('Sy_eq2', Sy, 2);
+            syncValue('T_loc_eq', T_loc, 2);
+            syncValue('D_min_eq', D_min, 4);
             syncAllInstances('D_min_eq');
 
             // Bearing load rating
@@ -1131,7 +1160,12 @@
             const L1 = 1;
 
             const C_bearing = k_bearing !== 0 ? R_bearing * Math.pow(LD_bearing / L1, 1/k_bearing) : 0;
-            document.getElementById('C_bearing_eq').value = C_bearing.toFixed(2);
+
+            // Sync to C_bearing equation boxes
+            syncValue('R_bearing_eq', R_bearing, 2);
+            syncValue('LD_bearing_eq', LD_bearing, 2);
+            syncValue('k_bearing_eq', k_bearing, 2);
+            syncValue('C_bearing_eq', C_bearing, 2);
             syncAllInstances('C_bearing_eq');
 
             // Key length
@@ -1141,7 +1175,13 @@
             const Sy_key = parseFloat(document.getElementById('Sy_key').value) || 51;
 
             const L_min_key = (Sy_key * 1000 * W_key * D_key) !== 0 ? (4 * T_key) / (Sy_key * 1000 * W_key * D_key) : 0;
-            document.getElementById('L_min_key_eq').value = L_min_key.toFixed(4);
+
+            // Sync to L_min_key equation boxes
+            syncValue('T_key_eq', T_key, 2);
+            syncValue('Sy_key_eq', Sy_key, 2);
+            syncValue('W_key_eq', W_key, 4);
+            syncValue('D_key_eq', D_key, 4);
+            syncValue('L_min_key_eq', L_min_key, 4);
             syncAllInstances('L_min_key_eq');
 
             // Auto-save
@@ -1174,6 +1214,7 @@
 
         function resetAll() {
             if (confirm('Are you sure you want to reset all values?')) {
+                userValues.clear();
                 const inputs = document.querySelectorAll('input[type="number"]');
                 inputs.forEach(input => {
                     input.value = '';
