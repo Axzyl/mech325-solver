@@ -4,11 +4,4 @@ This solver is an interactive HTML-based tool for solving problems in the machin
 
 In order to run this, download this repository (easiest way is to click Code -> Download ZIP, and then unzip the folder), then open ```index.html``` in your preferred browser. 
 
-As of Oct 19, I have not started on the second homework and have not tested this solver much on actual problems. I vibe coded much of this solver while playing mario kart (I played the DLC for the first time on my clubroom's switch), so there may be some issues. If that happens, contact me on Discord at @Axzyl (or raise an issue, but I don't check github much), letting me know what the issue is, and if it is an issue with the content not being implemented properly, let me know what it should be so I can fix (vibecode) it. 
-
-Future Plans:
-- ~~Adding support for Belts~~
-- Unit conversion guide
-- Interactivity with tables and graphs
-- Power Fluids and all other units coming up later
-- Maybe an offline LLM, but generative AI is not allowed in the exams so idk how helpful it will be
+As of Nov 10, all post-midterm content has been added, however they have not been tested rigourously. Raise an issue or contact me on discord (@Axzyl) to let me know if there is an issue. 
