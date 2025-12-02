@@ -337,6 +337,31 @@
         .hidden {
             display: none;
         }
+        .section-divider {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 12px;
+            padding: 18px 25px;
+            margin: 30px 0 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .section-divider.shaft-section {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2980b9 100%);
+            border-left: 6px solid #3498db;
+        }
+        .section-divider.key-section {
+            background: linear-gradient(135deg, #5d4e37 0%, #8b7355 100%);
+            border-left: 6px solid #d4a574;
+        }
+        .section-title {
+            color: white;
+            margin: 0;
+            padding: 0;
+            font-size: 1.4em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
         .variables-table {
             width: 100%;
             border-collapse: collapse;
@@ -404,12 +429,17 @@
                 </div>
 
                 <div class="warning">
-                    <strong>⚠️ COMPREHENSIVE DESIGN PROCEDURE:</strong> This is a 31-step shaft design procedure. This calculator covers core steps. For complete analysis, follow all steps in the PDF including shear/moment diagrams, stress concentration factors, and iterative sizing.
+                    <strong>⚠️ 31-STEP DESIGN PROCEDURE:</strong> This calculator covers key computational steps. Manual steps (FBD, diagrams, table lookups) are noted where applicable. Follow the PDF for complete analysis.
+                </div>
+
+                <!-- SHAFT DESIGN SECTION -->
+                <div class="section-divider shaft-section">
+                    <h2 class="section-title">⚙️ SHAFT DESIGN (Steps 1-25)</h2>
                 </div>
 
                 <!-- Step 1: Torque Calculation -->
                 <div class="section">
-                    <h2>Step 1: Calculate Torque at Each Component</h2>
+                    <h2>Step 1: Torque from Power</h2>
                     <div class="equation-block">
                         <div class="equation-latex">
                             $$T = \frac{63000 P}{n}$$
@@ -449,7 +479,7 @@
 
                 <!-- Step 2: Force Calculations -->
                 <div class="section">
-                    <h2>Step 2: Calculate Forces from Components</h2>
+                    <h2>Step 2: Component Forces</h2>
 
                     <div class="input-row">
                         <label>Component Type:</label>
@@ -565,67 +595,260 @@
                     </div>
                 </div>
 
-                <!-- Shaft Diameter Calculation -->
+                <!-- Steps 3-8: Manual Work -->
                 <div class="section">
-                    <h2>Shaft Diameter Calculation (ASME Code - Simplified)</h2>
+                    <h2>Steps 3-8: Diagrams & Resultant Forces</h2>
                     <div class="warning">
-                        This is a simplified calculation using ASME code. For complete design, follow all 31 steps in PDF including shear/moment diagrams, stress concentrations, and iterative sizing.
+                        <strong>Steps 3-7 (Manual):</strong> Draw FBD, calculate bearing reactions, create shear/moment/torque diagrams. See PDF for details.
                     </div>
-
                     <div class="subsection">
-                        <h3>Material Properties</h3>
-                        <div class="input-row">
-                            <label><strong>Ultimate Strength (S<sub>u</sub>):</strong></label>
-                            <input type="number" id="Su" class="lookup" step="any" oninput="syncAllInstances('Su'); markAsUser('Su'); calculate()">
-                            <span class="unit">ksi</span>
+                        <h3>Step 8: Resultant Shear & Moment</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">
+                                $$V = \sqrt{V_x^2 + V_y^2} \quad\quad M = \sqrt{M_x^2 + M_y^2}$$
+                            </div>
                         </div>
                         <div class="input-row">
-                            <label><strong>Yield Strength (S<sub>y</sub>):</strong></label>
-                            <input type="number" id="Sy" class="lookup" step="any" oninput="syncAllInstances('Sy'); markAsUser('Sy'); calculate()">
-                            <span class="unit">ksi</span>
+                            <label>Resultant Shear (V):</label>
+                            <input type="number" id="V_shear" step="any" oninput="syncAllInstances('V_shear'); markAsUser('V_shear'); calculate()">
+                            <span class="unit">lbf</span>
                         </div>
-                        <div class="note">
-                            📋 Look up from material tables. Common: AISI 1045 cold drawn: S<sub>u</sub> = 91 ksi, S<sub>y</sub> = 77 ksi
-                        </div>
-                    </div>
-
-                    <div class="subsection">
-                        <h3>Critical Location</h3>
                         <div class="input-row">
-                            <label>Bending Moment (M):</label>
+                            <label>Resultant Bending Moment (M):</label>
                             <input type="number" id="M" step="any" oninput="syncAllInstances('M'); markAsUser('M'); calculate()">
                             <span class="unit">lbf·in</span>
                         </div>
                         <div class="input-row">
-                            <label>Torque at Location (T<sub>loc</sub>):</label>
+                            <label>Torque at Location (T):</label>
                             <input type="number" id="T_loc" step="any" oninput="syncAllInstances('T_loc'); markAsUser('T_loc'); calculate()">
                             <span class="unit">lbf·in</span>
                         </div>
-                        <div class="note">
-                            Determine from shear/moment diagrams (Steps 5-7 in PDF)
+                    </div>
+                </div>
+
+                <!-- Step 9: Stress Concentration -->
+                <div class="section">
+                    <h2>Step 9: Stress Concentration Factor (K<sub>t</sub>)</h2>
+                    <div class="input-row">
+                        <label>Feature Type:</label>
+                        <select id="feature_type" onchange="updateKt(); calculate()">
+                            <option value="keyseat_profile">Profile Keyseat (K<sub>t</sub> = 2.0)</option>
+                            <option value="keyseat_sled">Sled Runner Keyseat (K<sub>t</sub> = 1.6)</option>
+                            <option value="fillet_sharp">Sharp Fillet (K<sub>t</sub> = 2.5)</option>
+                            <option value="fillet_rounded" selected>Well-Rounded Fillet (K<sub>t</sub> = 1.5)</option>
+                            <option value="bearing_press">Bearing Press Fit (K<sub>t</sub> = 1.0)</option>
+                            <option value="retaining">Retaining Ring (K<sub>t</sub> = 3.0)</option>
+                            <option value="custom">Custom Value</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Stress Concentration (K<sub>t</sub>):</strong></label>
+                        <input type="number" id="Kt" value="1.5" step="any" oninput="syncAllInstances('Kt'); markAsUser('Kt'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        Keyseat: 2.0 (profile) / 1.6 (sled) | Fillet: 2.5 (sharp) / 1.5 (rounded) | Bearing: 1.0 | Retaining ring: 3.0
+                    </div>
+                </div>
+
+                <!-- Step 10: Material Properties -->
+                <div class="section">
+                    <h2>Step 10: Material Properties</h2>
+                    <div class="input-row">
+                        <label><strong>Ultimate Strength (S<sub>u</sub>):</strong></label>
+                        <input type="number" id="Su" class="lookup" step="any" oninput="syncAllInstances('Su'); markAsUser('Su'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Yield Strength (S<sub>y</sub>):</strong></label>
+                        <input type="number" id="Sy" class="lookup" step="any" oninput="syncAllInstances('Sy'); markAsUser('Sy'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                    <div class="note">
+                        📋 Look up from material tables (Mott Appendix 3). Common: AISI 1045 cold drawn: S<sub>u</sub> = 91 ksi, S<sub>y</sub> = 77 ksi
+                    </div>
+                </div>
+
+                <!-- Step 11: Material Factor -->
+                <div class="section">
+                    <h2>Step 11: Material Factor (C<sub>m</sub>)</h2>
+                    <div class="input-row">
+                        <label>Material Type:</label>
+                        <select id="material_type" onchange="updateCm(); calculate()">
+                            <option value="wrought" selected>Wrought Steel (C<sub>m</sub> = 1.00)</option>
+                            <option value="cast">Cast Steel (C<sub>m</sub> = 0.80)</option>
+                            <option value="powdered">Powdered Steel (C<sub>m</sub> = 0.76)</option>
+                            <option value="malleable">Malleable Cast Iron (C<sub>m</sub> = 0.80)</option>
+                            <option value="gray">Gray Cast Iron (C<sub>m</sub> = 0.70)</option>
+                            <option value="ductile">Ductile Cast Iron (C<sub>m</sub> = 0.66)</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Material Factor (C<sub>m</sub>):</strong></label>
+                        <input type="number" id="Cm" value="1.0" step="any" oninput="syncAllInstances('Cm'); markAsUser('Cm'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                </div>
+
+                <!-- Step 12: Stress Type Factor -->
+                <div class="section">
+                    <h2>Step 12: Stress Type Factor (C<sub>st</sub>)</h2>
+                    <div class="input-row">
+                        <label>Loading Type:</label>
+                        <select id="loading_type" onchange="updateCst(); calculate()">
+                            <option value="bending" selected>Bending Stress (C<sub>st</sub> = 1.0)</option>
+                            <option value="axial">Axial Tension (C<sub>st</sub> = 0.80)</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Stress Type Factor (C<sub>st</sub>):</strong></label>
+                        <input type="number" id="Cst" value="1.0" step="any" oninput="syncAllInstances('Cst'); markAsUser('Cst'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        Almost all shaft cases use bending stress, so C<sub>st</sub> = 1.0
+                    </div>
+                </div>
+
+                <!-- Step 13: Base Endurance Strength -->
+                <div class="section">
+                    <h2>Step 13: Base Endurance Strength (s<sub>n</sub>)</h2>
+                    <div class="input-row">
+                        <label>Manufacturing Method:</label>
+                        <select id="manufacturing_method">
+                            <option value="polished">Polished</option>
+                            <option value="ground">Ground</option>
+                            <option value="machined" selected>Machined or Cold Drawn</option>
+                            <option value="rolled">As-Rolled / Hot-Rolled</option>
+                            <option value="forged">As-Forged</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Base Endurance Strength (s<sub>n</sub>):</strong></label>
+                        <input type="number" id="sn" class="lookup" step="any" oninput="syncAllInstances('sn'); markAsUser('sn'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                    <div class="note">
+                        📋 <strong>Look up from graph in PDF (Fig 5-8)</strong> using S<sub>u</sub> and manufacturing method. For machined/cold drawn steel with S<sub>u</sub> ≈ 90 ksi: s<sub>n</sub> ≈ 30-35 ksi
+                    </div>
+                </div>
+
+                <!-- Step 14: Reliability Factor -->
+                <div class="section">
+                    <h2>Step 14: Reliability Factor (C<sub>R</sub>)</h2>
+                    <div class="input-row">
+                        <label>Desired Reliability:</label>
+                        <select id="reliability" onchange="updateCR(); calculate()">
+                            <option value="0.50">50% (C<sub>R</sub> = 1.00)</option>
+                            <option value="0.90">90% (C<sub>R</sub> = 0.90)</option>
+                            <option value="0.99" selected>99% (C<sub>R</sub> = 0.81)</option>
+                            <option value="0.999">99.9% (C<sub>R</sub> = 0.75)</option>
+                        </select>
+                        <span class="unit"></span>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Reliability Factor (C<sub>R</sub>):</strong></label>
+                        <input type="number" id="CR" value="0.81" step="any" oninput="syncAllInstances('CR'); markAsUser('CR'); calculate()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        A safe guess is 99% reliability → C<sub>R</sub> = 0.81
+                    </div>
+                </div>
+
+                <!-- Step 15: Size Factor -->
+                <div class="section">
+                    <h2>Step 15: Size Factor (C<sub>s</sub>)</h2>
+                    <div class="input-row">
+                        <label>Estimated Shaft Diameter (D<sub>est</sub>):</label>
+                        <input type="number" id="D_est" value="2.0" step="any" oninput="syncAllInstances('D_est'); markAsUser('D_est'); calculate()">
+                        <span class="unit">in</span>
+                        <span class="hint">Guess ~2" initially, iterate later</span>
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$C_s = \left(\frac{D}{0.3}\right)^{-0.11} \quad \text{for } 0.3 < D \leq 2 \text{ in}$$
+                        </div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>C<sub>s</sub></label>
+                                <input type="number" id="Cs_eq" step="any" oninput="syncAllInstances('Cs_eq'); markAsUser('Cs_eq'); calculate()">
+                            </div>
+                            <span>= (</span>
+                            <div class="var-input">
+                                <label>D<sub>est</sub></label>
+                                <input type="number" id="D_est_eq" step="any" oninput="syncAllInstances('D_est_eq'); markAsUser('D_est_eq'); calculate()">
+                            </div>
+                            <span>/ 0.3)<sup>-0.11</sup></span>
                         </div>
                     </div>
+                    <div class="note">
+                        D ≤ 0.3": C<sub>s</sub> = 1.0 | 0.3" < D ≤ 2": C<sub>s</sub> = (D/0.3)<sup>-0.11</sup> | D > 2": C<sub>s</sub> = 0.859 - 0.02125D
+                    </div>
+                </div>
 
-                    <div class="subsection">
-                        <h3>Design Factors</h3>
-                        <div class="input-row">
-                            <label>Safety Factor (N):</label>
-                            <input type="number" id="N_design" value="3" step="any" oninput="syncAllInstances('N_design'); markAsUser('N_design'); calculate()">
-                            <span class="unit">-</span>
+                <!-- Step 16: Modified Endurance Strength -->
+                <div class="section">
+                    <h2>Step 16: Modified Endurance Strength (s'<sub>n</sub>)</h2>
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$s'_n = s_n \cdot C_m \cdot C_{st} \cdot C_R \cdot C_s$$
                         </div>
-                        <div class="input-row">
-                            <label>Stress Concentration (K<sub>t</sub>):</label>
-                            <input type="number" id="Kt" value="1.5" step="any" oninput="syncAllInstances('Kt'); markAsUser('Kt'); calculate()">
-                            <span class="unit">-</span>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>s'<sub>n</sub></label>
+                                <input type="number" id="sn_prime_eq" step="any" oninput="syncAllInstances('sn_prime_eq'); markAsUser('sn_prime_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>s<sub>n</sub></label>
+                                <input type="number" id="sn_eq2" step="any" oninput="syncAllInstances('sn_eq2'); markAsUser('sn_eq2'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>m</sub></label>
+                                <input type="number" id="Cm_eq" step="any" oninput="syncAllInstances('Cm_eq'); markAsUser('Cm_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>st</sub></label>
+                                <input type="number" id="Cst_eq" step="any" oninput="syncAllInstances('Cst_eq'); markAsUser('Cst_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>R</sub></label>
+                                <input type="number" id="CR_eq" step="any" oninput="syncAllInstances('CR_eq'); markAsUser('CR_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>C<sub>s</sub></label>
+                                <input type="number" id="Cs_eq2" step="any" oninput="syncAllInstances('Cs_eq2'); markAsUser('Cs_eq2'); calculate()">
+                            </div>
                         </div>
-                        <div class="note">
-                            📋 Look up K<sub>t</sub> from stress concentration tables based on shaft features (steps, keyseats, etc.)
-                        </div>
+                    </div>
+                    <div class="input-row">
+                        <label><strong>Modified Endurance Strength (s'<sub>n</sub>):</strong></label>
+                        <input type="number" id="sn_prime" step="any" oninput="syncAllInstances('sn_prime'); markAsUser('sn_prime'); calculate()">
+                        <span class="unit">ksi</span>
+                    </div>
+                </div>
+
+                <!-- Step 17: Shaft Diameter Calculation -->
+                <div class="section">
+                    <h2>Step 17: Minimum Shaft Diameter</h2>
+                    <div class="input-row">
+                        <label>Safety Factor (N):</label>
+                        <input type="number" id="N_design" value="3" step="any" oninput="syncAllInstances('N_design'); markAsUser('N_design'); calculate()">
+                        <span class="unit">-</span>
                     </div>
 
                     <div class="equation-block">
                         <div class="equation-latex">
-                            $$D_{min} = \left[\frac{16N}{\pi}\sqrt{\left(K_t\frac{M}{S_y}\right)^2 + \frac{3}{4}\left(\frac{T}{S_y}\right)^2}\right]^{1/3}$$
+                            $$D = \left[\frac{32N}{\pi}\sqrt{\left(\frac{K_t M}{s'_n}\right)^2 + \frac{3}{4}\left(\frac{T}{s_y}\right)^2}\right]^{1/3}$$
                         </div>
                         <div class="equation-inputs">
                             <div class="var-input">
@@ -633,7 +856,7 @@
                                 <input type="number" id="D_min_eq" step="any" oninput="syncAllInstances('D_min_eq'); markAsUser('D_min_eq'); calculate()">
                             </div>
                             <span>=</span>
-                            <span>[(16 ×</span>
+                            <span>[(32 ×</span>
                             <div class="var-input">
                                 <label>N</label>
                                 <input type="number" id="N_design_eq" step="any" oninput="syncAllInstances('N_design_eq'); markAsUser('N_design_eq'); calculate()">
@@ -650,8 +873,8 @@
                             </div>
                             <span>/</span>
                             <div class="var-input">
-                                <label>S<sub>y</sub></label>
-                                <input type="number" id="Sy_eq" step="any" oninput="syncAllInstances('Sy_eq'); markAsUser('Sy_eq'); calculate()">
+                                <label>s'<sub>n</sub></label>
+                                <input type="number" id="sn_prime_eq2" step="any" oninput="syncAllInstances('sn_prime_eq2'); markAsUser('sn_prime_eq2'); calculate()">
                             </div>
                             <span>)² + 0.75 × (</span>
                             <div class="var-input">
@@ -661,10 +884,13 @@
                             <span>/</span>
                             <div class="var-input">
                                 <label>S<sub>y</sub></label>
-                                <input type="number" id="Sy_eq2" step="any" oninput="syncAllInstances('Sy_eq2'); markAsUser('Sy_eq2'); calculate()">
+                                <input type="number" id="Sy_eq" step="any" oninput="syncAllInstances('Sy_eq'); markAsUser('Sy_eq'); calculate()">
                             </div>
                             <span>)²)]^(1/3)</span>
                         </div>
+                    </div>
+                    <div class="note">
+                        Use this equation when torque or bending moment is present. Uses s'<sub>n</sub> from Step 16.
                     </div>
 
                     <div class="input-row">
@@ -677,9 +903,12 @@
                     </div>
                 </div>
 
-                <!-- Bearing Selection -->
+                <!-- Steps 21-22: Bearing Selection -->
                 <div class="section">
-                    <h2>Bearing Selection (Simplified)</h2>
+                    <h2>Steps 21-22: Bearing Selection</h2>
+                    <div class="note">
+                        <strong>Steps 18-20 (Manual):</strong> Multiply retaining ring diameters by 1.06, identify most restrictive diameters, iterate if needed.
+                    </div>
                     <div class="input-row">
                         <label>Radial Reaction Force (R):</label>
                         <input type="number" id="R_bearing" step="any" oninput="syncAllInstances('R_bearing'); markAsUser('R_bearing'); calculate()">
@@ -737,9 +966,18 @@
                     </div>
                 </div>
 
-                <!-- Key Design -->
+                <!-- KEY DESIGN SECTION -->
+                <div class="section-divider key-section">
+                    <h2 class="section-title">🔑 KEY DESIGN (Steps 26-31)</h2>
+                </div>
+
+                <div class="note">
+                    <strong>Steps 23-25 (Manual):</strong> Use bearing bore for min shaft diameter, round up diameters to standard sizes.
+                </div>
+
+                <!-- Steps 26-28: Key Design -->
                 <div class="section">
-                    <h2>Key Design</h2>
+                    <h2>Steps 26-28: Key Size and Length</h2>
 
                     <div class="subsection">
                         <h3>Key Dimensions</h3>
@@ -818,9 +1056,13 @@
                             <span class="unit">in</span>
                         </div>
                         <div class="note">
-                            Round up L<sub>min</sub> to nearest standard size
+                            Round up L<sub>min</sub> to nearest standard size (Step 30)
                         </div>
                     </div>
+                </div>
+
+                <div class="note">
+                    <strong>Steps 29-31 (Manual):</strong> Verify key length is suitable (ideally &lt;1.5"), round to standard size, compute keyseat (S) and keyway (T) dimensions. See PDF page 122 for formulas.
                 </div>
 
                 <div class="note">
@@ -854,10 +1096,36 @@
                 </div>
 
                 <div class="section">
-                    <h3>ASME Shaft Diameter</h3>
+                    <h3>Size Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$C_s = \left(\frac{D}{0.3}\right)^{-0.11} \quad \text{for } 0.3 < D \leq 2 \text{ in}$$</div>
+                    </div>
+                    <div class="note">
+                        D ≤ 0.3": C<sub>s</sub> = 1.0 | D > 2": C<sub>s</sub> = 0.859 - 0.02125D
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Modified Endurance Strength</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$s'_n = s_n \cdot C_m \cdot C_{st} \cdot C_R \cdot C_s$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Shaft Diameter (with torque/bending)</h3>
                     <div class="equation-block">
                         <div class="equation-latex">
-                            $$D_{min} = \left[\frac{16N}{\pi}\sqrt{\left(K_t\frac{M}{S_y}\right)^2 + \frac{3}{4}\left(\frac{T}{S_y}\right)^2}\right]^{1/3}$$
+                            $$D = \left[\frac{32N}{\pi}\sqrt{\left(\frac{K_t M}{s'_n}\right)^2 + \frac{3}{4}\left(\frac{T}{s_y}\right)^2}\right]^{1/3}$$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Shaft Diameter (shear only)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">
+                            $$D = \sqrt{\frac{2.94 K_t V N}{s'_n}}$$
                         </div>
                     </div>
                 </div>
@@ -897,9 +1165,16 @@
                         <tr><td>W<sub>t</sub></td><td>Tangential force</td><td>lbf</td></tr>
                         <tr><td>W<sub>r</sub></td><td>Radial force</td><td>lbf</td></tr>
                         <tr><td>φ</td><td>Pressure angle</td><td>deg</td></tr>
-                        <tr><td>M</td><td>Bending moment</td><td>lbf·in</td></tr>
                         <tr><td>S<sub>u</sub></td><td>Ultimate strength</td><td>ksi</td></tr>
                         <tr><td>S<sub>y</sub></td><td>Yield strength</td><td>ksi</td></tr>
+                        <tr><td>s<sub>n</sub></td><td>Base endurance strength</td><td>ksi</td></tr>
+                        <tr><td>D<sub>est</sub></td><td>Estimated shaft diameter (for C<sub>s</sub>)</td><td>in</td></tr>
+                        <tr><td>C<sub>s</sub></td><td>Size factor</td><td>-</td></tr>
+                        <tr><td>C<sub>m</sub></td><td>Material factor</td><td>-</td></tr>
+                        <tr><td>C<sub>st</sub></td><td>Stress type factor</td><td>-</td></tr>
+                        <tr><td>C<sub>R</sub></td><td>Reliability factor</td><td>-</td></tr>
+                        <tr><td>s'<sub>n</sub></td><td>Modified endurance strength</td><td>ksi</td></tr>
+                        <tr><td>M</td><td>Bending moment</td><td>lbf·in</td></tr>
                         <tr><td>N</td><td>Safety factor</td><td>-</td></tr>
                         <tr><td>K<sub>t</sub></td><td>Stress concentration</td><td>-</td></tr>
                         <tr><td>D<sub>min</sub></td><td>Minimum shaft diameter</td><td>in</td></tr>
@@ -938,8 +1213,16 @@
             'phi_bevel': ['phi_bevel'],
             'gamma': ['gamma'],
             'k_belt': ['k_belt'],
+            'V_shear': ['V_shear'],
             'Su': ['Su'],
-            'Sy': ['Sy', 'Sy_eq', 'Sy_eq2'],
+            'Sy': ['Sy', 'Sy_eq'],
+            'sn': ['sn', 'sn_eq2'],
+            'D_est': ['D_est', 'D_est_eq'],
+            'Cs': ['Cs_eq', 'Cs_eq2'],
+            'Cm': ['Cm', 'Cm_eq'],
+            'Cst': ['Cst', 'Cst_eq'],
+            'CR': ['CR', 'CR_eq'],
+            'sn_prime': ['sn_prime', 'sn_prime_eq', 'sn_prime_eq2'],
             'M': ['M', 'M_eq'],
             'T_loc': ['T_loc', 'T_loc_eq'],
             'N_design': ['N_design', 'N_design_eq'],
@@ -1070,6 +1353,52 @@
             calculate();
         }
 
+        function updateKt() {
+            const featureType = document.getElementById('feature_type').value;
+            const ktInput = document.getElementById('Kt');
+            if (!userValues.has('Kt')) {
+                if (featureType === 'keyseat_profile') ktInput.value = '2.0';
+                else if (featureType === 'keyseat_sled') ktInput.value = '1.6';
+                else if (featureType === 'fillet_sharp') ktInput.value = '2.5';
+                else if (featureType === 'fillet_rounded') ktInput.value = '1.5';
+                else if (featureType === 'bearing_press') ktInput.value = '1.0';
+                else if (featureType === 'retaining') ktInput.value = '3.0';
+            }
+        }
+
+        function updateCm() {
+            const matType = document.getElementById('material_type').value;
+            const cmInput = document.getElementById('Cm');
+            if (!userValues.has('Cm')) {
+                if (matType === 'wrought') cmInput.value = '1.00';
+                else if (matType === 'cast') cmInput.value = '0.80';
+                else if (matType === 'powdered') cmInput.value = '0.76';
+                else if (matType === 'malleable') cmInput.value = '0.80';
+                else if (matType === 'gray') cmInput.value = '0.70';
+                else if (matType === 'ductile') cmInput.value = '0.66';
+            }
+        }
+
+        function updateCst() {
+            const loadType = document.getElementById('loading_type').value;
+            const cstInput = document.getElementById('Cst');
+            if (!userValues.has('Cst')) {
+                if (loadType === 'bending') cstInput.value = '1.0';
+                else if (loadType === 'axial') cstInput.value = '0.80';
+            }
+        }
+
+        function updateCR() {
+            const reliability = document.getElementById('reliability').value;
+            const crInput = document.getElementById('CR');
+            if (!userValues.has('CR')) {
+                if (reliability === '0.50') crInput.value = '1.00';
+                else if (reliability === '0.90') crInput.value = '0.90';
+                else if (reliability === '0.99') crInput.value = '0.81';
+                else if (reliability === '0.999') crInput.value = '0.75';
+            }
+        }
+
         function calculate() {
             // Helper to sync value only if user hasn't manually edited it
             const syncValue = (id, value, decimals = 4) => {
@@ -1128,7 +1457,60 @@
             syncValue('Wr_eq', Wr, 2);
             syncAllInstances('Wr_eq');
 
-            // Shaft diameter calculation (simplified ASME)
+            // Fatigue factors and modified endurance strength
+
+            // Material factor Cm
+            const Cm = parseFloat(document.getElementById('Cm').value) || 1.0;
+            syncValue('Cm_eq', Cm, 2);
+            syncAllInstances('Cm_eq');
+
+            // Stress type factor Cst
+            const Cst = parseFloat(document.getElementById('Cst').value) || 1.0;
+            syncValue('Cst_eq', Cst, 3);
+            syncAllInstances('Cst_eq');
+
+            // Base endurance strength sn (lookup from graph, not calculated)
+            const sn = parseFloat(document.getElementById('sn').value) || 0;
+            syncValue('sn_eq2', sn, 2);
+            syncAllInstances('sn');
+
+            // Reliability factor CR
+            const CR = parseFloat(document.getElementById('CR').value) || 0.81;
+            syncValue('CR_eq', CR, 2);
+            syncAllInstances('CR_eq');
+
+            // Size factor Cs - using correct formula from PDF Table 5-4
+            // D <= 0.3: Cs = 1.0
+            // 0.3 < D <= 2.0: Cs = (D/0.3)^(-0.11)
+            // D > 2.0: Cs = 0.859 - 0.02125*D
+            const D_est = parseFloat(document.getElementById('D_est').value) || 2.0;
+            let Cs = 1.0;
+            if (D_est <= 0.3) {
+                Cs = 1.0;
+            } else if (D_est <= 2.0) {
+                Cs = Math.pow(D_est / 0.3, -0.11);
+            } else {
+                Cs = 0.859 - 0.02125 * D_est;
+            }
+            syncValue('D_est_eq', D_est, 4);
+            syncValue('Cs_eq', Cs, 4);
+            syncValue('Cs_eq2', Cs, 4);
+            syncAllInstances('Cs_eq');
+
+            // Modified endurance strength s'_n = s_n * Cm * Cst * CR * Cs
+            let sn_prime = sn * Cm * Cst * CR * Cs;
+            // Allow user override
+            if (userValues.has('sn_prime')) {
+                sn_prime = parseFloat(document.getElementById('sn_prime').value) || sn_prime;
+            } else {
+                document.getElementById('sn_prime').value = sn_prime.toFixed(2);
+            }
+            syncValue('sn_prime_eq', sn_prime, 2);
+            syncValue('sn_prime_eq2', sn_prime, 2);
+            syncAllInstances('sn_prime_eq');
+
+            // Shaft diameter calculation using PDF formula:
+            // D = [(32N/π) * sqrt((Kt*M/s'_n)² + (3/4)*(T/Sy)²)]^(1/3)
             const M = parseFloat(document.getElementById('M').value) || 0;
             const T_loc = parseFloat(document.getElementById('T_loc').value) || 0;
             const N_design = parseFloat(document.getElementById('N_design').value) || 3;
@@ -1136,11 +1518,12 @@
             const Sy = parseFloat(document.getElementById('Sy').value) || 0;
 
             let D_min = 0;
-            if (Sy > 0) {
-                const term1 = Kt * M / (Sy * 1000);
+            if (sn_prime > 0 && Sy > 0) {
+                // Convert ksi to psi for calculation (multiply by 1000)
+                const term1 = Kt * M / (sn_prime * 1000);
                 const term2 = T_loc / (Sy * 1000);
                 const inside_sqrt = term1 * term1 + 0.75 * term2 * term2;
-                D_min = Math.pow((16 * N_design / Math.PI) * Math.sqrt(inside_sqrt), 1/3);
+                D_min = Math.pow((32 * N_design / Math.PI) * Math.sqrt(inside_sqrt), 1/3);
             }
 
             // Sync to D_min equation boxes
@@ -1148,7 +1531,6 @@
             syncValue('Kt_eq', Kt, 2);
             syncValue('M_eq', M, 2);
             syncValue('Sy_eq', Sy, 2);
-            syncValue('Sy_eq2', Sy, 2);
             syncValue('T_loc_eq', T_loc, 2);
             syncValue('D_min_eq', D_min, 4);
             syncAllInstances('D_min_eq');
@@ -1219,14 +1601,31 @@
                 inputs.forEach(input => {
                     input.value = '';
                 });
+                // Force inputs
                 document.getElementById('component_type').value = 'spur';
                 document.getElementById('phi').value = '20';
                 document.getElementById('phi_n').value = '20';
                 document.getElementById('phi_bevel').value = '20';
                 document.getElementById('k_belt').value = '5';
-                document.getElementById('N_design').value = '3';
+                // Stress concentration
+                document.getElementById('feature_type').value = 'fillet_rounded';
                 document.getElementById('Kt').value = '1.5';
+                // Material factor
+                document.getElementById('material_type').value = 'wrought';
+                document.getElementById('Cm').value = '1.0';
+                // Stress type factor
+                document.getElementById('loading_type').value = 'bending';
+                document.getElementById('Cst').value = '1.0';
+                // Reliability factor
+                document.getElementById('reliability').value = '0.99';
+                document.getElementById('CR').value = '0.81';
+                // Size factor
+                document.getElementById('D_est').value = '2.0';
+                // Design factor
+                document.getElementById('N_design').value = '3';
+                // Bearing
                 document.getElementById('k_bearing').value = '3';
+                // Key
                 document.getElementById('Sy_key').value = '51';
                 localStorage.removeItem('shaftSession');
                 updateForceInputs();
