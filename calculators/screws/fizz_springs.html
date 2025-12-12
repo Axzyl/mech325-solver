@@ -1616,7 +1616,12 @@
         }
 
         // Helper to set computed values and sync all instances
+        // Only sets value if the user hasn't manually edited this variable
         function setValue(id, value) {
+            const baseVar = getBaseVariable(id);
+            // Don't overwrite user-set values
+            if (userValues.has(baseVar)) return;
+
             const elem = document.getElementById(id);
             if (elem) {
                 elem.value = value.toFixed(4);

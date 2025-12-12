@@ -1019,17 +1019,23 @@
 
             // Step 1: Tensile stress area
             const A_t = sigma_d !== 0 ? F / sigma_d : 0;
-            document.getElementById('A_t_eq').value = A_t.toFixed(6);
-            syncAllInstances('A_t_eq');
+            if (!userValues.has('A_t')) {
+                document.getElementById('A_t_eq').value = A_t.toFixed(6);
+                syncAllInstances('A_t_eq');
+            }
 
             // Step 3: Shear area and nut length
             const A_s_calc = tau_d !== 0 ? F / tau_d : 0;
-            document.getElementById('A_s_eq').value = A_s_calc.toFixed(6);
-            syncAllInstances('A_s_eq');
+            if (!userValues.has('A_s')) {
+                document.getElementById('A_s_eq').value = A_s_calc.toFixed(6);
+                syncAllInstances('A_s_eq');
+            }
 
             const h_calc = A_s_rated !== 0 ? A_s_calc / A_s_rated : 0;
-            document.getElementById('h_eq').value = h_calc.toFixed(4);
-            syncAllInstances('h_eq');
+            if (!userValues.has('h')) {
+                document.getElementById('h_eq').value = h_calc.toFixed(4);
+                syncAllInstances('h_eq');
+            }
 
             const h_rounded = Math.ceil(h_calc * 4) / 4;
             // No display for h_rounded anymore
@@ -1037,8 +1043,10 @@
             // Step 4: Lead angle
             const lambda_rad = D_p !== 0 ? Math.atan(p / (Math.PI * D_p)) : 0;
             const lambda_deg = lambda_rad * (180 / Math.PI);
-            document.getElementById('lambda_eq').value = lambda_deg.toFixed(4);
-            syncAllInstances('lambda_eq');
+            if (!userValues.has('lambda')) {
+                document.getElementById('lambda_eq').value = lambda_deg.toFixed(4);
+                syncAllInstances('lambda_eq');
+            }
 
             // Step 5: Torques
             const phi_deg = parseFloat(document.getElementById('phi_eq').value) || 0;
@@ -1051,14 +1059,18 @@
             const torque_base_u = (F * D_p / 2) * ((cos_phi * tan_lambda + f) / (cos_phi - f * tan_lambda));
             const collar_torque = f_c * F * R_c;
             const T_u = torque_base_u + collar_torque;
-            document.getElementById('T_u_eq').value = T_u.toFixed(4);
-            syncAllInstances('T_u_eq');
+            if (!userValues.has('T_u')) {
+                document.getElementById('T_u_eq').value = T_u.toFixed(4);
+                syncAllInstances('T_u_eq');
+            }
 
             // Lowering torque
             const torque_base_d = (F * D_p / 2) * ((f - cos_phi * tan_lambda) / (cos_phi + f * tan_lambda));
             const T_d = torque_base_d + collar_torque;
-            document.getElementById('T_d_eq').value = T_d.toFixed(4);
-            syncAllInstances('T_d_eq');
+            if (!userValues.has('T_d')) {
+                document.getElementById('T_d_eq').value = T_d.toFixed(4);
+                syncAllInstances('T_d_eq');
+            }
 
             // Show self-locking warning
             const warning = document.getElementById('self_locking_warning');
@@ -1070,17 +1082,23 @@
 
             // Step 6: Efficiency
             const e = T_u !== 0 ? (F * p) / (2 * Math.PI * T_u) : 0;
-            document.getElementById('e_eq').value = e.toFixed(4);
-            syncAllInstances('e_eq');
+            if (!userValues.has('e')) {
+                document.getElementById('e_eq').value = e.toFixed(4);
+                syncAllInstances('e_eq');
+            }
 
             // Step 7: Speed
             const n = T_u !== 0 ? (63000 * P_input) / T_u : 0;
-            document.getElementById('n_eq').value = n.toFixed(2);
-            syncAllInstances('n_eq');
+            if (!userValues.has('n')) {
+                document.getElementById('n_eq').value = n.toFixed(2);
+                syncAllInstances('n_eq');
+            }
 
             const V = (n * p) / 60;
-            document.getElementById('V_eq').value = V.toFixed(4);
-            syncAllInstances('V_eq');
+            if (!userValues.has('V')) {
+                document.getElementById('V_eq').value = V.toFixed(4);
+                syncAllInstances('V_eq');
+            }
 
             saveSession();
         }

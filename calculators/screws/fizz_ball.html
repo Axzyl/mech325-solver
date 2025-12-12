@@ -661,7 +661,10 @@
 
             // Step 1: Calculate Travel Life
             const travel_life = distance_per_cycle * cycles_per_hour * hours_per_day * days_per_year * years_lifetime;
-            document.getElementById('travel_life').value = travel_life.toFixed(2);
+            if (!userValues.has('travel_life')) {
+                document.getElementById('travel_life').value = travel_life.toFixed(2);
+                syncAllInstances('travel_life');
+            }
 
             // Step 3: Calculate Driving Torque
             const T_u = 0.177 * F * L;
@@ -675,14 +678,22 @@
 
             // Step 4b: Calculate Required Power
             const P = (T_u * n) / 63000;
-            document.getElementById('P').value = P.toFixed(6);
+            if (!userValues.has('P')) {
+                document.getElementById('P').value = P.toFixed(6);
+                syncAllInstances('P');
+            }
 
             // Auto-save session
             saveSession();
         }
 
         // Helper to set computed values and sync all instances
+        // Only sets value if the user hasn't manually edited this variable
         function setValue(id, value) {
+            const baseVar = getBaseVariable(id);
+            // Don't overwrite user-set values
+            if (userValues.has(baseVar)) return;
+
             const elem = document.getElementById(id);
             if (elem) {
                 elem.value = value.toFixed(4);

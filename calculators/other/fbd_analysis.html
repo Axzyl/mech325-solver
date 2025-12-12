@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBD & Shear/Bending Moment Diagram Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .visualization-column {
+            flex: 1;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .viz-title {
+            color: white;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .canvas-container {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .canvas-tabs {
+            display: flex;
+            background: #34495e;
+        }
+        .canvas-tab {
+            flex: 1;
+            padding: 10px;
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        .canvas-tab:hover {
+            background: #3d566e;
+        }
+        .canvas-tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .canvas-wrapper {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+        }
+        canvas {
+            width: 100%;
+            display: block;
+        }
+        .position-lookup {
+            background: #34495e;
+            padding: 12px 15px;
+            border-top: 2px solid #2c3e50;
+        }
+        .lookup-title {
+            color: #ecf0f1;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .lookup-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .lookup-input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .lookup-input-group label {
+            color: #bdc3c7;
+            font-size: 0.85em;
+        }
+        .lookup-input-group input {
+            width: 80px;
+            padding: 6px 8px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            font-size: 0.85em;
+            text-align: center;
+            background: white;
+        }
+        .lookup-input-group input:focus {
+            outline: none;
+            border-color: #2980b9;
+        }
+        .lookup-results {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .lookup-result {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .lookup-result-label {
+            color: #bdc3c7;
+        }
+        .lookup-result-value {
+            color: white;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+        .controls-column {
+            width: 650px;
+            min-width: 400px;
+            max-width: 900px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid #3498db;
+            position: relative;
+        }
+        .resize-handle {
+            position: absolute;
+            left: -5px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            cursor: ew-resize;
+            background: transparent;
+            z-index: 100;
+        }
+        .resize-handle:hover {
+            background: rgba(52, 152, 219, 0.3);
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .tooltip-row {
+            margin: 2px 0;
+        }
+        .tooltip-label {
+            color: #bdc3c7;
+        }
+        .tooltip-value {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        h1 {
+            color: white;
+            margin: 0;
+            padding: 20px;
+            font-size: 1.4em;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .toolbar button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-add {
+            background: #28a745;
+            color: white;
+        }
+        .btn-add:hover {
+            background: #218838;
+        }
+        .btn-solve {
+            background: #007bff;
+            color: white;
+        }
+        .btn-solve:hover {
+            background: #0056b3;
+        }
+        .btn-diagram {
+            background: #6f42c1;
+            color: white;
+        }
+        .btn-diagram:hover {
+            background: #5a32a3;
+        }
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-clear:hover {
+            background: #c82333;
+        }
+        .points-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .point-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .point-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .point-title {
+            font-weight: 600;
+            color: #495057;
+        }
+        .point-type {
+            font-size: 0.85em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: #6c757d;
+            color: white;
+        }
+        .point-type.support {
+            background: #28a745;
+        }
+        .point-type.load {
+            background: #dc3545;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        .point-body {
+            padding: 15px;
+        }
+        .input-group {
+            margin-bottom: 12px;
+        }
+        .input-group-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .input-cell {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-cell label {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .input-cell input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .input-cell input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .input-cell input.unknown {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .input-cell input.computed {
+            background: #d4edda;
+            border-color: #28a745;
+            font-weight: 600;
+        }
+        .input-cell input:disabled {
+            background: #fff3cd;
+            border-color: #ffc107;
+            cursor: not-allowed;
+        }
+        .input-cell .unknown-checkbox {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75em;
+            color: #6c757d;
+        }
+        .input-cell .unknown-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+        .position-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: #e3f2fd;
+        }
+        .support-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+            margin-top: 8px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 15px;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            margin: 15px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            display: none;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            margin: 15px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            display: none;
+        }
+        .legend {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+        }
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+            font-size: 0.85em;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .checkbox-row label {
+            font-size: 0.9em;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="visualization-column">
+            <div class="viz-title">Visualization</div>
+            <div class="canvas-container">
+                <div class="canvas-tabs">
+                    <button class="canvas-tab active" onclick="switchCanvasTab('fbd')">Free Body Diagram</button>
+                    <button class="canvas-tab" onclick="switchCanvasTab('shear')">Shear Diagrams</button>
+                    <button class="canvas-tab" onclick="switchCanvasTab('moment')">Moment Diagrams</button>
+                </div>
+                <div class="canvas-wrapper">
+                    <canvas id="mainCanvas"></canvas>
+                    <div class="tooltip" id="canvasTooltip" style="display: none;"></div>
+                </div>
+                <div class="position-lookup" id="positionLookup">
+                    <div class="lookup-title">Position Lookup</div>
+                    <div class="lookup-row">
+                        <div class="lookup-input-group">
+                            <label for="lookupX">x =</label>
+                            <input type="number" id="lookupX" step="any" placeholder="Enter x" oninput="updateLookupValues()">
+                        </div>
+                    </div>
+                    <div class="lookup-results" id="lookupResults">
+                        <span style="color: #7f8c8d; font-size: 0.85em;">Enter a position to see values</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-column" id="controlsColumn">
+            <div class="resize-handle" id="resizeHandle"></div>
+            <h1>FBD & Shear/Moment Analysis</h1>
+
+            <div class="toolbar">
+                <button class="btn-add" onclick="addPoint()">+ Add Point</button>
+                <button class="btn-solve" onclick="solveReactions()">Solve Reactions</button>
+                <button class="btn-diagram" onclick="generateDiagrams()">Generate Diagrams</button>
+                <button class="btn-clear" onclick="clearAll()">Clear All</button>
+            </div>
+
+            <div class="info-box">
+                <strong>Instructions:</strong><br>
+                1. Add points along the beam (position x)<br>
+                2. Enter known forces/moments at each point<br>
+                3. Check "Unknown" box for reactions to solve<br>
+                4. Click "Solve Reactions" to find unknowns<br>
+                5. Click "Generate Diagrams" to see results
+            </div>
+
+            <div id="errorBox" class="error-box"></div>
+            <div id="successBox" class="success-box"></div>
+
+            <div class="points-container" id="pointsContainer">
+                <!-- Points will be added here dynamically -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-title">Legend</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fff3cd; border: 2px solid #ffc107;"></div>
+                    <span>Unknown (checkbox checked)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #d4edda; border: 2px solid #28a745;"></div>
+                    <span>Computed reaction (solved)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: white; border: 2px solid #ced4da;"></div>
+                    <span>Known load (user input)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let points = [];
+        let pointIdCounter = 0;
+        let currentTab = 'fbd';
+        let diagramsGenerated = false;
+        let axialData = { Nx: [] };
+        let shearData = { Vy: [], Vz: [] };
+        let momentData = { Mx: [], My: [], Mz: [] };
+
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            const container = document.querySelector('.canvas-container');
+            canvas.width = wrapper.clientWidth;
+
+            // Calculate available height (container height minus tabs and lookup section)
+            const tabs = document.querySelector('.canvas-tabs');
+            const lookup = document.getElementById('positionLookup');
+            const tabsHeight = tabs ? tabs.offsetHeight : 40;
+            const lookupHeight = lookup ? lookup.offsetHeight : 80;
+            const availableHeight = container.clientHeight - tabsHeight - lookupHeight;
+
+            // Set fixed height based on tab - diagrams need more height for 3 graphs
+            if (currentTab === 'fbd') {
+                canvas.height = Math.max(400, availableHeight);
+            } else {
+                // For shear/moment tabs, set a fixed height for 3 diagrams
+                canvas.height = 600;
+            }
+            draw();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        function updateLookupValues() {
+            const lookupInput = document.getElementById('lookupX');
+            const resultsDiv = document.getElementById('lookupResults');
+            const x = parseFloat(lookupInput.value);
+
+            if (isNaN(x) || !diagramsGenerated) {
+                resultsDiv.innerHTML = '<span style="color: #7f8c8d; font-size: 0.85em;">Enter a position to see values</span>';
+                return;
+            }
+
+            // Check if x is within range
+            if (shearData.Vy.length === 0) {
+                resultsDiv.innerHTML = '<span style="color: #e74c3c; font-size: 0.85em;">Generate diagrams first</span>';
+                return;
+            }
+
+            const xMin = shearData.Vy[0].x;
+            const xMax = shearData.Vy[shearData.Vy.length - 1].x;
+
+            if (x < xMin || x > xMax) {
+                resultsDiv.innerHTML = `<span style="color: #e74c3c; font-size: 0.85em;">x must be between ${xMin.toFixed(2)} and ${xMax.toFixed(2)}</span>`;
+                return;
+            }
+
+            // Calculate values at position x
+            const Nx = interpolateValue(axialData.Nx, x);
+            const Vy = interpolateValue(shearData.Vy, x);
+            const Vz = interpolateValue(shearData.Vz, x);
+            const Mx = interpolateValue(momentData.Mx.map(d => ({ x: d.x, v: d.m })), x);
+            const My = interpolateValue(momentData.My.map(d => ({ x: d.x, v: d.m })), x);
+            const Mz = interpolateValue(momentData.Mz.map(d => ({ x: d.x, v: d.m })), x);
+
+            resultsDiv.innerHTML = `
+                <div class="lookup-result">
+                    <span class="lookup-result-label">Nx:</span>
+                    <span class="lookup-result-value" style="color: #f39c12">${Nx.toFixed(4)}</span>
+                </div>
+                <div class="lookup-result">
+                    <span class="lookup-result-label">Vy:</span>
+                    <span class="lookup-result-value" style="color: #e74c3c">${Vy.toFixed(4)}</span>
+                </div>
+                <div class="lookup-result">
+                    <span class="lookup-result-label">Vz:</span>
+                    <span class="lookup-result-value" style="color: #3498db">${Vz.toFixed(4)}</span>
+                </div>
+                <div class="lookup-result">
+                    <span class="lookup-result-label">Mx:</span>
+                    <span class="lookup-result-value" style="color: #e67e22">${Mx.toFixed(4)}</span>
+                </div>
+                <div class="lookup-result">
+                    <span class="lookup-result-label">My:</span>
+                    <span class="lookup-result-value" style="color: #9b59b6">${My.toFixed(4)}</span>
+                </div>
+                <div class="lookup-result">
+                    <span class="lookup-result-label">Mz:</span>
+                    <span class="lookup-result-value" style="color: #27ae60">${Mz.toFixed(4)}</span>
+                </div>
+            `;
+        }
+
+        function addPoint() {
+            const id = pointIdCounter++;
+            const point = {
+                id: id,
+                x: 0,
+                forces: { Fx: '', Fy: '', Fz: '' },
+                moments: { Mx: '', My: '', Mz: '' },
+                isUnknown: { Fx: false, Fy: false, Fz: false, Mx: false, My: false, Mz: false },
+                isComputed: { Fx: false, Fy: false, Fz: false, Mx: false, My: false, Mz: false }
+            };
+            points.push(point);
+            renderPoints();
+            draw();
+        }
+
+        function deletePoint(id) {
+            points = points.filter(p => p.id !== id);
+            renderPoints();
+            draw();
+        }
+
+        function updatePoint(id, field, value) {
+            const point = points.find(p => p.id === id);
+            if (!point) return;
+
+            if (field === 'x') {
+                point.x = parseFloat(value) || 0;
+            } else if (field.startsWith('F')) {
+                point.forces[field] = value;
+                point.isComputed[field] = false;
+            } else if (field.startsWith('M')) {
+                point.moments[field] = value;
+                point.isComputed[field] = false;
+            }
+
+            diagramsGenerated = false;
+            draw();
+        }
+
+        function toggleUnknown(id, field, isChecked) {
+            const point = points.find(p => p.id === id);
+            if (!point) return;
+
+            point.isUnknown[field] = isChecked;
+            point.isComputed[field] = false;
+
+            if (isChecked) {
+                // Clear the value when marking as unknown
+                if (field.startsWith('F')) {
+                    point.forces[field] = '';
+                } else {
+                    point.moments[field] = '';
+                }
+            }
+
+            diagramsGenerated = false;
+            renderPoints();
+            draw();
+        }
+
+        function renderPoints() {
+            const container = document.getElementById('pointsContainer');
+            container.innerHTML = '';
+
+            // Sort points by x position for display
+            const sortedPoints = [...points].sort((a, b) => a.x - b.x);
+
+            sortedPoints.forEach((point, index) => {
+                const pointNumber = index + 1;
+                const hasUnknowns = Object.values(point.isUnknown).some(v => v);
+                const hasLoads = ['Fx', 'Fy', 'Fz', 'Mx', 'My', 'Mz'].some(k =>
+                    point.forces[k] !== '' || point.moments[k] !== '' || point.isUnknown[k]
+                );
+
+                let typeClass = '';
+                let typeLabel = 'Point';
+                if (hasUnknowns) {
+                    typeClass = 'support';
+                    typeLabel = 'Support';
+                } else if (hasLoads) {
+                    typeClass = 'load';
+                    typeLabel = 'Load';
+                }
+
+                const card = document.createElement('div');
+                card.className = 'point-card';
+                card.innerHTML = `
+                    <div class="point-header">
+                        <span class="point-title">Point ${pointNumber}</span>
+                        <span class="point-type ${typeClass}">${typeLabel}</span>
+                        <button class="btn-delete" onclick="deletePoint(${point.id})">Delete</button>
+                    </div>
+                    <div class="point-body">
+                        <div class="input-group">
+                            <label class="input-group-label">Position along beam (x)</label>
+                            <input type="number" class="position-input" value="${point.x}"
+                                   onchange="updatePoint(${point.id}, 'x', this.value)" step="any">
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-group-label">Forces</label>
+                            <div class="input-row">
+                                <div class="input-cell">
+                                    <label>Fx</label>
+                                    <input type="number" id="input_${point.id}_Fx" step="any" value="${point.forces.Fx}"
+                                           class="${point.isComputed.Fx ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'Fx', this.value)"
+                                           ${point.isUnknown.Fx ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_Fx"
+                                               ${point.isUnknown.Fx ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'Fx', this.checked)">
+                                        <label for="unk_${point.id}_Fx">Unknown</label>
+                                    </div>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Fy</label>
+                                    <input type="number" id="input_${point.id}_Fy" step="any" value="${point.forces.Fy}"
+                                           class="${point.isComputed.Fy ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'Fy', this.value)"
+                                           ${point.isUnknown.Fy ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_Fy"
+                                               ${point.isUnknown.Fy ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'Fy', this.checked)">
+                                        <label for="unk_${point.id}_Fy">Unknown</label>
+                                    </div>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Fz</label>
+                                    <input type="number" id="input_${point.id}_Fz" step="any" value="${point.forces.Fz}"
+                                           class="${point.isComputed.Fz ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'Fz', this.value)"
+                                           ${point.isUnknown.Fz ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_Fz"
+                                               ${point.isUnknown.Fz ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'Fz', this.checked)">
+                                        <label for="unk_${point.id}_Fz">Unknown</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-group-label">Moments</label>
+                            <div class="input-row">
+                                <div class="input-cell">
+                                    <label>Mx</label>
+                                    <input type="number" id="input_${point.id}_Mx" step="any" value="${point.moments.Mx}"
+                                           class="${point.isComputed.Mx ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'Mx', this.value)"
+                                           ${point.isUnknown.Mx ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_Mx"
+                                               ${point.isUnknown.Mx ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'Mx', this.checked)">
+                                        <label for="unk_${point.id}_Mx">Unknown</label>
+                                    </div>
+                                </div>
+                                <div class="input-cell">
+                                    <label>My</label>
+                                    <input type="number" id="input_${point.id}_My" step="any" value="${point.moments.My}"
+                                           class="${point.isComputed.My ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'My', this.value)"
+                                           ${point.isUnknown.My ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_My"
+                                               ${point.isUnknown.My ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'My', this.checked)">
+                                        <label for="unk_${point.id}_My">Unknown</label>
+                                    </div>
+                                </div>
+                                <div class="input-cell">
+                                    <label>Mz</label>
+                                    <input type="number" id="input_${point.id}_Mz" step="any" value="${point.moments.Mz}"
+                                           class="${point.isComputed.Mz ? 'computed' : ''}"
+                                           onchange="updatePoint(${point.id}, 'Mz', this.value)"
+                                           ${point.isUnknown.Mz ? 'disabled' : ''}>
+                                    <div class="unknown-checkbox">
+                                        <input type="checkbox" id="unk_${point.id}_Mz"
+                                               ${point.isUnknown.Mz ? 'checked' : ''}
+                                               onchange="toggleUnknown(${point.id}, 'Mz', this.checked)">
+                                        <label for="unk_${point.id}_Mz">Unknown</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function solveReactions() {
+            hideMessages();
+
+            // Count unknowns
+            let unknowns = [];
+            points.forEach(point => {
+                ['Fx', 'Fy', 'Fz'].forEach(f => {
+                    if (point.isUnknown[f]) {
+                        unknowns.push({ point: point, type: 'force', component: f });
+                    }
+                });
+                ['Mx', 'My', 'Mz'].forEach(m => {
+                    if (point.isUnknown[m]) {
+                        unknowns.push({ point: point, type: 'moment', component: m });
+                    }
+                });
+            });
+
+            if (unknowns.length === 0) {
+                showError('No unknowns to solve. Leave force/moment boxes empty or use a support preset.');
+                return;
+            }
+
+            // For a statically determinate system in 3D: 6 equations
+            // For 2D (ignoring z): 3 equations
+            // We'll solve using the equilibrium equations
+
+            // Build the system of equations: Ax = b
+            // Equations: Sum Fx = 0, Sum Fy = 0, Sum Fz = 0, Sum Mx = 0, Sum My = 0, Sum Mz = 0
+
+            // Calculate the reference point for moments (use x=0)
+            const refX = 0;
+
+            // Build coefficient matrix and RHS
+            const numEq = 6;
+            const numUnk = unknowns.length;
+
+            if (numUnk > numEq) {
+                showError(`System is statically indeterminate: ${numUnk} unknowns but only ${numEq} equilibrium equations.`);
+                return;
+            }
+
+            // Initialize matrix A and vector b
+            let A = [];
+            let b = [];
+
+            for (let i = 0; i < numEq; i++) {
+                A.push(new Array(numUnk).fill(0));
+                b.push(0);
+            }
+
+            // Equation indices: 0=SumFx, 1=SumFy, 2=SumFz, 3=SumMx, 4=SumMy, 5=SumMz
+
+            // Fill in the coefficient matrix for unknowns
+            unknowns.forEach((unk, col) => {
+                const x = unk.point.x;
+                if (unk.type === 'force') {
+                    if (unk.component === 'Fx') {
+                        A[0][col] = 1; // Sum Fx
+                        // Fx contributes to My: My += Fx * 0 (if beam along x, Fx doesn't create moment about y from x position)
+                        // Actually for a beam along x: Fx creates no moment, Fy creates Mz, Fz creates My
+                    } else if (unk.component === 'Fy') {
+                        A[1][col] = 1; // Sum Fy
+                        A[5][col] = -(x - refX); // Sum Mz (moment arm is x position, negative for CCW positive convention)
+                    } else if (unk.component === 'Fz') {
+                        A[2][col] = 1; // Sum Fz
+                        A[4][col] = (x - refX); // Sum My (Fz creates moment about y)
+                    }
+                } else if (unk.type === 'moment') {
+                    if (unk.component === 'Mx') {
+                        A[3][col] = 1; // Sum Mx
+                    } else if (unk.component === 'My') {
+                        A[4][col] = 1; // Sum My
+                    } else if (unk.component === 'Mz') {
+                        A[5][col] = 1; // Sum Mz
+                    }
+                }
+            });
+
+            // Calculate RHS from known loads
+            points.forEach(point => {
+                const x = point.x;
+
+                // Known forces
+                ['Fx', 'Fy', 'Fz'].forEach(f => {
+                    if (!point.isUnknown[f] && point.forces[f] !== '') {
+                        const val = parseFloat(point.forces[f]) || 0;
+                        if (f === 'Fx') {
+                            b[0] -= val;
+                        } else if (f === 'Fy') {
+                            b[1] -= val;
+                            b[5] -= val * (-(x - refX));
+                        } else if (f === 'Fz') {
+                            b[2] -= val;
+                            b[4] -= val * (x - refX);
+                        }
+                    }
+                });
+
+                // Known moments
+                ['Mx', 'My', 'Mz'].forEach(m => {
+                    if (!point.isUnknown[m] && point.moments[m] !== '') {
+                        const val = parseFloat(point.moments[m]) || 0;
+                        if (m === 'Mx') {
+                            b[3] -= val;
+                        } else if (m === 'My') {
+                            b[4] -= val;
+                        } else if (m === 'Mz') {
+                            b[5] -= val;
+                        }
+                    }
+                });
+            });
+
+            // Solve the system using Gaussian elimination
+            // First, extract only the equations we need (non-zero rows)
+            let activeEqs = [];
+            for (let i = 0; i < numEq; i++) {
+                if (A[i].some(v => v !== 0) || b[i] !== 0) {
+                    activeEqs.push(i);
+                }
+            }
+
+            // Build reduced system
+            let Ar = activeEqs.map(i => [...A[i]]);
+            let br = activeEqs.map(i => b[i]);
+
+            if (Ar.length < numUnk) {
+                showError(`System is underdetermined: ${numUnk} unknowns but only ${Ar.length} independent equations.`);
+                return;
+            }
+
+            // Gaussian elimination with partial pivoting
+            const solution = gaussianElimination(Ar, br, numUnk);
+
+            if (solution === null) {
+                showError('Could not solve the system. Check that the problem is properly constrained.');
+                return;
+            }
+
+            // Apply solutions - uncheck unknowns and fill in computed values
+            unknowns.forEach((unk, i) => {
+                const val = solution[i];
+                if (unk.type === 'force') {
+                    unk.point.forces[unk.component] = val.toFixed(4);
+                } else {
+                    unk.point.moments[unk.component] = val.toFixed(4);
+                }
+                // Mark as computed and no longer unknown
+                unk.point.isComputed[unk.component] = true;
+                unk.point.isUnknown[unk.component] = false;
+            });
+
+            renderPoints();
+            draw();
+            showSuccess('Reactions solved successfully! Click "Generate Diagrams" to see shear and moment diagrams.');
+        }
+
+        function gaussianElimination(A, b, n) {
+            // Create augmented matrix
+            let aug = A.map((row, i) => [...row, b[i]]);
+            const m = aug.length;
+
+            for (let col = 0; col < n && col < m; col++) {
+                // Find pivot
+                let maxRow = col;
+                for (let row = col + 1; row < m; row++) {
+                    if (Math.abs(aug[row][col]) > Math.abs(aug[maxRow][col])) {
+                        maxRow = row;
+                    }
+                }
+
+                // Swap rows
+                [aug[col], aug[maxRow]] = [aug[maxRow], aug[col]];
+
+                if (Math.abs(aug[col][col]) < 1e-10) {
+                    continue; // Skip if pivot is zero
+                }
+
+                // Eliminate column
+                for (let row = col + 1; row < m; row++) {
+                    const factor = aug[row][col] / aug[col][col];
+                    for (let j = col; j <= n; j++) {
+                        aug[row][j] -= factor * aug[col][j];
+                    }
+                }
+            }
+
+            // Back substitution
+            let x = new Array(n).fill(0);
+            for (let i = Math.min(n, m) - 1; i >= 0; i--) {
+                if (Math.abs(aug[i][i]) < 1e-10) {
+                    if (Math.abs(aug[i][n]) > 1e-10) {
+                        return null; // Inconsistent
+                    }
+                    continue;
+                }
+                x[i] = aug[i][n];
+                for (let j = i + 1; j < n; j++) {
+                    x[i] -= aug[i][j] * x[j];
+                }
+                x[i] /= aug[i][i];
+            }
+
+            return x;
+        }
+
+        function generateDiagrams() {
+            hideMessages();
+
+            if (points.length < 2) {
+                showError('Add at least 2 points to generate diagrams.');
+                return;
+            }
+
+            // Sort points by x
+            const sortedPoints = [...points].sort((a, b) => a.x - b.x);
+            const xMin = sortedPoints[0].x;
+            const xMax = sortedPoints[sortedPoints.length - 1].x;
+
+            if (xMax <= xMin) {
+                showError('Points must span a range along the x-axis.');
+                return;
+            }
+
+            // Generate axial, shear and moment diagrams
+            const numSamples = 500;
+            const dx = (xMax - xMin) / numSamples;
+
+            axialData = { Nx: [] };
+            shearData = { Vy: [], Vz: [] };
+            momentData = { Mx: [], My: [], Mz: [] };
+
+            // Initialize internal forces/moments (using sign convention: positive on right face)
+            let Nx = 0, Vy = 0, Vz = 0, Mx = 0, My = 0, Mz = 0;
+            let prevX = xMin - 0.0001; // Start slightly before xMin to include first point
+
+            for (let i = 0; i <= numSamples; i++) {
+                const x = xMin + i * dx;
+
+                // Check for point loads/moments at or before this x
+                sortedPoints.forEach(point => {
+                    if (point.x > prevX && point.x <= x + 0.0001) {
+                        // Apply point loads (add to internal forces)
+                        Nx += parseFloat(point.forces.Fx) || 0;
+                        Vy += parseFloat(point.forces.Fy) || 0;
+                        Vz += parseFloat(point.forces.Fz) || 0;
+
+                        // Apply point moments
+                        Mx += parseFloat(point.moments.Mx) || 0;
+                        My += parseFloat(point.moments.My) || 0;
+                        Mz += parseFloat(point.moments.Mz) || 0;
+                    }
+                });
+
+                // Store values
+                axialData.Nx.push({ x: x, v: Nx });
+                shearData.Vy.push({ x: x, v: Vy });
+                shearData.Vz.push({ x: x, v: Vz });
+                momentData.Mx.push({ x: x, m: Mx });
+                momentData.My.push({ x: x, m: My });
+                momentData.Mz.push({ x: x, m: Mz });
+
+                // Update moments due to shear for next segment
+                My += Vz * dx;
+                Mz -= Vy * dx;
+
+                prevX = x;
+            }
+
+            // Recalculate moments properly
+            recalculateMoments(sortedPoints, xMin, xMax, numSamples);
+
+            diagramsGenerated = true;
+            draw();
+            showSuccess('Diagrams generated! Use the tabs above the visualization to view different diagrams.');
+        }
+
+        function recalculateMoments(sortedPoints, xMin, xMax, numSamples) {
+            const dx = (xMax - xMin) / numSamples;
+
+            // Reset moment data
+            momentData.Mx = [];
+            momentData.My = [];
+            momentData.Mz = [];
+
+            let Mx = 0, My = 0, Mz = 0;
+            let prevX = xMin - 0.0001; // Start slightly before xMin to include first point
+
+            for (let i = 0; i <= numSamples; i++) {
+                const x = xMin + i * dx;
+
+                // Check for point moments at or before this x
+                sortedPoints.forEach(point => {
+                    if (point.x > prevX && point.x <= x + 0.0001) {
+                        Mx += parseFloat(point.moments.Mx) || 0;
+                        My += parseFloat(point.moments.My) || 0;
+                        Mz += parseFloat(point.moments.Mz) || 0;
+                    }
+                });
+
+                momentData.Mx.push({ x: x, m: Mx });
+                momentData.My.push({ x: x, m: My });
+                momentData.Mz.push({ x: x, m: Mz });
+
+                // Integrate shear to get moment change
+                if (i < numSamples) {
+                    const Vy = shearData.Vy[i].v;
+                    const Vz = shearData.Vz[i].v;
+                    My += Vz * dx;
+                    Mz -= Vy * dx;
+                }
+
+                prevX = x;
+            }
+        }
+
+        function switchCanvasTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.canvas-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            resizeCanvas(); // Resize canvas for proper height based on tab
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (currentTab === 'fbd') {
+                drawFBD();
+            } else if (currentTab === 'shear') {
+                drawShearDiagrams();
+            } else if (currentTab === 'moment') {
+                drawMomentDiagrams();
+            }
+        }
+
+        function drawFBD() {
+            const padding = 60;
+            const w = canvas.width - 2 * padding;
+            const h = canvas.height - 2 * padding;
+
+            if (points.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add points to see the free body diagram', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // Find x range
+            const xVals = points.map(p => p.x);
+            let xMin = Math.min(...xVals);
+            let xMax = Math.max(...xVals);
+            if (xMax === xMin) {
+                xMin -= 1;
+                xMax += 1;
+            }
+            const xRange = xMax - xMin;
+
+            // Transform functions
+            const toCanvasX = x => padding + ((x - xMin) / xRange) * w;
+            const beamY = canvas.height / 2;
+
+            // Draw beam
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(xMin), beamY);
+            ctx.lineTo(toCanvasX(xMax), beamY);
+            ctx.stroke();
+
+            // Draw x-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Segoe UI';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 5; i++) {
+                const x = xMin + (xRange * i / 5);
+                const cx = toCanvasX(x);
+                ctx.fillText(x.toFixed(1), cx, canvas.height - 20);
+            }
+
+            // Draw points and forces
+            points.forEach(point => {
+                const cx = toCanvasX(point.x);
+
+                // Draw point marker
+                ctx.fillStyle = '#3498db';
+                ctx.beginPath();
+                ctx.arc(cx, beamY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw support symbol if has unknowns
+                const hasUnknowns = Object.values(point.isUnknown).some(v => v);
+                if (hasUnknowns) {
+                    drawSupport(cx, beamY, point);
+                }
+
+                // Draw force arrows
+                const Fy = parseFloat(point.forces.Fy) || 0;
+                const Fz = parseFloat(point.forces.Fz) || 0;
+                const Fx = parseFloat(point.forces.Fx) || 0;
+
+                if (Math.abs(Fy) > 0.001 || point.isUnknown.Fy) {
+                    const color = point.isComputed.Fy ? '#28a745' : (point.isUnknown.Fy ? '#ffc107' : '#dc3545');
+                    drawArrow(cx, beamY, cx, beamY - Math.sign(Fy || 1) * 60, color);
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 11px Segoe UI';
+                    ctx.textAlign = 'center';
+                    const label = point.isUnknown.Fy && !point.isComputed.Fy ? 'Fy=?' : `Fy=${Fy.toFixed(1)}`;
+                    ctx.fillText(label, cx, beamY - Math.sign(Fy || 1) * 70);
+                }
+
+                if (Math.abs(Fx) > 0.001 || point.isUnknown.Fx) {
+                    const color = point.isComputed.Fx ? '#28a745' : (point.isUnknown.Fx ? '#ffc107' : '#dc3545');
+                    drawArrow(cx, beamY, cx + Math.sign(Fx || 1) * 50, beamY, color);
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 11px Segoe UI';
+                    ctx.textAlign = 'left';
+                    const label = point.isUnknown.Fx && !point.isComputed.Fx ? 'Fx=?' : `Fx=${Fx.toFixed(1)}`;
+                    ctx.fillText(label, cx + Math.sign(Fx || 1) * 55, beamY - 5);
+                }
+
+                // Draw moment symbols
+                const Mz = parseFloat(point.moments.Mz) || 0;
+                if (Math.abs(Mz) > 0.001 || point.isUnknown.Mz) {
+                    const color = point.isComputed.Mz ? '#28a745' : (point.isUnknown.Mz ? '#ffc107' : '#6f42c1');
+                    drawMomentArc(cx, beamY + 30, Mz >= 0 ? 1 : -1, color);
+                    ctx.fillStyle = color;
+                    ctx.font = 'bold 11px Segoe UI';
+                    ctx.textAlign = 'center';
+                    const label = point.isUnknown.Mz && !point.isComputed.Mz ? 'Mz=?' : `Mz=${Mz.toFixed(1)}`;
+                    ctx.fillText(label, cx, beamY + 60);
+                }
+            });
+
+            // Title
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('Free Body Diagram (X-Y Plane)', canvas.width / 2, 30);
+        }
+
+        function drawSupport(x, y, point) {
+            const hasFixedMoment = point.isUnknown.Mz || point.isUnknown.My || point.isUnknown.Mx;
+
+            if (hasFixedMoment) {
+                // Fixed support - draw hatched rectangle
+                ctx.fillStyle = '#95a5a6';
+                ctx.fillRect(x - 15, y, 30, 20);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - 15, y, 30, 20);
+                // Hatching
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(x - 15 + i * 8, y + 20);
+                    ctx.lineTo(x - 10 + i * 8, y + 25);
+                    ctx.stroke();
+                }
+            } else if (point.isUnknown.Fx && point.isUnknown.Fy) {
+                // Pin support - draw triangle
+                ctx.fillStyle = '#95a5a6';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - 15, y + 25);
+                ctx.lineTo(x + 15, y + 25);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else if (point.isUnknown.Fy && !point.isUnknown.Fx) {
+                // Roller support - draw triangle with circle
+                ctx.fillStyle = '#95a5a6';
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x - 12, y + 20);
+                ctx.lineTo(x + 12, y + 20);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                // Roller circle
+                ctx.beginPath();
+                ctx.arc(x, y + 27, 7, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        function drawArrow(x1, y1, x2, y2, color) {
+            const headLen = 10;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawMomentArc(x, y, direction, color) {
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2;
+
+            const radius = 15;
+            const startAngle = direction > 0 ? -Math.PI * 0.75 : Math.PI * 0.25;
+            const endAngle = direction > 0 ? Math.PI * 0.25 : Math.PI * 1.25;
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, startAngle, endAngle);
+            ctx.stroke();
+
+            // Arrowhead
+            const arrowAngle = direction > 0 ? endAngle : startAngle;
+            const ax = x + radius * Math.cos(arrowAngle);
+            const ay = y + radius * Math.sin(arrowAngle);
+            const perpAngle = arrowAngle + (direction > 0 ? Math.PI / 2 : -Math.PI / 2);
+
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(ax + 8 * Math.cos(perpAngle + 0.5), ay + 8 * Math.sin(perpAngle + 0.5));
+            ctx.lineTo(ax + 8 * Math.cos(perpAngle - 0.5), ay + 8 * Math.sin(perpAngle - 0.5));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawShearDiagrams() {
+            if (!diagramsGenerated || shearData.Vy.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Click "Generate Diagrams" to see shear diagrams', canvas.width / 2, canvas.height / 2);
+                diagramBounds = [];
+                return;
+            }
+
+            diagramBounds = []; // Clear bounds for fresh drawing
+
+            const padding = 50;
+            const gap = 20;
+            const h = (canvas.height - 2 * padding - 2 * gap) / 3;
+
+            // Draw Axial Force Nx diagram
+            drawDiagram(axialData.Nx, padding, padding, canvas.width - 2 * padding, h, 'Axial Force Nx', '#f39c12', true);
+
+            // Draw Shear Force Vy diagram
+            drawDiagram(shearData.Vy, padding, padding + h + gap, canvas.width - 2 * padding, h, 'Shear Force Vy', '#e74c3c', true);
+
+            // Draw Shear Force Vz diagram
+            drawDiagram(shearData.Vz, padding, padding + 2 * (h + gap), canvas.width - 2 * padding, h, 'Shear Force Vz', '#3498db', true);
+        }
+
+        function drawMomentDiagrams() {
+            if (!diagramsGenerated || momentData.My.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Click "Generate Diagrams" to see moment diagrams', canvas.width / 2, canvas.height / 2);
+                diagramBounds = [];
+                return;
+            }
+
+            diagramBounds = []; // Clear bounds for fresh drawing
+
+            const padding = 50;
+            const gap = 20;
+            const h = (canvas.height - 2 * padding - 2 * gap) / 3;
+
+            // Draw Torsion Mx diagram
+            drawDiagram(momentData.Mx.map(d => ({ x: d.x, v: d.m })), padding, padding, canvas.width - 2 * padding, h, 'Torsion Mx', '#e67e22', true);
+
+            // Draw Bending Moment My diagram
+            drawDiagram(momentData.My.map(d => ({ x: d.x, v: d.m })), padding, padding + h + gap, canvas.width - 2 * padding, h, 'Bending Moment My', '#9b59b6', true);
+
+            // Draw Bending Moment Mz diagram
+            drawDiagram(momentData.Mz.map(d => ({ x: d.x, v: d.m })), padding, padding + 2 * (h + gap), canvas.width - 2 * padding, h, 'Bending Moment Mz', '#27ae60', true);
+        }
+
+        function drawDiagram(data, x, y, w, h, title, color, centerAtZero = false) {
+            if (data.length === 0) return;
+
+            const xMin = data[0].x;
+            const xMax = data[data.length - 1].x;
+            const xRange = xMax - xMin || 1;
+
+            const vValues = data.map(d => d.v);
+            let vMin = Math.min(...vValues);
+            let vMax = Math.max(...vValues);
+
+            // Center at zero: make the range symmetric around zero
+            if (centerAtZero) {
+                const maxAbs = Math.max(Math.abs(vMin), Math.abs(vMax), 0.001);
+                vMin = -maxAbs;
+                vMax = maxAbs;
+            } else {
+                // Ensure zero is included
+                vMin = Math.min(vMin, 0);
+                vMax = Math.max(vMax, 0);
+            }
+
+            if (vMax === vMin) {
+                vMin -= 1;
+                vMax += 1;
+            }
+            const vRange = vMax - vMin;
+
+            const toCanvasX = xVal => x + ((xVal - xMin) / xRange) * w;
+            const toCanvasY = vVal => y + h - ((vVal - vMin) / vRange) * h;
+
+            // Background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = '#dee2e6';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, w, h);
+
+            // Zero line (centered when centerAtZero is true)
+            const zeroY = toCanvasY(0);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = centerAtZero ? 2 : 1;
+            ctx.setLineDash(centerAtZero ? [] : [5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(x, zeroY);
+            ctx.lineTo(x + w, zeroY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Fill area between curve and zero line
+            ctx.fillStyle = color + '33';
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(data[0].x), zeroY);
+            data.forEach(d => {
+                ctx.lineTo(toCanvasX(d.x), toCanvasY(d.v));
+            });
+            ctx.lineTo(toCanvasX(data[data.length - 1].x), zeroY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw line
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            data.forEach((d, i) => {
+                const cx = toCanvasX(d.x);
+                const cy = toCanvasY(d.v);
+                if (i === 0) ctx.moveTo(cx, cy);
+                else ctx.lineTo(cx, cy);
+            });
+            ctx.stroke();
+
+            // Title
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 13px Segoe UI';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, x + 10, y + 18);
+
+            // Y-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Segoe UI';
+            ctx.textAlign = 'right';
+            ctx.fillText(vMax.toFixed(2), x - 5, y + 12);
+            ctx.fillText(vMin.toFixed(2), x - 5, y + h - 3);
+
+            // Zero label on y-axis
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 10px Segoe UI';
+            ctx.fillText('0', x - 5, zeroY + 4);
+
+            // X-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText(xMin.toFixed(1), x + 15, y + h + 12);
+            ctx.fillText(xMax.toFixed(1), x + w - 15, y + h + 12);
+
+            // Store bounds for tooltip
+            diagramBounds.push({
+                x: x,
+                y: y,
+                w: w,
+                h: h,
+                xMin: xMin,
+                xMax: xMax,
+                data: data,
+                title: title,
+                color: color
+            });
+        }
+
+        function clearAll() {
+            if (confirm('Clear all points and start over?')) {
+                points = [];
+                pointIdCounter = 0;
+                diagramsGenerated = false;
+                axialData = { Nx: [] };
+                shearData = { Vy: [], Vz: [] };
+                momentData = { Mx: [], My: [], Mz: [] };
+                renderPoints();
+                draw();
+                hideMessages();
+            }
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.innerHTML = '<strong>Error:</strong> ' + msg;
+            box.style.display = 'block';
+        }
+
+        function showSuccess(msg) {
+            const box = document.getElementById('successBox');
+            box.innerHTML = '<strong>Success:</strong> ' + msg;
+            box.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorBox').style.display = 'none';
+            document.getElementById('successBox').style.display = 'none';
+        }
+
+        // Resize handle functionality
+        function initResizeHandle() {
+            const handle = document.getElementById('resizeHandle');
+            const column = document.getElementById('controlsColumn');
+            let isResizing = false;
+
+            handle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                document.body.style.cursor = 'ew-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                const containerRect = document.querySelector('.container').getBoundingClientRect();
+                const newWidth = containerRect.right - e.clientX;
+                const clampedWidth = Math.max(400, Math.min(900, newWidth));
+                column.style.width = clampedWidth + 'px';
+                resizeCanvas();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+        }
+
+        // Tooltip functionality for diagrams
+        let diagramBounds = []; // Store bounds for each diagram
+
+        function initCanvasTooltip() {
+            const canvasWrapper = canvas.parentElement;
+            const tooltip = document.getElementById('canvasTooltip');
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (currentTab === 'fbd' || !diagramsGenerated) {
+                    tooltip.style.display = 'none';
+                    return;
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Check which diagram the mouse is over
+                let tooltipContent = '';
+                let isOverDiagram = false;
+
+                diagramBounds.forEach(bound => {
+                    if (mouseX >= bound.x && mouseX <= bound.x + bound.w &&
+                        mouseY >= bound.y && mouseY <= bound.y + bound.h) {
+                        isOverDiagram = true;
+
+                        // Calculate x position in data coordinates
+                        const xRatio = (mouseX - bound.x) / bound.w;
+                        const dataX = bound.xMin + xRatio * (bound.xMax - bound.xMin);
+
+                        // Find the value at this x position
+                        const value = interpolateValue(bound.data, dataX);
+
+                        tooltipContent = `
+                            <div class="tooltip-row">
+                                <span class="tooltip-label">x:</span>
+                                <span class="tooltip-value">${dataX.toFixed(3)}</span>
+                            </div>
+                            <div class="tooltip-row">
+                                <span class="tooltip-label">${bound.title}:</span>
+                                <span class="tooltip-value" style="color: ${bound.color}">${value.toFixed(4)}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (isOverDiagram && tooltipContent) {
+                    tooltip.innerHTML = tooltipContent;
+                    tooltip.style.display = 'block';
+
+                    // Position tooltip
+                    let tooltipX = e.clientX - rect.left + 15;
+                    let tooltipY = e.clientY - rect.top - 10;
+
+                    // Keep tooltip within canvas bounds
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    if (tooltipX + tooltipRect.width > canvas.width) {
+                        tooltipX = e.clientX - rect.left - tooltipRect.width - 15;
+                    }
+                    if (tooltipY < 0) {
+                        tooltipY = e.clientY - rect.top + 20;
+                    }
+
+                    tooltip.style.left = tooltipX + 'px';
+                    tooltip.style.top = tooltipY + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+        }
+
+        function interpolateValue(data, x) {
+            if (data.length === 0) return 0;
+            if (x <= data[0].x) return data[0].v;
+            if (x >= data[data.length - 1].x) return data[data.length - 1].v;
+
+            // Find the two points to interpolate between
+            for (let i = 0; i < data.length - 1; i++) {
+                if (x >= data[i].x && x <= data[i + 1].x) {
+                    const t = (x - data[i].x) / (data[i + 1].x - data[i].x);
+                    return data[i].v + t * (data[i + 1].v - data[i].v);
+                }
+            }
+            return 0;
+        }
+
+        // Initialize
+        resizeCanvas();
+        initResizeHandle();
+        initCanvasTooltip();
+    </script>
+</body>
+</html>

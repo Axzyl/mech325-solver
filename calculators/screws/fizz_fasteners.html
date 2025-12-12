@@ -722,8 +722,61 @@
                 <!-- Step 3: Member Stiffness -->
                 <div class="section">
                     <h2>Step 3: Determine Member Stiffness</h2>
-                    <div class="warning">
-                        <strong>⚠️ SIMPLIFIED VERSION:</strong> This calculator uses simplified member stiffness. For precise calculations with multiple sections (washers, plates), manually calculate each section stiffness using Equation 11 and combine in series.
+
+                    <div class="subsection">
+                        <h3>Understanding Frustum Variables (D, d, t)</h3>
+                        <div class="note">
+                            📋 Calculate k separately for each section (top washer, top plate, bottom plate, bottom washer), then combine in series.
+                        </div>
+
+                        <table class="variables-table" style="margin: 15px 0;">
+                            <thead>
+                                <tr>
+                                    <th>Section</th>
+                                    <th>d (inner diameter)</th>
+                                    <th>D (frustum diameter)</th>
+                                    <th>t (thickness)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Top Washer</strong></td>
+                                    <td>Washer inner diameter<br><em>(≈ 0.75)</em></td>
+                                    <td>Bolt head diameter<br><em>(1.437)</em></td>
+                                    <td>Washer thickness<br><em>(0.095)</em></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Top Plate</strong></td>
+                                    <td>Bolt nominal diameter<br><em>(0.75)</em></td>
+                                    <td>Washer outer diameter<br><em>(1.437)</em></td>
+                                    <td>Plate thickness<br><em>(0.6725)</em></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bottom Plate</strong></td>
+                                    <td>Bolt nominal diameter<br><em>(0.75)</em></td>
+                                    <td>Washer outer diameter<br><em>(1.527)</em></td>
+                                    <td>Plate thickness<br><em>(0.6725)</em></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bottom Washer</strong></td>
+                                    <td>Washer inner diameter<br><em>(≈ 0.75)</em></td>
+                                    <td>Nut face diameter<br><em>(1.527)</em></td>
+                                    <td>Washer thickness<br><em>(0.0775)</em></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="warning">
+                            <strong>⚠️ Key Rules:</strong><br>
+                            • <strong>D</strong> = shortest distance between the two separating frustum lines at that section<br>
+                            • If two adjacent members have the <strong>same material AND same d</strong>, combine them: use t = sum of thicknesses<br>
+                            • If frustum lines change from separating to converging mid-section, split into two separate calculations with different D values
+                        </div>
+
+                        <div class="note">
+                            <strong>Combining k values in series:</strong> After calculating k for each section, combine using:<br>
+                            <span style="font-family: monospace; margin-left: 20px;">1/k<sub>m</sub> = 1/k<sub>1</sub> + 1/k<sub>2</sub> + 1/k<sub>3</sub> + ...</span>
+                        </div>
                     </div>
 
                     <div class="input-row">
@@ -733,12 +786,63 @@
                     </div>
 
                     <div class="input-row">
+                        <label>Frustum Diameter (D):</label>
+                        <input type="number" id="D_fr" step="any" oninput="syncAllInstances('D_fr'); markAsUser('D_fr'); calculate()">
+                        <span class="unit" id="unit_D_fr">in</span>
+                        <span class="hint">Washer face or bolt head diameter (≈ 1.5d)</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Grip Length for Frustum (t<sub>f</sub>):</label>
+                        <input type="number" id="tf" step="any" oninput="syncAllInstances('tf'); markAsUser('tf'); calculate()">
+                        <span class="unit" id="unit_tf">in</span>
+                        <span class="hint">Use l/2 for symmetric joint, or full thickness for one side</span>
+                    </div>
+
+                    <h3>Frustum Member Stiffness (Single Cone)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$k = \frac{0.5774 \pi E d}{\ln\left(\frac{(1.155t + D - d)(D + d)}{(1.155t + D + d)(D - d)}\right)}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>k<sub>m</sub></label>
+                                <input type="number" id="km_eq" step="any" oninput="syncAllInstances('km_eq'); markAsUser('km_eq'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>0.5774π ×</span>
+                            <div class="var-input">
+                                <label>E<sub>m</sub></label>
+                                <input type="number" id="Em_eq" step="any" oninput="syncAllInstances('Em_eq'); markAsUser('Em_eq'); calculate()">
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="d_eq_km" step="any" oninput="syncAllInstances('d_eq_km'); markAsUser('d_eq_km'); calculate()">
+                            </div>
+                            <span>/ ln[...]</span>
+                        </div>
+                        <div class="equation-inputs" style="margin-top: 10px;">
+                            <span>ln arg =</span>
+                            <span>(1.155 ×</span>
+                            <div class="var-input">
+                                <label>t<sub>f</sub></label>
+                                <input type="number" id="tf_eq" step="any" oninput="syncAllInstances('tf_eq'); markAsUser('tf_eq'); calculate()">
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="D_fr_eq" step="any" oninput="syncAllInstances('D_fr_eq'); markAsUser('D_fr_eq'); calculate()">
+                            </div>
+                            <span>- d)(D + d) / (1.155t<sub>f</sub> + D + d)(D - d)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
                         <label><strong>Member Stiffness (k<sub>m</sub>):</strong></label>
                         <input type="number" id="km" class="lookup" step="any" oninput="syncAllInstances('km'); markAsUser('km'); calculate()">
                         <span class="unit" id="unit_km">lbf/in</span>
                     </div>
                     <div class="note">
-                        Calculate using frustum method (Equation 11) for each section and combine. Enter result as yellow input.
+                        💡 For symmetric joints: k<sub>m</sub> = 2 × k (two frustums in series, each with t = l/2). Copy the computed k<sub>m</sub> value above if needed.
                     </div>
                 </div>
 
@@ -1424,7 +1528,7 @@
         }
 
         const varInstanceMap = {
-            'd': ['d', 'd_eq', 'd_eq2', 'd_eq_b', 'd_eq_LT'],
+            'd': ['d', 'd_eq', 'd_eq2', 'd_eq_b', 'd_eq_LT', 'd_eq_km'],
             't1': ['t1', 't1_eq_a'],
             't2_a': ['t2_a', 't2_a_eq'],
             't2_b': ['t2_b'],
@@ -1438,9 +1542,11 @@
             'Ad': ['Ad_eq', 'Ad_eq2', 'Ad_eq3'],
             'At': ['At', 'At_eq', 'At_eq2', 'At_eq3', 'At_eq4', 'At_eq5', 'At_eq6', 'At_pct_eq', 'At_shig_eq'],
             'Eb': ['Eb', 'Eb_eq'],
-            'Em': ['Em'],
+            'Em': ['Em', 'Em_eq'],
             'kb': ['kb_eq', 'kb_eq2', 'kb_eq3'],
             'km': ['km', 'km_eq'],
+            'D_fr': ['D_fr', 'D_fr_eq'],
+            'tf': ['tf', 'tf_eq'],
             'Ptot': ['Ptot', 'Ptot_eq'],
             'N': ['N', 'N_eq'],
             'P': ['P_eq', 'P_eq2', 'P_eq3', 'P_eq4', 'P_eq5'],
@@ -1475,16 +1581,34 @@
 
         function syncAllInstances(changedId) {
             const baseVar = getBaseVariable(changedId);
-            const value = document.getElementById(changedId).value;
+            const sourceElem = document.getElementById(changedId);
+            if (!sourceElem) return;
+            const value = sourceElem.value;
             const instances = varInstanceMap[baseVar];
 
             if (instances) {
                 instances.forEach(id => {
                     const elem = document.getElementById(id);
-                    if (elem && id !== changedId) {
+                    // Don't update the element that triggered the change or the currently focused element
+                    if (elem && id !== changedId && elem !== document.activeElement) {
                         elem.value = value;
                     }
                 });
+            }
+        }
+
+        // Helper to set computed values and sync all instances
+        // Only sets value if the user hasn't manually edited this variable
+        function setValue(id, value, decimals = 4) {
+            const baseVar = getBaseVariable(id);
+            // Don't overwrite user-set values
+            if (userValues.has(baseVar)) return;
+
+            const elem = document.getElementById(id);
+            // Don't update the currently focused element (prevents cursor jumping)
+            if (elem && elem !== document.activeElement) {
+                elem.value = value.toFixed(decimals);
+                syncAllInstances(id);
             }
         }
 
@@ -1604,7 +1728,7 @@
 
             document.querySelectorAll('[id^="unit_"]').forEach(el => {
                 const id = el.id.replace('unit_', '');
-                if (['t1', 't2_a', 't2_b', 'h', 'H', 'd', 'l', 'L', 'LT', 'ld', 'lt'].includes(id)) {
+                if (['t1', 't2_a', 't2_b', 'h', 'H', 'd', 'l', 'L', 'LT', 'ld', 'lt', 'D_fr', 'tf'].includes(id)) {
                     el.textContent = unitText;
                 } else if (['Ad', 'At'].includes(id)) {
                     el.textContent = areaText;
@@ -1645,9 +1769,8 @@
                 L_min = l + H;
 
                 // Sync to equation instances
-                if (document.getElementById('l_eq_a')) document.getElementById('l_eq_a').value = l.toFixed(4);
-                if (document.getElementById('l_eq_a2')) document.getElementById('l_eq_a2').value = l.toFixed(4);
-                if (document.getElementById('L_eq_a')) document.getElementById('L_eq_a').value = L_min.toFixed(4);
+                setValue('l_eq_a', l);
+                setValue('L_eq_a', L_min);
             } else {
                 const h = parseFloat(document.getElementById('h').value) || 0;
                 const t2 = parseFloat(document.getElementById('t2_b').value) || 0;
@@ -1660,8 +1783,8 @@
                 L_min = h + 1.5 * d;
 
                 // Sync to equation instances
-                if (document.getElementById('l_eq_b')) document.getElementById('l_eq_b').value = l.toFixed(4);
-                if (document.getElementById('L_eq_b')) document.getElementById('L_eq_b').value = L_min.toFixed(4);
+                setValue('l_eq_b', l);
+                setValue('L_eq_b', L_min);
             }
 
             // Round L up to nearest 0.25
@@ -1686,11 +1809,11 @@
             const Ad = Math.PI * d * d / 4;
 
             // Sync computed values to equation instances
-            if (document.getElementById('LT_eq')) document.getElementById('LT_eq').value = LT.toFixed(4);
-            if (document.getElementById('ld_eq')) document.getElementById('ld_eq').value = ld.toFixed(4);
-            if (document.getElementById('lt_eq')) document.getElementById('lt_eq').value = lt.toFixed(4);
-            if (document.getElementById('Ad_eq')) document.getElementById('Ad_eq').value = Ad.toFixed(6);
-            if (document.getElementById('L_eq_ld')) document.getElementById('L_eq_ld').value = L.toFixed(2);
+            setValue('LT_eq', LT);
+            setValue('ld_eq', ld);
+            setValue('lt_eq', lt);
+            setValue('Ad_eq', Ad, 6);
+            setValue('L_eq_ld', L, 2);
 
             const At = parseFloat(document.getElementById('At').value) || 0;
             const Eb = parseFloat(document.getElementById('Eb').value) || 30e6;
@@ -1701,10 +1824,38 @@
             }
 
             // Sync kb to equation instances
-            if (document.getElementById('kb_eq')) document.getElementById('kb_eq').value = kb.toFixed(2);
+            setValue('kb_eq', kb, 2);
 
-            // Step 3: Member stiffness (manual input)
-            const km = parseFloat(document.getElementById('km').value) || 0;
+            // Step 3: Member stiffness - Frustum calculation
+            const Em = parseFloat(document.getElementById('Em').value) || 30e6;
+            const D_fr = parseFloat(document.getElementById('D_fr').value) || 0;
+            const tf = parseFloat(document.getElementById('tf').value) || 0;
+
+            // Sync frustum equation inputs
+            syncAllInstances('Em');
+            syncAllInstances('D_fr');
+            syncAllInstances('tf');
+            syncAllInstances('d');
+
+            // Calculate frustum member stiffness: k = 0.5774*pi*E*d / ln(((1.155t + D - d)(D + d)) / ((1.155t + D + d)(D - d)))
+            let km_calc = 0;
+            if (d > 0 && D_fr > d && tf > 0 && Em > 0) {
+                const numerator = 0.5774 * Math.PI * Em * d;
+                const term1 = (1.155 * tf + D_fr - d) * (D_fr + d);
+                const term2 = (1.155 * tf + D_fr + d) * (D_fr - d);
+                if (term2 > 0 && term1 > 0) {
+                    const ln_arg = term1 / term2;
+                    if (ln_arg > 0) {
+                        km_calc = numerator / Math.log(ln_arg);
+                    }
+                }
+            }
+
+            // Sync km_calc to equation instances
+            setValue('km_eq', km_calc, 2);
+
+            // Use manual input km if user provided, otherwise use calculated
+            const km = parseFloat(document.getElementById('km').value) || km_calc;
 
             // Safety Factors
             const Ptot = parseFloat(document.getElementById('Ptot').value) || 0;
@@ -1712,7 +1863,7 @@
             const P = N > 0 ? Ptot / N : 0;
 
             // Sync P to equation instances
-            if (document.getElementById('P_eq')) document.getElementById('P_eq').value = P.toFixed(2);
+            setValue('P_eq', P, 2);
 
             const Sp = parseFloat(document.getElementById('Sp').value) || 0;
             const Sut = parseFloat(document.getElementById('Sut').value) || 0;
@@ -1727,13 +1878,15 @@
             } else if (preloadType === 'percentage') {
                 const pct = parseFloat(document.getElementById('preload_pct').value) || 0;
                 Fi = (pct / 100) * At * Sp * 1000; // Sp in kpsi
-                if (document.getElementById('Fi_pct_eq')) document.getElementById('Fi_pct_eq').value = Fi.toFixed(2);
+                setValue('Fi_pct_eq', Fi, 2);
             } else { // Shigley
                 const connType = document.getElementById('connection_type').value;
                 const factor = connType === 'permanent' ? 0.90 : 0.75;
                 Fi = factor * At * Sp * 1000;
-                if (document.getElementById('Fi_shig_eq')) document.getElementById('Fi_shig_eq').value = Fi.toFixed(2);
-                if (document.getElementById('factor_eq')) document.getElementById('factor_eq').value = factor;
+                setValue('Fi_shig_eq', Fi, 2);
+                if (!userValues.has('factor') && document.getElementById('factor_eq')) {
+                    document.getElementById('factor_eq').value = factor;
+                }
             }
 
             // Sync Fi to equation instances
@@ -1744,7 +1897,7 @@
             const T = K * Fi * d;
 
             // Sync T to equation instances
-            if (document.getElementById('T_eq')) document.getElementById('T_eq').value = T.toFixed(2);
+            setValue('T_eq', T, 2);
 
             const torqueWarning = document.getElementById('torque_warning');
             if (T > 1000) {
@@ -1759,12 +1912,12 @@
             const C = (kb + km) !== 0 ? kb / (kb + km) : 0;
 
             // Sync C to equation instances
-            if (document.getElementById('C_eq')) document.getElementById('C_eq').value = C.toFixed(4);
+            setValue('C_eq', C);
 
             // Load factor nL
             const nL = (C * P) !== 0 ? (Sp * 1000 * At - Fi) / (C * P) : 0;
 
-            if (document.getElementById('nL_eq')) document.getElementById('nL_eq').value = nL.toFixed(4);
+            setValue('nL_eq', nL);
 
             const nL_check = document.getElementById('nL_check');
             nL_check.classList.remove('hidden');
@@ -1780,8 +1933,8 @@
             const sigma_b = At !== 0 ? (C * P + Fi) / At / 1000 : 0; // Convert to kpsi
             const np = sigma_b !== 0 ? Sp / sigma_b : 0;
 
-            if (document.getElementById('sigma_b_eq')) document.getElementById('sigma_b_eq').value = sigma_b.toFixed(4);
-            if (document.getElementById('np_eq')) document.getElementById('np_eq').value = np.toFixed(4);
+            setValue('sigma_b_eq', sigma_b);
+            setValue('np_eq', np);
 
             const np_check = document.getElementById('np_check');
             np_check.classList.remove('hidden');
@@ -1796,7 +1949,7 @@
             // Joint separation factor
             const n0 = (P * (1 - C)) !== 0 ? Fi / (P * (1 - C)) : 0;
 
-            if (document.getElementById('n0_eq')) document.getElementById('n0_eq').value = n0.toFixed(4);
+            setValue('n0_eq', n0);
 
             const n0_check = document.getElementById('n0_check');
             n0_check.classList.remove('hidden');
@@ -1829,10 +1982,10 @@
                 nf = denominator !== 0 ? (Se * (Sut - sigma_i)) / denominator : 0;
             }
 
-            if (document.getElementById('sigma_i_eq')) document.getElementById('sigma_i_eq').value = sigma_i.toFixed(4);
-            if (document.getElementById('sigma_a_eq')) document.getElementById('sigma_a_eq').value = sigma_a.toFixed(4);
-            if (document.getElementById('sigma_m_eq')) document.getElementById('sigma_m_eq').value = sigma_m.toFixed(4);
-            if (document.getElementById('nf_eq')) document.getElementById('nf_eq').value = nf.toFixed(4);
+            setValue('sigma_i_eq', sigma_i);
+            setValue('sigma_a_eq', sigma_a);
+            setValue('sigma_m_eq', sigma_m);
+            setValue('nf_eq', nf);
 
             const nf_check = document.getElementById('nf_check');
             nf_check.classList.remove('hidden');
@@ -1885,6 +2038,8 @@
                 inputs.forEach(input => {
                     input.value = '';
                 });
+                // Clear user values tracking
+                userValues.clear();
                 // Reset to defaults
                 document.getElementById('config').value = 'a';
                 document.getElementById('unit_system').value = 'inches';
