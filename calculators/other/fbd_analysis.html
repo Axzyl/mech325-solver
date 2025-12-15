@@ -1365,7 +1365,7 @@
 
             const padding = 50;
             const gap = 20;
-            const h = (canvas.height - 2 * padding - 2 * gap) / 3;
+            const h = (canvas.height - 2 * padding - 3 * gap) / 4;
 
             // Draw Torsion Mx diagram
             drawDiagram(momentData.Mx.map(d => ({ x: d.x, v: d.m })), padding, padding, canvas.width - 2 * padding, h, 'Torsion Mx', '#e67e22', true);
@@ -1375,6 +1375,15 @@
 
             // Draw Bending Moment Mz diagram
             drawDiagram(momentData.Mz.map(d => ({ x: d.x, v: d.m })), padding, padding + 2 * (h + gap), canvas.width - 2 * padding, h, 'Bending Moment Mz', '#27ae60', true);
+
+            // Calculate and draw Total Moment Magnitude (My and Mz only)
+            const totalMomentData = momentData.My.map((d, i) => {
+                const My = d.m;
+                const Mz = momentData.Mz[i].m;
+                const magnitude = Math.sqrt(My * My + Mz * Mz);
+                return { x: d.x, v: magnitude };
+            });
+            drawDiagram(totalMomentData, padding, padding + 3 * (h + gap), canvas.width - 2 * padding, h, 'Total Bending Moment √(My²+Mz²)', '#e74c3c', false);
         }
 
         function drawDiagram(data, x, y, w, h, title, color, centerAtZero = false) {
