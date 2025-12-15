@@ -1495,11 +1495,18 @@
             const FeA_calc = userValues.has('FeA') ? (parseFloat(document.getElementById('FeA_eq3')?.value) || FeA) : FeA;
             const FeB_calc = userValues.has('FeB') ? (parseFloat(document.getElementById('FeB_eq3')?.value) || FeB) : FeB;
 
+            // Get Weibull parameters for calculation - use equation box values if user edited them
+            // Note: tapered roller calculator doesn't have x0_eq, theta_eq, b_eq in equation boxes
+            // but we check userValues in case user edited primary inputs
+            const x0_calc = x0;
+            const theta_calc = theta;
+            const b_calc = b;
+
             // Calculate Weibull denominator (use 1 as default if conditions not met)
             let denominator = 1;
             if (Ri_calc > 0 && Ri_calc < 1) {
                 const lnTerm = Math.log(1/Ri_calc);
-                denominator = x0 + (theta - x0) * Math.pow(lnTerm, 1/b);
+                denominator = x0_calc + (theta_calc - x0_calc) * Math.pow(lnTerm, 1/b_calc);
             }
 
             // Calculate C10 for both bearings

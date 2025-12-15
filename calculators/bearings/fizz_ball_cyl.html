@@ -1368,12 +1368,18 @@
             const af = parseFloat(document.getElementById('af').value) || 1;
 
             // Step 7: Calculate C10
+            // Get Weibull parameters for calculation - use equation box values if user edited them
+            const x0_calc = userValues.has('x0') ? (parseFloat(document.getElementById('x0_eq')?.value) || x0_val) : x0_val;
+            const theta_calc = userValues.has('theta') ? (parseFloat(document.getElementById('theta_eq')?.value) || theta_val) : theta_val;
+            const b_calc = userValues.has('b') ? (parseFloat(document.getElementById('b_eq')?.value) || b_val) : b_val;
+            const Ri_calc = userValues.has('Ri') ? (parseFloat(document.getElementById('Ri_eq')?.value) || Ri) : Ri;
+
             // Calculate Weibull denominator: x0 + (theta - x0) * [ln(1/Ri)]^(1/b)
             let weibullDenom = 1;
             let C10 = 0;
-            if (Ri > 0 && Ri < 1) {
-                const lnTerm = Math.log(1 / Ri);
-                weibullDenom = x0_val + (theta_val - x0_val) * Math.pow(lnTerm, 1 / b_val);
+            if (Ri_calc > 0 && Ri_calc < 1) {
+                const lnTerm = Math.log(1 / Ri_calc);
+                weibullDenom = x0_calc + (theta_calc - x0_calc) * Math.pow(lnTerm, 1 / b_calc);
             }
 
             if (procedure === 'radial_only') {
@@ -1386,9 +1392,10 @@
                 const FR_radial = userValues.has('FR') ? (parseFloat(document.getElementById('FR_eq2')?.value) || FR) : FR;
                 const xD_radial = userValues.has('xD') ? (parseFloat(document.getElementById('xD_eq2')?.value) || xD) : xD;
                 const af_radial = userValues.has('af') ? (parseFloat(document.getElementById('af_eq')?.value) || af) : af;
+                const a_radial = userValues.has('a') ? (parseFloat(document.getElementById('a_eq')?.value) || a) : a;
 
                 // Calculate C10 using Weibull formula: C10 = af * FR * [xD / weibullDenom]^(1/a)
-                C10 = af_radial * FR_radial * Math.pow(xD_radial / weibullDenom, 1 / a);
+                C10 = af_radial * FR_radial * Math.pow(xD_radial / weibullDenom, 1 / a_radial);
 
                 // Sync C10 to all instances (only if user hasn't edited)
                 if (!userValues.has('C10_calc')) {
@@ -1465,9 +1472,13 @@
                 if (userValues.has('af')) {
                     af_calc = parseFloat(document.getElementById('af_eq2').value) || af;
                 }
+                let a_calc = a;
+                if (userValues.has('a')) {
+                    a_calc = parseFloat(document.getElementById('a_eq2').value) || a;
+                }
 
                 // Calculate C10 using Weibull formula: C10 = af * Fe * [xD / weibullDenom]^(1/a)
-                C10 = af_calc * Fe * Math.pow(xD_calc / weibullDenom, 1 / a);
+                C10 = af_calc * Fe * Math.pow(xD_calc / weibullDenom, 1 / a_calc);
 
                 // Sync C10 to all instances (only if user hasn't edited)
                 if (!userValues.has('C10_calc')) {
