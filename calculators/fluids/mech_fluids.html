@@ -1082,14 +1082,10 @@
 
         function setValue(id, value, decimals = 4) {
             const baseVar = getBaseVariable(id);
-            if (userValues.has(baseVar)) {
-                console.log('setValue BLOCKED for', id, '- userValues contains', baseVar);
-                return;
-            }
+            if (userValues.has(baseVar)) return;
 
             if (value !== null && !isNaN(value) && isFinite(value)) {
                 const instances = varInstanceMap[baseVar] || [id];
-                console.log('setValue:', id, '=', value, 'instances:', instances);
                 instances.forEach(instanceId => {
                     const el = document.getElementById(instanceId);
                     if (el) {
@@ -1097,8 +1093,6 @@
                         if (!el.classList.contains('lookup')) {
                             el.classList.add('computed');
                         }
-                    } else {
-                        console.log('WARNING: Element not found:', instanceId);
                     }
                 });
             }
@@ -1196,13 +1190,9 @@
             const d_pipe = getValue('d_pipe');
             const HP_motor = getValue('HP_motor');
 
-            // Debug: Log values for L_basic calculation
-            console.log('calculate() called - L_stroke:', L_stroke, 'k_stroke:', k_stroke, 'userValues has L_basic:', userValues.has('L_basic'));
-
             // Step 3: Basic Length
             if (L_stroke !== null && k_stroke !== null) {
                 const L_basic_val = L_stroke * k_stroke;
-                console.log('Computing L_basic:', L_basic_val);
                 setValue('L_basic', L_basic_val, 2);
             }
 
