@@ -1735,7 +1735,10 @@
         function setValue(id, value, decimals = 4) {
             const baseVar = getBaseVariable(id);
             // Don't overwrite user-set values
-            if (userValues.has(baseVar)) return;
+            if (userValues.has(baseVar)) {
+                console.log('setValue BLOCKED for', id, '- userValues contains', baseVar);
+                return;
+            }
 
             const elem = document.getElementById(id);
             // Don't update the currently focused element (prevents cursor jumping)
@@ -1970,6 +1973,9 @@
             syncAllInstances('tf');
             syncAllInstances('d');
 
+            // Debug: Log frustum calculation inputs
+            console.log('Frustum calc - d:', d, 'D_fr:', D_fr, 'tf:', tf, 'Em:', Em, 'userValues has km:', userValues.has('km'));
+
             // Calculate frustum member stiffness: k = 0.5774*pi*E*d / ln(((1.155t + D - d)(D + d)) / ((1.155t + D + d)(D - d)))
             let km_calc = 0;
             if (d > 0 && D_fr > d && tf > 0 && Em > 0) {
@@ -1980,6 +1986,7 @@
                     const ln_arg = term1 / term2;
                     if (ln_arg > 0) {
                         km_calc = numerator / Math.log(ln_arg);
+                        console.log('Frustum km_calc:', km_calc);
                     }
                 }
             }

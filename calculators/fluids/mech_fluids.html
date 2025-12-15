@@ -410,6 +410,12 @@
             background: #f8d7da;
             color: #721c24;
         }
+        .unit-inline {
+            font-size: 0.75em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -514,18 +520,21 @@
                         <div class="equation-latex">$$L_{basic} = L_{stroke} \times k$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>L<sub>basic</sub> [in]</label>
+                                <label>L<sub>basic</sub></label>
                                 <input type="number" id="L_basic" class="computed" step="any" oninput="syncAllInstances('L_basic'); markAsUser('L_basic'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>L<sub>stroke</sub></label>
                                 <input type="number" id="L_stroke_eq" step="any" oninput="syncAllInstances('L_stroke_eq'); markAsUser('L_stroke_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>&times;</span>
                             <div class="var-input">
                                 <label>k</label>
                                 <input type="number" id="k_stroke_eq" step="any" oninput="syncAllInstances('k_stroke_eq'); markAsUser('k_stroke_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -587,17 +596,20 @@
                             <div class="var-input">
                                 <label>g</label>
                                 <input type="number" id="g_factor" class="computed" step="any" oninput="syncAllInstances('g_factor'); markAsUser('g_factor'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <span>(</span>
                             <div class="var-input">
                                 <label>V</label>
                                 <input type="number" id="V_accel_eq" step="any" oninput="syncAllInstances('V_accel_eq'); markAsUser('V_accel_eq'); calculate()">
+                                <span class="unit-inline">[ft/min]</span>
                             </div>
                             <span>)<sup>2</sup> /</span>
                             <div class="var-input">
                                 <label>S</label>
                                 <input type="number" id="S_accel_eq" step="any" oninput="syncAllInstances('S_accel_eq'); markAsUser('S_accel_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>&times; 0.0000517</span>
                         </div>
@@ -613,18 +625,21 @@
                             <div class="equation-latex">$$F_{total} = F_{max} \times (1 + g)$$</div>
                             <div class="equation-inputs">
                                 <div class="var-input">
-                                    <label>F<sub>total</sub> [lbf]</label>
+                                    <label>F<sub>total</sub></label>
                                     <input type="number" id="F_total" class="computed" step="any" oninput="syncAllInstances('F_total'); markAsUser('F_total'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>F<sub>max</sub></label>
                                     <input type="number" id="F_max_eq" step="any" oninput="syncAllInstances('F_max_eq'); markAsUser('F_max_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>&times; (1 +</span>
                                 <div class="var-input">
                                     <label>g</label>
                                     <input type="number" id="g_factor_eq" step="any" oninput="syncAllInstances('g_factor_eq'); markAsUser('g_factor_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -649,18 +664,21 @@
                         <div class="equation-latex">$$Q_{true} = \frac{V_{ext}}{10} \times Q_{table}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>Q<sub>true</sub> [GPM]</label>
+                                <label>Q<sub>true</sub></label>
                                 <input type="number" id="Q_true" class="computed" step="any" oninput="syncAllInstances('Q_true'); markAsUser('Q_true'); calculate()">
+                                <span class="unit-inline">[GPM]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>V<sub>ext</sub></label>
                                 <input type="number" id="V_ext_eq" step="any" oninput="syncAllInstances('V_ext_eq'); markAsUser('V_ext_eq'); calculate()">
+                                <span class="unit-inline">[ft/min]</span>
                             </div>
                             <span>/ 10 &times;</span>
                             <div class="var-input">
                                 <label>Q<sub>table</sub></label>
                                 <input type="number" id="Q_table_eq" step="any" oninput="syncAllInstances('Q_table_eq'); markAsUser('Q_table_eq'); calculate()">
+                                <span class="unit-inline">[GPM]</span>
                             </div>
                         </div>
                     </div>
@@ -682,18 +700,21 @@
                         <div class="equation-latex">$$v_{actual} = v_{table} \times \frac{V_{ext}}{10} < 15 \text{ ft/s}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>v<sub>actual</sub> [ft/s]</label>
+                                <label>v<sub>actual</sub></label>
                                 <input type="number" id="v_actual" class="computed" step="any" oninput="syncAllInstances('v_actual'); markAsUser('v_actual'); calculate()">
+                                <span class="unit-inline">[ft/s]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>v<sub>table</sub></label>
                                 <input type="number" id="v_fluid_table_eq" step="any" oninput="syncAllInstances('v_fluid_table_eq'); markAsUser('v_fluid_table_eq'); calculate()">
+                                <span class="unit-inline">[ft/s]</span>
                             </div>
                             <span>&times;</span>
                             <div class="var-input">
                                 <label>V<sub>ext</sub></label>
                                 <input type="number" id="V_ext_eq2" step="any" oninput="syncAllInstances('V_ext_eq2'); markAsUser('V_ext_eq2'); calculate()">
+                                <span class="unit-inline">[ft/min]</span>
                             </div>
                             <span>/ 10</span>
                         </div>
@@ -718,16 +739,19 @@
                             <div class="var-input">
                                 <label>HP<sub>min</sub></label>
                                 <input type="number" id="HP_min" class="computed" step="any" oninput="syncAllInstances('HP_min'); markAsUser('HP_min'); calculate()">
+                                <span class="unit-inline">[hp]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>Q<sub>true</sub></label>
                                 <input type="number" id="Q_true_eq" step="any" oninput="syncAllInstances('Q_true_eq'); markAsUser('Q_true_eq'); calculate()">
+                                <span class="unit-inline">[GPM]</span>
                             </div>
                             <span>&times;</span>
                             <div class="var-input">
                                 <label>P</label>
                                 <input type="number" id="P_relief_eq" step="any" oninput="syncAllInstances('P_relief_eq'); markAsUser('P_relief_eq'); calculate()">
+                                <span class="unit-inline">[psi]</span>
                             </div>
                             <span>/ (1714 &times; 0.85)</span>
                         </div>
@@ -1058,10 +1082,14 @@
 
         function setValue(id, value, decimals = 4) {
             const baseVar = getBaseVariable(id);
-            if (userValues.has(baseVar)) return;
+            if (userValues.has(baseVar)) {
+                console.log('setValue BLOCKED for', id, '- userValues contains', baseVar);
+                return;
+            }
 
             if (value !== null && !isNaN(value) && isFinite(value)) {
                 const instances = varInstanceMap[baseVar] || [id];
+                console.log('setValue:', id, '=', value, 'instances:', instances);
                 instances.forEach(instanceId => {
                     const el = document.getElementById(instanceId);
                     if (el) {
@@ -1069,6 +1097,8 @@
                         if (!el.classList.contains('lookup')) {
                             el.classList.add('computed');
                         }
+                    } else {
+                        console.log('WARNING: Element not found:', instanceId);
                     }
                 });
             }
@@ -1166,9 +1196,14 @@
             const d_pipe = getValue('d_pipe');
             const HP_motor = getValue('HP_motor');
 
+            // Debug: Log values for L_basic calculation
+            console.log('calculate() called - L_stroke:', L_stroke, 'k_stroke:', k_stroke, 'userValues has L_basic:', userValues.has('L_basic'));
+
             // Step 3: Basic Length
-            if (L_stroke && k_stroke) {
-                setValue('L_basic', L_stroke * k_stroke, 2);
+            if (L_stroke !== null && k_stroke !== null) {
+                const L_basic_val = L_stroke * k_stroke;
+                console.log('Computing L_basic:', L_basic_val);
+                setValue('L_basic', L_basic_val, 2);
             }
 
             // Step 6: Acceleration Factor
