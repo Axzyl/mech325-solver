@@ -793,31 +793,37 @@
                             <div class="var-input">
                                 <label>F<sub>e</sub></label>
                                 <input type="number" id="Fe_eq" step="any" oninput="syncAllInstances('Fe_eq'); markAsUser('Fe_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>X<sub>i</sub></label>
                                 <input type="number" id="Xi_eq" step="any" oninput="syncAllInstances('Xi_eq'); markAsUser('Xi_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>V</label>
                                 <input type="number" id="V_eq" step="any" oninput="syncAllInstances('V_eq'); markAsUser('V_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>F<sub>r</sub></label>
                                 <input type="number" id="Fr_eq" step="any" oninput="syncAllInstances('Fr_eq'); markAsUser('Fr_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>Y<sub>i</sub></label>
                                 <input type="number" id="Yi_eq" step="any" oninput="syncAllInstances('Yi_eq'); markAsUser('Yi_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>F<sub>a</sub></label>
                                 <input type="number" id="Fa_eq" step="any" oninput="syncAllInstances('Fa_eq'); markAsUser('Fa_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                         </div>
                     </div>
@@ -827,51 +833,61 @@
                             <div class="var-input">
                                 <label>C<sub>10</sub></label>
                                 <input type="number" id="C10_comb_eq" step="any" oninput="syncAllInstances('C10_comb_eq'); markAsUser('C10_comb_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>a<sub>f</sub></label>
                                 <input type="number" id="af_eq2" step="any" oninput="syncAllInstances('af_eq2'); markAsUser('af_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>F<sub>e</sub></label>
                                 <input type="number" id="Fe_eq2" step="any" oninput="syncAllInstances('Fe_eq2'); markAsUser('Fe_eq2'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>× [</span>
                             <div class="var-input">
                                 <label>x<sub>D</sub></label>
                                 <input type="number" id="xD_eq3" step="any" oninput="syncAllInstances('xD_eq3'); markAsUser('xD_eq3'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>/ (</span>
                             <div class="var-input">
                                 <label>x<sub>0</sub></label>
                                 <input type="number" id="x0_eq3" step="any" oninput="syncAllInstances('x0_eq3'); markAsUser('x0_eq3'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>+ (</span>
                             <div class="var-input">
                                 <label>θ</label>
                                 <input type="number" id="theta_eq2" step="any" oninput="syncAllInstances('theta_eq2'); markAsUser('theta_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>-</span>
                             <div class="var-input">
                                 <label>x<sub>0</sub></label>
                                 <input type="number" id="x0_eq4" step="any" oninput="syncAllInstances('x0_eq4'); markAsUser('x0_eq4'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>) × ln(1/</span>
                             <div class="var-input">
                                 <label>R<sub>i</sub></label>
                                 <input type="number" id="Ri_eq3" step="any" oninput="syncAllInstances('Ri_eq3'); markAsUser('Ri_eq3'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)^(1/</span>
                             <div class="var-input">
                                 <label>b</label>
                                 <input type="number" id="b_eq2" step="any" oninput="syncAllInstances('b_eq2'); markAsUser('b_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>))]^(1/</span>
                             <div class="var-input">
                                 <label>a</label>
                                 <input type="number" id="a_eq2" step="any" oninput="syncAllInstances('a_eq2'); markAsUser('a_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -938,17 +954,20 @@
                             <div class="equation-inputs">
                                 <div class="var-input">
                                     <label>F<sub>a</sub>/C<sub>0</sub></label>
-                                    <input type="number" id="Fa_C0_eq" step="any" oninput="calculate()">
+                                    <input type="number" id="Fa_C0_eq" step="any" oninput="markAsUser('Fa_C0_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>F<sub>a</sub></label>
-                                    <input type="number" id="Fa_eq2" step="any" oninput="syncAllInstances('Fa_eq2'); calculate()">
+                                    <input type="number" id="Fa_eq2" step="any" oninput="syncAllInstances('Fa_eq2'); markAsUser('Fa_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>C<sub>0</sub></label>
-                                    <input type="number" id="C0_table_eq" step="any" oninput="syncAllInstances('C0_table_eq'); calculate()">
+                                    <input type="number" id="C0_table_eq" step="any" oninput="syncAllInstances('C0_table_eq'); markAsUser('C0_table_eq'); calculate()">
+                                    <span class="unit-inline">[kN]</span>
                                 </div>
                             </div>
                         </div>
@@ -957,23 +976,27 @@
                             <div class="equation-inputs">
                                 <div class="var-input">
                                     <label>F<sub>a</sub>/(VF<sub>r</sub>)</label>
-                                    <input type="number" id="Fa_VFr_eq" step="any" oninput="calculate()">
+                                    <input type="number" id="Fa_VFr_eq" step="any" oninput="markAsUser('Fa_VFr_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>F<sub>a</sub></label>
-                                    <input type="number" id="Fa_eq3" step="any" oninput="syncAllInstances('Fa_eq3'); calculate()">
+                                    <input type="number" id="Fa_eq3" step="any" oninput="syncAllInstances('Fa_eq3'); markAsUser('Fa_eq3'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>V</label>
-                                    <input type="number" id="V_eq2" step="any" oninput="syncAllInstances('V_eq2'); calculate()">
+                                    <input type="number" id="V_eq2" step="any" oninput="syncAllInstances('V_eq2'); markAsUser('V_eq2'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>F<sub>r</sub></label>
-                                    <input type="number" id="Fr_eq2" step="any" oninput="syncAllInstances('Fr_eq2'); calculate()">
+                                    <input type="number" id="Fr_eq2" step="any" oninput="syncAllInstances('Fr_eq2'); markAsUser('Fr_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -1077,22 +1100,22 @@
             'nD': ['nD', 'nD_eq', 'nD_eq2'],
             'Fx': ['Fx', 'Fx_eq'],
             'Fy': ['Fy', 'Fy_eq'],
-            'FR': ['FR', 'FR_eq', 'FR_eq2', 'Fr_eq', 'Fr_eq2'],
+            'FR': ['FR_eq', 'FR_eq2', 'Fr_eq', 'Fr_eq2'],
             'Fa': ['Fa', 'Fa_eq', 'Fa_eq2', 'Fa_eq3'],
             'V': ['ring_rotation', 'V_eq', 'V_eq2'],
             'Rtot': ['Rtot', 'Rtot_eq'],
             'n_bearings': ['n_bearings', 'n_bearings_eq'],
-            'Ri': ['Ri', 'Ri_eq', 'Ri_eq2', 'Ri_eq3'],
+            'Ri': ['Ri_eq', 'Ri_eq2', 'Ri_eq3'],
             'LD_hours': ['LD_hours', 'LD_hours_eq'],
             'L10': ['L10', 'L10_eq'],
-            'LD_rev': ['LD_rev', 'LD_rev_eq', 'LD_rev_eq2'],
-            'xD': ['xD', 'xD_eq', 'xD_eq2', 'xD_eq3'],
+            'LD_rev': ['LD_rev_eq', 'LD_rev_eq2'],
+            'xD': ['xD_eq', 'xD_eq2', 'xD_eq3'],
             'x0': ['x0', 'x0_eq', 'x0_eq2', 'x0_eq3', 'x0_eq4'],
             'theta': ['theta', 'theta_eq', 'theta_eq2'],
             'b': ['b', 'b_eq', 'b_eq2'],
             'a': ['a_eq', 'a_eq2'],
             'af': ['af', 'af_eq', 'af_eq2'],
-            'Fe': ['Fe', 'Fe_eq', 'Fe_eq2'],
+            'Fe': ['Fe_eq', 'Fe_eq2'],
             'Xi': ['Xi', 'Xi_eq'],
             'Yi': ['Yi', 'Yi_eq'],
             'bore': ['bore'],
@@ -1100,7 +1123,9 @@
             'width': ['width'],
             'C10_table': ['C10_table'],
             'C10_calc': ['C10_calc_eq', 'C10_comb_eq'],
-            'C0_table': ['C0_table', 'C0_table_eq']
+            'C0_table': ['C0_table', 'C0_table_eq'],
+            'Fa_C0': ['Fa_C0_eq'],
+            'Fa_VFr': ['Fa_VFr_eq']
         };
 
         // Track user-modified values
@@ -1229,22 +1254,34 @@
                 syncAllInstances('nD_eq');
             }
 
-            // Step 2: Radial load
+            // Step 2: Radial load - always compute, sync only if not user-edited
             const Fx = parseFloat(document.getElementById('Fx').value) || 0;
             const Fy = parseFloat(document.getElementById('Fy').value) || 0;
             const FR = Math.sqrt(Fx * Fx + Fy * Fy);
-            syncValue('FR_eq', FR, 2);
-            syncAllInstances('FR_eq');
+            // Sync FR to all instances (only if user hasn't edited)
+            if (!userValues.has('FR')) {
+                const FR_instances = varInstanceMap['FR'] || [];
+                FR_instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = FR.toFixed(2);
+                });
+            }
 
             // Combined loading: rotation factor
             const V = parseFloat(document.getElementById('ring_rotation').value) || 1;
 
-            // Step 3: Individual bearing reliability
+            // Step 3: Individual bearing reliability - always compute, sync only if not user-edited
             const Rtot = parseFloat(document.getElementById('Rtot').value) || 0;
             const n_bearings = parseFloat(document.getElementById('n_bearings').value) || 1;
             const Ri = n_bearings > 0 ? Math.pow(Rtot, 1/n_bearings) : 0;
-            syncValue('Ri_eq', Ri, 6);
-            syncAllInstances('Ri_eq');
+            // Sync Ri to all instances (only if user hasn't edited)
+            if (!userValues.has('Ri')) {
+                const Ri_instances = varInstanceMap['Ri'] || [];
+                Ri_instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = Ri.toFixed(6);
+                });
+            }
 
             // Step 4: Design life
             const appType = document.getElementById('application_type').value;
@@ -1260,36 +1297,67 @@
             const theta_val = parseFloat(document.getElementById('theta').value) || 1;
             const b_val = parseFloat(document.getElementById('b').value) || 1;
 
+            // Always compute LD_rev and xD, sync only if not user-edited
             const LD_rev = 60 * LD_hours * 1000 * nD; // LD_hours is in kilohours
             const xD = LD_rev / (L10 * 1e6); // L10 is in 10^6 revolutions
 
-            syncValueExp('LD_rev_eq', LD_rev, 3);
-            syncAllInstances('LD_rev_eq');
+            // Sync LD_rev to all instances (only if user hasn't edited)
+            if (!userValues.has('LD_rev')) {
+                const LD_rev_instances = varInstanceMap['LD_rev'] || [];
+                LD_rev_instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = LD_rev.toExponential(3);
+                });
+            }
 
-            syncValue('xD_eq', xD, 4);
-            syncAllInstances('xD_eq');
+            // Sync xD to all instances (only if user hasn't edited)
+            if (!userValues.has('xD')) {
+                const xD_instances = varInstanceMap['xD'] || [];
+                xD_instances.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = xD.toFixed(4);
+                });
+            }
 
-            // Sync x0 to equation boxes
-            syncValue('x0_eq', x0_val, 4);
-            syncValue('x0_eq2', x0_val, 4);
-            syncValue('x0_eq3', x0_val, 4);
-            syncValue('x0_eq4', x0_val, 4);
+            // Sync x0 to equation boxes (only if user hasn't edited)
+            if (!userValues.has('x0')) {
+                ['x0_eq', 'x0_eq2', 'x0_eq3', 'x0_eq4'].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = x0_val.toFixed(4);
+                });
+            }
 
-            // Sync theta to equation boxes
-            syncValue('theta_eq', theta_val, 4);
-            syncValue('theta_eq2', theta_val, 4);
+            // Sync theta to equation boxes (only if user hasn't edited)
+            if (!userValues.has('theta')) {
+                ['theta_eq', 'theta_eq2'].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = theta_val.toFixed(4);
+                });
+            }
 
-            // Sync b to equation boxes
-            syncValue('b_eq', b_val, 4);
-            syncValue('b_eq2', b_val, 4);
+            // Sync b to equation boxes (only if user hasn't edited)
+            if (!userValues.has('b')) {
+                ['b_eq', 'b_eq2'].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = b_val.toFixed(4);
+                });
+            }
 
-            // Sync a (load-life exponent) to equation boxes
-            syncValue('a_eq', a, 4);
-            syncValue('a_eq2', a, 4);
+            // Sync a (load-life exponent) to equation boxes (only if user hasn't edited)
+            if (!userValues.has('a')) {
+                ['a_eq', 'a_eq2'].forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.value = a.toFixed(4);
+                });
+            }
 
-            // Sync Ri to C10 equation boxes
-            syncValue('Ri_eq2', Ri, 6);
-            syncValue('Ri_eq3', Ri, 6);
+            // Sync Ri to C10 equation boxes (only if user hasn't edited)
+            if (!userValues.has('Ri')) {
+                const Ri_eq2_elem = document.getElementById('Ri_eq2');
+                if (Ri_eq2_elem) Ri_eq2_elem.value = Ri.toFixed(6);
+                const Ri_eq3_elem = document.getElementById('Ri_eq3');
+                if (Ri_eq3_elem) Ri_eq3_elem.value = Ri.toFixed(6);
+            }
 
             // Step 6: Application factor
             const appClass = document.getElementById('application_class').value;
@@ -1301,72 +1369,147 @@
 
             // Step 7: Calculate C10
             // Calculate Weibull denominator: x0 + (theta - x0) * [ln(1/Ri)]^(1/b)
-            let weibullDenom = 0;
+            let weibullDenom = 1;
             let C10 = 0;
-            if (Ri > 0 && Ri < 1 && b_val !== 0) {
+            if (Ri > 0 && Ri < 1) {
                 const lnTerm = Math.log(1 / Ri);
                 weibullDenom = x0_val + (theta_val - x0_val) * Math.pow(lnTerm, 1 / b_val);
             }
 
             if (procedure === 'radial_only') {
                 // Radial only procedure - C10 = af * FR * [...]
-                // Sync values to C10 equation box
+                // Sync values to C10 equation box (only if user hasn't edited)
                 syncValue('af_eq', af, 4);
-                syncValue('FR_eq2', FR, 2);
-                syncValue('xD_eq2', xD, 4);
+                // FR_eq2 and xD_eq2 are already synced above
+
+                // Get values for calculation - use equation box values if user edited them
+                const FR_radial = userValues.has('FR') ? (parseFloat(document.getElementById('FR_eq2')?.value) || FR) : FR;
+                const xD_radial = userValues.has('xD') ? (parseFloat(document.getElementById('xD_eq2')?.value) || xD) : xD;
+                const af_radial = userValues.has('af') ? (parseFloat(document.getElementById('af_eq')?.value) || af) : af;
 
                 // Calculate C10 using Weibull formula: C10 = af * FR * [xD / weibullDenom]^(1/a)
-                if (weibullDenom > 0 && a !== 0) {
-                    C10 = af * FR * Math.pow(xD / weibullDenom, 1 / a);
-                }
+                C10 = af_radial * FR_radial * Math.pow(xD_radial / weibullDenom, 1 / a);
 
-                // Sync C10 to equation box
-                syncValue('C10_calc_eq', C10, 2);
+                // Sync C10 to all instances (only if user hasn't edited)
+                if (!userValues.has('C10_calc')) {
+                    const C10_instances = varInstanceMap['C10_calc'] || [];
+                    C10_instances.forEach(id => {
+                        const elem = document.getElementById(id);
+                        if (elem) elem.value = C10.toFixed(2);
+                    });
+                }
             } else {
                 // Combined loading procedure - C10 = af * Fe * [...]
-                const Fa = parseFloat(document.getElementById('Fa').value) || 0;
-                const Xi = parseFloat(document.getElementById('Xi').value) || 0.56;
-                const Yi = parseFloat(document.getElementById('Yi').value) || 1.63;
+                const Fa_input = parseFloat(document.getElementById('Fa').value) || 0;
+                const Xi_input = parseFloat(document.getElementById('Xi').value) || 0.56;
+                const Yi_input = parseFloat(document.getElementById('Yi').value) || 1.63;
 
-                // Sync inputs to Fe equation boxes
-                syncValue('Xi_eq', Xi, 4);
-                syncValue('V_eq', V, 2);
-                syncValue('Fr_eq', FR, 2);  // Fr in Fe equation = FR (radial load)
-                syncValue('Yi_eq', Yi, 4);
-                syncValue('Fa_eq', Fa, 2);
+                // Get values for calculation - use equation box values if user edited them
+                const Xi_calc = userValues.has('Xi') ? (parseFloat(document.getElementById('Xi_eq')?.value) || Xi_input) : Xi_input;
+                const V_calc = userValues.has('V') ? (parseFloat(document.getElementById('V_eq')?.value) || V) : V;
+                const FR_calc = userValues.has('FR') ? (parseFloat(document.getElementById('Fr_eq')?.value) || FR) : FR;
+                const Yi_calc = userValues.has('Yi') ? (parseFloat(document.getElementById('Yi_eq')?.value) || Yi_input) : Yi_input;
+                const Fa_calc = userValues.has('Fa') ? (parseFloat(document.getElementById('Fa_eq')?.value) || Fa_input) : Fa_input;
 
-                const Fe = Xi * V * FR + Yi * Fa;
-
-                syncValue('Fe_eq', Fe, 2);
-                syncAllInstances('Fe_eq');
-
-                // Sync values to C10 combined equation boxes
-                syncValue('af_eq2', af, 4);
-                syncValue('Fe_eq2', Fe, 2);
-                syncValue('xD_eq3', xD, 4);
-
-                // Calculate C10 using Weibull formula: C10 = af * Fe * [xD / weibullDenom]^(1/a)
-                if (weibullDenom > 0 && a !== 0) {
-                    C10 = af * Fe * Math.pow(xD / weibullDenom, 1 / a);
+                // Sync inputs to Fe equation boxes (only if user hasn't edited)
+                if (!userValues.has('Xi')) {
+                    const Xi_eq_elem = document.getElementById('Xi_eq');
+                    if (Xi_eq_elem) Xi_eq_elem.value = Xi_input.toFixed(4);
+                }
+                if (!userValues.has('V')) {
+                    const V_eq_elem = document.getElementById('V_eq');
+                    if (V_eq_elem) V_eq_elem.value = V.toFixed(2);
+                }
+                if (!userValues.has('FR')) {
+                    const Fr_eq_elem = document.getElementById('Fr_eq');
+                    if (Fr_eq_elem) Fr_eq_elem.value = FR.toFixed(2);
+                }
+                if (!userValues.has('Yi')) {
+                    const Yi_eq_elem = document.getElementById('Yi_eq');
+                    if (Yi_eq_elem) Yi_eq_elem.value = Yi_input.toFixed(4);
+                }
+                if (!userValues.has('Fa')) {
+                    const Fa_eq_elem = document.getElementById('Fa_eq');
+                    if (Fa_eq_elem) Fa_eq_elem.value = Fa_input.toFixed(2);
                 }
 
-                // Sync C10 to equation box
-                syncValue('C10_comb_eq', C10, 2);
+                // Compute Fe - use user-entered value if edited, otherwise compute
+                let Fe;
+                if (userValues.has('Fe')) {
+                    Fe = parseFloat(document.getElementById('Fe_eq').value) || 0;
+                } else {
+                    Fe = Xi_calc * V_calc * FR_calc + Yi_calc * Fa_calc;
+                    const Fe_instances = varInstanceMap['Fe'] || [];
+                    Fe_instances.forEach(id => {
+                        const elem = document.getElementById(id);
+                        if (elem) elem.value = Fe.toFixed(2);
+                    });
+                }
 
-                // Iteration helper calculations
+                // Sync values to C10 combined equation boxes (only if user hasn't edited)
+                if (!userValues.has('af')) {
+                    const af_eq2_elem = document.getElementById('af_eq2');
+                    if (af_eq2_elem) af_eq2_elem.value = af.toFixed(4);
+                }
+                if (!userValues.has('xD')) {
+                    const xD_eq3_elem = document.getElementById('xD_eq3');
+                    if (xD_eq3_elem) xD_eq3_elem.value = xD.toFixed(4);
+                }
+
+                // Get values for C10 calculation - use user-entered value if edited
+                let xD_calc = xD;
+                if (userValues.has('xD')) {
+                    xD_calc = parseFloat(document.getElementById('xD_eq3').value) || xD;
+                }
+                let af_calc = af;
+                if (userValues.has('af')) {
+                    af_calc = parseFloat(document.getElementById('af_eq2').value) || af;
+                }
+
+                // Calculate C10 using Weibull formula: C10 = af * Fe * [xD / weibullDenom]^(1/a)
+                C10 = af_calc * Fe * Math.pow(xD_calc / weibullDenom, 1 / a);
+
+                // Sync C10 to all instances (only if user hasn't edited)
+                if (!userValues.has('C10_calc')) {
+                    const C10_instances_combined = varInstanceMap['C10_calc'] || [];
+                    C10_instances_combined.forEach(id => {
+                        const elem = document.getElementById(id);
+                        if (elem) elem.value = C10.toFixed(2);
+                    });
+                }
+
+                // Iteration helper calculations (use user-edited values)
                 const C0_table = parseFloat(document.getElementById('C0_table').value) || 1;
-                const Fa_C0 = Fa / (C0_table * 224.809);  // Convert C0 from kN to lbf (1 kN = 224.809 lbf)
-                const Fa_VFr = (V * FR) !== 0 ? Fa / (V * FR) : 0;
+                const Fa_C0 = Fa_calc / (C0_table * 224.809);  // Convert C0 from kN to lbf (1 kN = 224.809 lbf)
+                const Fa_VFr = (V_calc * FR_calc) !== 0 ? Fa_calc / (V_calc * FR_calc) : 0;
 
-                // Sync to iteration helper equation boxes
-                syncValue('Fa_eq2', Fa, 2);
-                syncValue('Fa_eq3', Fa, 2);
-                syncValue('V_eq2', V, 2);
-                syncValue('Fr_eq2', FR, 2);
-                syncValue('C0_table_eq', C0_table, 2);
-
-                syncValue('Fa_C0_eq', Fa_C0, 6);
-                syncValue('Fa_VFr_eq', Fa_VFr, 4);
+                // Sync to iteration helper equation boxes (only if user hasn't edited)
+                if (!userValues.has('Fa')) {
+                    const Fa_eq2_elem = document.getElementById('Fa_eq2');
+                    if (Fa_eq2_elem) Fa_eq2_elem.value = Fa_calc.toFixed(2);
+                    const Fa_eq3_elem = document.getElementById('Fa_eq3');
+                    if (Fa_eq3_elem) Fa_eq3_elem.value = Fa_calc.toFixed(2);
+                }
+                if (!userValues.has('V')) {
+                    const V_eq2_elem = document.getElementById('V_eq2');
+                    if (V_eq2_elem) V_eq2_elem.value = V_calc.toFixed(2);
+                }
+                if (!userValues.has('FR')) {
+                    const Fr_eq2_elem = document.getElementById('Fr_eq2');
+                    if (Fr_eq2_elem) Fr_eq2_elem.value = FR_calc.toFixed(2);
+                }
+                if (!userValues.has('C0_table')) {
+                    const C0_table_eq_elem = document.getElementById('C0_table_eq');
+                    if (C0_table_eq_elem) C0_table_eq_elem.value = C0_table.toFixed(2);
+                }
+                if (!userValues.has('Fa_C0')) {
+                    const Fa_C0_eq_elem = document.getElementById('Fa_C0_eq');
+                    if (Fa_C0_eq_elem) Fa_C0_eq_elem.value = Fa_C0.toFixed(6);
+                }
+                if (!userValues.has('Fa_VFr')) {
+                    const Fa_VFr_eq_elem = document.getElementById('Fa_VFr_eq');
+                    if (Fa_VFr_eq_elem) Fa_VFr_eq_elem.value = Fa_VFr.toFixed(4);
+                }
             }
 
             // Check bearing selection
