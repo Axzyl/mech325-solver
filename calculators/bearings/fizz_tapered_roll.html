@@ -337,6 +337,21 @@
             border-radius: 6px;
             border: 1px solid #dee2e6;
         }
+        .subsection.case-active {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+        .subsection.case-active h3 {
+            color: #155724;
+        }
+        .subsection.case-inactive {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            opacity: 0.5;
+        }
+        .subsection.case-inactive h3 {
+            color: #6c757d;
+        }
         .bearing-group {
             background: #f0f8ff;
             padding: 15px;
@@ -584,8 +599,8 @@
                     <div class="note" id="equivalent_load_case">
                         <!-- Dynamic display of which case applies -->
                     </div>
-                    <div class="subsection">
-                        <h3>Bearing A Equivalent Load - Case 1 (F<sub>iA</sub> ≤ F<sub>iB</sub> + F<sub>ae</sub>)</h3>
+                    <div class="subsection" id="case1_section">
+                        <h3>Case 1 (F<sub>iA</sub> ≤ F<sub>iB</sub> + F<sub>ae</sub>) ✓</h3>
                         <div class="equation-block">
                             <div class="equation-latex">$$F_{eA} = 0.4 F_{rA} + K_A(F_{iB} + F_{ae})$$</div>
                             <div class="equation-inputs">
@@ -639,8 +654,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="subsection">
-                        <h3>Bearing Equivalent Load - Case 2 (F<sub>iA</sub> > F<sub>iB</sub> + F<sub>ae</sub>)</h3>
+                    <div class="subsection" id="case2_section">
+                        <h3>Case 2 (F<sub>iA</sub> > F<sub>iB</sub> + F<sub>ae</sub>) ✓</h3>
                         <div class="equation-block">
                             <div class="equation-latex">$$F_{eB} = 0.4 F_{rB} + K_B(F_{iA} - F_{ae})$$</div>
                             <div class="equation-inputs">
@@ -738,25 +753,25 @@
                         <span class="unit"></span>
                     </div>
                     <div class="subsection">
-                        <h3>Weibull Parameters (Auto-Filled)</h3>
+                        <h3>Weibull Parameters (Auto-Filled, Editable)</h3>
                         <div class="input-row">
                             <label><strong>L<sub>10</sub>:</strong></label>
-                            <input type="number" id="L10" class="lookup" readonly>
+                            <input type="number" id="L10" class="lookup" step="any" oninput="markAsUser('L10'); calculate()">
                             <span class="unit">10⁶ rev</span>
                         </div>
                         <div class="input-row">
                             <label><strong>x<sub>0</sub>:</strong></label>
-                            <input type="number" id="x0" class="lookup" readonly>
+                            <input type="number" id="x0" class="lookup" step="any" oninput="markAsUser('x0'); calculate()">
                             <span class="unit">-</span>
                         </div>
                         <div class="input-row">
                             <label><strong>θ:</strong></label>
-                            <input type="number" id="theta" class="lookup" readonly>
+                            <input type="number" id="theta" class="lookup" step="any" oninput="markAsUser('theta'); calculate()">
                             <span class="unit">-</span>
                         </div>
                         <div class="input-row">
                             <label><strong>b:</strong></label>
-                            <input type="number" id="b" class="lookup" readonly>
+                            <input type="number" id="b" class="lookup" step="any" oninput="markAsUser('b'); calculate()">
                             <span class="unit">-</span>
                         </div>
                     </div>
@@ -872,7 +887,7 @@
                         a = 10/3 for tapered roller bearings (constant)
                     </div>
 
-                    <div class="equation-block">
+                    <!-- <div class="equation-block">
                         <div class="equation-latex">$$C_{10} = a_f F_e \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{3/10}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
@@ -894,7 +909,7 @@
                             </div>
                             <span>× [...]^(3/10)</span>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="bearing-group">
                         <h3>Bearing A Load Rating</h3>
@@ -1187,13 +1202,17 @@
             'KB': ['KB', 'KB_eq', 'KB_eq2'],
             'FiA': ['FiA_eq', 'FiA_eq2'],
             'FiB': ['FiB_eq', 'FiB_eq2'],
+            'Fe': ['Fe_eq'],
             'FeA': ['FeA_eq1', 'FeA_eq2', 'FeA_eq3'],
             'FeB': ['FeB_eq1', 'FeB_eq2', 'FeB_eq3'],
             'LD_hours': ['LD_hours', 'LD_hours_eq'],
             'nD': ['nD', 'nD_eq'],
             'LD_rev': ['LD_rev_eq', 'LD_rev_eq2'],
-            'L10': ['L10_eq'],
+            'L10': ['L10', 'L10_eq'],
             'xD': ['xD_eq'],
+            'x0': ['x0'],
+            'theta': ['theta'],
+            'b': ['b'],
             'Rtot': ['Rtot', 'Rtot_eq'],
             'n_bearings': ['n_bearings', 'n_bearings_eq'],
             'Ri': ['Ri_eq'],
@@ -1298,15 +1317,15 @@
             const b = document.getElementById('b');
 
             if (manufacturer === 'timken') {
-                L10.value = '90';
-                x0.value = '0';
-                theta.value = '4.48';
-                b.value = '1.5';
+                if (!userValues.has('L10')) L10.value = '90';
+                if (!userValues.has('x0')) x0.value = '0';
+                if (!userValues.has('theta')) theta.value = '4.48';
+                if (!userValues.has('b')) b.value = '1.5';
             } else { // SKF
-                L10.value = '1';
-                x0.value = '0.02';
-                theta.value = '4.459';
-                b.value = '1.483';
+                if (!userValues.has('L10')) L10.value = '1';
+                if (!userValues.has('x0')) x0.value = '0.02';
+                if (!userValues.has('theta')) theta.value = '4.459';
+                if (!userValues.has('b')) b.value = '1.483';
             }
 
             calculate();
@@ -1323,8 +1342,14 @@
             const FrB = Math.sqrt(RxB * RxB + RyB * RyB);
 
             // Set to equation instances
-            if (document.getElementById('FrA_eq')) document.getElementById('FrA_eq').value = FrA.toFixed(2);
-            syncAllInstances('FrA_eq');
+            if (document.getElementById('FrA_eq') && !userValues.has('FrA')) {
+                document.getElementById('FrA_eq').value = FrA.toFixed(2);
+                syncAllInstances('FrA_eq');
+            }
+            if (document.getElementById('FrB_eq') && !userValues.has('FrB')) {
+                document.getElementById('FrB_eq').value = FrB.toFixed(2);
+                syncAllInstances('FrB_eq');
+            }
 
             // Axial loads
             const Fa = parseFloat(document.getElementById('Fa').value) || 0;
@@ -1337,48 +1362,85 @@
             const KA = parseFloat(document.getElementById('KA').value) || 1.5;
             const KB = parseFloat(document.getElementById('KB').value) || 1.5;
 
-            const FiA = KA !== 0 ? 0.47 * FrA / KA : 0;
-            const FiB = KB !== 0 ? 0.47 * FrB / KB : 0;
+            // Get FrA/FrB for calculation - use equation box values if user edited them
+            const FrA_calc = userValues.has('FrA') ? (parseFloat(document.getElementById('FrA_eq')?.value) || FrA) : FrA;
+            const FrB_calc = userValues.has('FrB') ? (parseFloat(document.getElementById('FrB_eq')?.value) || FrB) : FrB;
+            const KA_calc = userValues.has('KA') ? (parseFloat(document.getElementById('KA_eq')?.value) || KA) : KA;
+            const KB_calc = userValues.has('KB') ? (parseFloat(document.getElementById('KB_eq')?.value) || KB) : KB;
+
+            const FiA = KA_calc !== 0 ? 0.47 * FrA_calc / KA_calc : 0;
+            const FiB = KB_calc !== 0 ? 0.47 * FrB_calc / KB_calc : 0;
 
             // Set to equation instances
-            if (document.getElementById('FiA_eq')) document.getElementById('FiA_eq').value = FiA.toFixed(2);
-            syncAllInstances('FiA_eq');
-            if (document.getElementById('FiB_eq')) document.getElementById('FiB_eq').value = FiB.toFixed(2);
-            syncAllInstances('FiB_eq');
-
-            // Step 3: Equivalent loads (piecewise)
-            let FeA, FeB;
-            const caseDisplay = document.getElementById('equivalent_load_case');
-
-            if (FiA <= (FiB + Fae)) {
-                // Case 1: FiA ≤ (FiB + Fae)
-                FeA = 0.4 * FrA + KA * (FiB + Fae);
-                FeB = FrB;
-                caseDisplay.innerHTML = `
-                    <strong>Case 1:</strong> F<sub>iA</sub> ≤ (F<sub>iB</sub> + F<sub>ae</sub>)<br>
-                    F<sub>eA</sub> = 0.4F<sub>rA</sub> + K<sub>A</sub>(F<sub>iB</sub> + F<sub>ae</sub>)<br>
-                    F<sub>eB</sub> = F<sub>rB</sub>
-                `;
-            } else {
-                // Case 2: FiA > (FiB + Fae)
-                FeB = 0.4 * FrB + KB * (FiA - Fae);
-                FeA = FrA;
-                caseDisplay.innerHTML = `
-                    <strong>Case 2:</strong> F<sub>iA</sub> > (F<sub>iB</sub> + F<sub>ae</sub>)<br>
-                    F<sub>eB</sub> = 0.4F<sub>rB</sub> + K<sub>B</sub>(F<sub>iA</sub> - F<sub>ae</sub>)<br>
-                    F<sub>eA</sub> = F<sub>rA</sub>
-                `;
+            if (document.getElementById('FiA_eq') && !userValues.has('FiA')) {
+                document.getElementById('FiA_eq').value = FiA.toFixed(2);
+                syncAllInstances('FiA_eq');
+            }
+            if (document.getElementById('FiB_eq') && !userValues.has('FiB')) {
+                document.getElementById('FiB_eq').value = FiB.toFixed(2);
+                syncAllInstances('FiB_eq');
             }
 
-            // Set to equation instances
-            if (document.getElementById('FeA_eq1')) document.getElementById('FeA_eq1').value = FeA.toFixed(2);
-            syncAllInstances('FeA_eq1');
-            if (document.getElementById('FeB_eq1')) document.getElementById('FeB_eq1').value = FeB.toFixed(2);
-            syncAllInstances('FeB_eq1');
+            // Step 3: Equivalent loads (piecewise)
+            // Get FiA/FiB for calculation - use equation box values if user edited them
+            const FiA_calc = userValues.has('FiA') ? (parseFloat(document.getElementById('FiA_eq')?.value) || FiA) : FiA;
+            const FiB_calc = userValues.has('FiB') ? (parseFloat(document.getElementById('FiB_eq')?.value) || FiB) : FiB;
+            const Fae_calc = userValues.has('Fae') ? (parseFloat(document.getElementById('Fae_eq')?.value) || Fae) : Fae;
+
+            let FeA, FeB;
+            const caseDisplay = document.getElementById('equivalent_load_case');
+            const case1Section = document.getElementById('case1_section');
+            const case2Section = document.getElementById('case2_section');
+
+            if (FiA_calc <= (FiB_calc + Fae_calc)) {
+                // Case 1: FiA ≤ (FiB + Fae)
+                FeA = 0.4 * FrA_calc + KA_calc * (FiB_calc + Fae_calc);
+                FeB = FrB_calc;
+                caseDisplay.innerHTML = `
+                    <strong>✓ Case 1 Active:</strong> F<sub>iA</sub> (${FiA_calc.toFixed(2)}) ≤ F<sub>iB</sub> + F<sub>ae</sub> (${(FiB_calc + Fae_calc).toFixed(2)})
+                `;
+                // Highlight Case 1, dim Case 2
+                case1Section.classList.add('case-active');
+                case1Section.classList.remove('case-inactive');
+                case2Section.classList.add('case-inactive');
+                case2Section.classList.remove('case-active');
+            } else {
+                // Case 2: FiA > (FiB + Fae)
+                FeB = 0.4 * FrB_calc + KB_calc * (FiA_calc - Fae_calc);
+                FeA = FrA_calc;
+                caseDisplay.innerHTML = `
+                    <strong>✓ Case 2 Active:</strong> F<sub>iA</sub> (${FiA_calc.toFixed(2)}) > F<sub>iB</sub> + F<sub>ae</sub> (${(FiB_calc + Fae_calc).toFixed(2)})
+                `;
+                // Highlight Case 2, dim Case 1
+                case2Section.classList.add('case-active');
+                case2Section.classList.remove('case-inactive');
+                case1Section.classList.add('case-inactive');
+                case1Section.classList.remove('case-active');
+            }
+
+            // Set to equation instances for the ACTIVE case
+            if (!userValues.has('FeA')) {
+                if (document.getElementById('FeA_eq1')) {
+                    document.getElementById('FeA_eq1').value = FeA.toFixed(2);
+                    syncAllInstances('FeA_eq1');
+                }
+                if (document.getElementById('FeA_eq2')) {
+                    document.getElementById('FeA_eq2').value = FeA.toFixed(2);
+                }
+            }
+            if (!userValues.has('FeB')) {
+                if (document.getElementById('FeB_eq1')) {
+                    document.getElementById('FeB_eq1').value = FeB.toFixed(2);
+                    syncAllInstances('FeB_eq1');
+                }
+                if (document.getElementById('FeB_eq2')) {
+                    document.getElementById('FeB_eq2').value = FeB.toFixed(2);
+                }
+            }
 
             // Step 4: Design life
             const appType = document.getElementById('application_type').value;
-            if (appType) {
+            if (appType && !userValues.has('LD_hours')) {
                 document.getElementById('LD_hours').value = appType;
                 syncAllInstances('LD_hours');
             }
@@ -1395,10 +1457,14 @@
             const xD = LD_rev / (L10 * 1e6);
 
             // Set to equation instances
-            if (document.getElementById('LD_rev_eq')) document.getElementById('LD_rev_eq').value = LD_rev.toExponential(3);
-            syncAllInstances('LD_rev_eq');
-            if (document.getElementById('xD_eq')) document.getElementById('xD_eq').value = xD.toFixed(4);
-            syncAllInstances('xD_eq');
+            if (document.getElementById('LD_rev_eq') && !userValues.has('LD_rev')) {
+                document.getElementById('LD_rev_eq').value = LD_rev.toExponential(3);
+                syncAllInstances('LD_rev_eq');
+            }
+            if (document.getElementById('xD_eq') && !userValues.has('xD')) {
+                document.getElementById('xD_eq').value = xD.toFixed(4);
+                syncAllInstances('xD_eq');
+            }
 
             // Step 6: Reliability
             const Rtot = parseFloat(document.getElementById('Rtot').value) || 0;
@@ -1406,12 +1472,14 @@
             const Ri = n_bearings > 0 ? Math.pow(Rtot, 1/n_bearings) : 0;
 
             // Set to equation instances
-            if (document.getElementById('Ri_eq')) document.getElementById('Ri_eq').value = Ri.toFixed(6);
-            syncAllInstances('Ri_eq');
+            if (document.getElementById('Ri_eq') && !userValues.has('Ri')) {
+                document.getElementById('Ri_eq').value = Ri.toFixed(6);
+                syncAllInstances('Ri_eq');
+            }
 
             // Step 7: Load ratings
             const appClass = document.getElementById('application_class').value;
-            if (appClass) {
+            if (appClass && !userValues.has('af')) {
                 document.getElementById('af').value = appClass;
                 syncAllInstances('af');
             }
@@ -1420,31 +1488,48 @@
             // a = 10/3 for tapered roller bearings
             const a = 10/3;
 
+            // Get values for calculation - use equation box values if user edited them
+            const af_calc = userValues.has('af') ? (parseFloat(document.getElementById('af_eq')?.value) || af) : af;
+            const xD_calc = userValues.has('xD') ? (parseFloat(document.getElementById('xD_eq')?.value) || xD) : xD;
+            const Ri_calc = userValues.has('Ri') ? (parseFloat(document.getElementById('Ri_eq')?.value) || Ri) : Ri;
+            const FeA_calc = userValues.has('FeA') ? (parseFloat(document.getElementById('FeA_eq3')?.value) || FeA) : FeA;
+            const FeB_calc = userValues.has('FeB') ? (parseFloat(document.getElementById('FeB_eq3')?.value) || FeB) : FeB;
+
+            // Calculate Weibull denominator (use 1 as default if conditions not met)
+            let denominator = 1;
+            if (Ri_calc > 0 && Ri_calc < 1) {
+                const lnTerm = Math.log(1/Ri_calc);
+                denominator = x0 + (theta - x0) * Math.pow(lnTerm, 1/b);
+            }
+
             // Calculate C10 for both bearings
-            if (Ri > 0 && Ri < 1) {
-                const lnTerm = Math.log(1/Ri);
-                const denominator = x0 + (theta - x0) * Math.pow(lnTerm, 1/b);
+            // Bearing A
+            const FD_A = af_calc * FeA_calc;
+            const C10A_lbf = FD_A * Math.pow(xD_calc / denominator, 1/a);
+            const C10A_kN = C10A_lbf * 0.004448;
 
-                // Bearing A
-                const FD_A = af * FeA;
-                const C10A_lbf = FD_A * Math.pow(xD / denominator, 1/a);
-                const C10A_kN = C10A_lbf * 0.004448;
-
-                // Set to equation instances
-                if (document.getElementById('C10A_lbf_eq')) document.getElementById('C10A_lbf_eq').value = C10A_lbf.toFixed(2);
+            // Set to equation instances
+            if (document.getElementById('C10A_lbf_eq') && !userValues.has('C10A_lbf')) {
+                document.getElementById('C10A_lbf_eq').value = C10A_lbf.toFixed(2);
                 syncAllInstances('C10A_lbf_eq');
-                if (document.getElementById('C10A_kN_eq')) document.getElementById('C10A_kN_eq').value = C10A_kN.toFixed(2);
+            }
+            if (document.getElementById('C10A_kN_eq') && !userValues.has('C10A_kN')) {
+                document.getElementById('C10A_kN_eq').value = C10A_kN.toFixed(2);
                 syncAllInstances('C10A_kN_eq');
+            }
 
-                // Bearing B
-                const FD_B = af * FeB;
-                const C10B_lbf = FD_B * Math.pow(xD / denominator, 1/a);
-                const C10B_kN = C10B_lbf * 0.004448;
+            // Bearing B
+            const FD_B = af_calc * FeB_calc;
+            const C10B_lbf = FD_B * Math.pow(xD_calc / denominator, 1/a);
+            const C10B_kN = C10B_lbf * 0.004448;
 
-                // Set to equation instances
-                if (document.getElementById('C10B_lbf_eq')) document.getElementById('C10B_lbf_eq').value = C10B_lbf.toFixed(2);
+            // Set to equation instances
+            if (document.getElementById('C10B_lbf_eq') && !userValues.has('C10B_lbf')) {
+                document.getElementById('C10B_lbf_eq').value = C10B_lbf.toFixed(2);
                 syncAllInstances('C10B_lbf_eq');
-                if (document.getElementById('C10B_kN_eq')) document.getElementById('C10B_kN_eq').value = C10B_kN.toFixed(2);
+            }
+            if (document.getElementById('C10B_kN_eq') && !userValues.has('C10B_kN')) {
+                document.getElementById('C10B_kN_eq').value = C10B_kN.toFixed(2);
                 syncAllInstances('C10B_kN_eq');
             }
 
@@ -1478,6 +1563,9 @@
 
         function resetAll() {
             if (confirm('Are you sure you want to reset all values?')) {
+                // Clear user values tracking
+                userValues.clear();
+
                 const inputs = document.querySelectorAll('input[type="number"], input[type="text"]');
                 inputs.forEach(input => {
                     input.value = '';
