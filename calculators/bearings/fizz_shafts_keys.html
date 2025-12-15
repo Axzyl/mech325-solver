@@ -394,6 +394,12 @@
             text-decoration: underline;
             color: #2980b9;
         }
+        .unit-inline {
+            font-size: 0.75em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -448,17 +454,20 @@
                             <div class="var-input">
                                 <label>T</label>
                                 <input type="number" id="T_eq" step="any" oninput="syncAllInstances('T_eq'); markAsUser('T_eq'); calculate()">
+                                <span class="unit-inline">[lbf·in]</span>
                             </div>
                             <span>=</span>
                             <span>63000 ×</span>
                             <div class="var-input">
                                 <label>P</label>
                                 <input type="number" id="P_eq" step="any" oninput="syncAllInstances('P_eq'); markAsUser('P_eq'); calculate()">
+                                <span class="unit-inline">[hp]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>n</label>
                                 <input type="number" id="n_eq" step="any" oninput="syncAllInstances('n_eq'); markAsUser('n_eq'); calculate()">
+                                <span class="unit-inline">[rpm]</span>
                             </div>
                         </div>
                     </div>
@@ -508,17 +517,20 @@
                             <div class="var-input">
                                 <label>W<sub>t</sub></label>
                                 <input type="number" id="Wt_eq" step="any" oninput="syncAllInstances('Wt_eq'); markAsUser('Wt_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <span>2 ×</span>
                             <div class="var-input">
                                 <label>T</label>
                                 <input type="number" id="T_eq2" step="any" oninput="syncAllInstances('T_eq2'); markAsUser('T_eq2'); calculate()">
+                                <span class="unit-inline">[lbf·in]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>D</label>
                                 <input type="number" id="D_pitch_eq" step="any" oninput="syncAllInstances('D_pitch_eq'); markAsUser('D_pitch_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -538,16 +550,19 @@
                                 <div class="var-input">
                                     <label>W<sub>r</sub></label>
                                     <input type="number" id="Wr_eq" step="any" oninput="syncAllInstances('Wr_eq'); markAsUser('Wr_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>W<sub>t</sub></label>
                                     <input type="number" id="Wt_eq2" step="any" oninput="syncAllInstances('Wt_eq2'); markAsUser('Wt_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>× tan(</span>
                                 <div class="var-input">
                                     <label>φ</label>
                                     <input type="number" id="phi_eq" step="any" oninput="syncAllInstances('phi_eq'); markAsUser('phi_eq'); calculate()">
+                                    <span class="unit-inline">[deg]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -777,11 +792,13 @@
                             <div class="var-input">
                                 <label>C<sub>s</sub></label>
                                 <input type="number" id="Cs_eq" step="any" oninput="syncAllInstances('Cs_eq'); markAsUser('Cs_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>= (</span>
                             <div class="var-input">
                                 <label>D<sub>est</sub></label>
                                 <input type="number" id="D_est_eq" step="any" oninput="syncAllInstances('D_est_eq'); markAsUser('D_est_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>/ 0.3)<sup>-0.11</sup></span>
                         </div>
@@ -802,31 +819,37 @@
                             <div class="var-input">
                                 <label>s'<sub>n</sub></label>
                                 <input type="number" id="sn_prime_eq" step="any" oninput="syncAllInstances('sn_prime_eq'); markAsUser('sn_prime_eq'); calculate()">
+                                <span class="unit-inline">[ksi]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>s<sub>n</sub></label>
                                 <input type="number" id="sn_eq2" step="any" oninput="syncAllInstances('sn_eq2'); markAsUser('sn_eq2'); calculate()">
+                                <span class="unit-inline">[ksi]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>C<sub>m</sub></label>
                                 <input type="number" id="Cm_eq" step="any" oninput="syncAllInstances('Cm_eq'); markAsUser('Cm_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>C<sub>st</sub></label>
                                 <input type="number" id="Cst_eq" step="any" oninput="syncAllInstances('Cst_eq'); markAsUser('Cst_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>C<sub>R</sub></label>
                                 <input type="number" id="CR_eq" step="any" oninput="syncAllInstances('CR_eq'); markAsUser('CR_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>C<sub>s</sub></label>
                                 <input type="number" id="Cs_eq2" step="any" oninput="syncAllInstances('Cs_eq2'); markAsUser('Cs_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -854,37 +877,44 @@
                             <div class="var-input">
                                 <label>D<sub>min</sub></label>
                                 <input type="number" id="D_min_eq" step="any" oninput="syncAllInstances('D_min_eq'); markAsUser('D_min_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <span>[(32 ×</span>
                             <div class="var-input">
                                 <label>N</label>
                                 <input type="number" id="N_design_eq" step="any" oninput="syncAllInstances('N_design_eq'); markAsUser('N_design_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>/ π) × √((</span>
                             <div class="var-input">
                                 <label>K<sub>t</sub></label>
                                 <input type="number" id="Kt_eq" step="any" oninput="syncAllInstances('Kt_eq'); markAsUser('Kt_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>M</label>
                                 <input type="number" id="M_eq" step="any" oninput="syncAllInstances('M_eq'); markAsUser('M_eq'); calculate()">
+                                <span class="unit-inline">[lbf·in]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>s'<sub>n</sub></label>
                                 <input type="number" id="sn_prime_eq2" step="any" oninput="syncAllInstances('sn_prime_eq2'); markAsUser('sn_prime_eq2'); calculate()">
+                                <span class="unit-inline">[ksi]</span>
                             </div>
                             <span>)² + 0.75 × (</span>
                             <div class="var-input">
                                 <label>T</label>
                                 <input type="number" id="T_loc_eq" step="any" oninput="syncAllInstances('T_loc_eq'); markAsUser('T_loc_eq'); calculate()">
+                                <span class="unit-inline">[lbf·in]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>S<sub>y</sub></label>
                                 <input type="number" id="Sy_eq" step="any" oninput="syncAllInstances('Sy_eq'); markAsUser('Sy_eq'); calculate()">
+                                <span class="unit-inline">[ksi]</span>
                             </div>
                             <span>)²)]^(1/3)</span>
                         </div>
@@ -936,21 +966,25 @@
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_bearing_eq" step="any" oninput="syncAllInstances('C_bearing_eq'); markAsUser('C_bearing_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>R</label>
                                 <input type="number" id="R_bearing_eq" step="any" oninput="syncAllInstances('R_bearing_eq'); markAsUser('R_bearing_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>× (</span>
                             <div class="var-input">
                                 <label>L<sub>D</sub></label>
                                 <input type="number" id="LD_bearing_eq" step="any" oninput="syncAllInstances('LD_bearing_eq'); markAsUser('LD_bearing_eq'); calculate()">
+                                <span class="unit-inline">[10⁶ rev]</span>
                             </div>
                             <span>/ 1)^(1 /</span>
                             <div class="var-input">
                                 <label>k</label>
                                 <input type="number" id="k_bearing_eq" step="any" oninput="syncAllInstances('k_bearing_eq'); markAsUser('k_bearing_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -1025,27 +1059,32 @@
                                 <div class="var-input">
                                     <label>L<sub>min</sub></label>
                                     <input type="number" id="L_min_key_eq" step="any" oninput="syncAllInstances('L_min_key_eq'); markAsUser('L_min_key_eq'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>=</span>
                                 <span>4 ×</span>
                                 <div class="var-input">
                                     <label>T</label>
                                     <input type="number" id="T_key_eq" step="any" oninput="syncAllInstances('T_key_eq'); markAsUser('T_key_eq'); calculate()">
+                                    <span class="unit-inline">[lbf·in]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>S<sub>y</sub></label>
                                     <input type="number" id="Sy_key_eq" step="any" oninput="syncAllInstances('Sy_key_eq'); markAsUser('Sy_key_eq'); calculate()">
+                                    <span class="unit-inline">[ksi]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>W</label>
                                     <input type="number" id="W_key_eq" step="any" oninput="syncAllInstances('W_key_eq'); markAsUser('W_key_eq'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>D</label>
                                     <input type="number" id="D_key_eq" step="any" oninput="syncAllInstances('D_key_eq'); markAsUser('D_key_eq'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>

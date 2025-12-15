@@ -324,6 +324,12 @@
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
+        .unit-inline {
+            font-size: 0.75em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
         .equation-inputs > span {
             font-weight: bold;
             font-size: 1.2em;
@@ -391,13 +397,690 @@
             <h1>Helical Compression Springs Calculator</h1>
 
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('procedure')">Procedure</button>
+                <button class="tab active" onclick="switchTab('static-design')">Static Design</button>
+                <button class="tab" onclick="switchTab('procedure')">Procedure</button>
                 <button class="tab" onclick="switchTab('equations')">General Equations</button>
                 <button class="tab" onclick="switchTab('variables')">Variables</button>
             </div>
 
+            <!-- STATIC DESIGN TAB -->
+            <div id="static-design" class="tab-content active">
+                <div class="button-group">
+                    <button class="save-btn" onclick="saveSession()">Save Session</button>
+                    <button class="reset-btn" onclick="resetAll()">Reset All</button>
+                </div>
+
+                <!-- Design Inputs -->
+                <div class="section">
+                    <h2>Step 1: Design Inputs</h2>
+                    <div class="note">
+                        Enter the basic design requirements. Choose wire diameter (d) from standard gauges.
+                    </div>
+
+                    <div class="input-row">
+                        <label>Wire Diameter (d):</label>
+                        <input type="number" id="sd_d" step="any" oninput="syncAllInstances('sd_d'); markAsUser('sd_d'); calculateStaticDesign()">
+                        <span class="unit">in</span>
+                    </div>
+                    <div class="note">
+                        Select from <a href="#" onclick="goToPage(8)">Table A-28</a> (Standard Wire Gauges). Common: 0.020", 0.032", 0.047", 0.063", 0.081", 0.105", 0.148", 0.192"
+                    </div>
+
+                    <div class="input-row">
+                        <label>Maximum Load (F<sub>max</sub>):</label>
+                        <input type="number" id="sd_Fmax" step="any" oninput="syncAllInstances('sd_Fmax'); markAsUser('sd_Fmax'); calculateStaticDesign()">
+                        <span class="unit">lbf</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Maximum Deflection (y<sub>max</sub>):</label>
+                        <input type="number" id="sd_ymax" step="any" oninput="syncAllInstances('sd_ymax'); markAsUser('sd_ymax'); calculateStaticDesign()">
+                        <span class="unit">in</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Design Safety Factor (n<sub>s</sub>):</label>
+                        <input type="number" id="sd_ns_target" value="1.2" step="any" oninput="syncAllInstances('sd_ns_target'); markAsUser('sd_ns_target'); calculateStaticDesign()">
+                        <span class="unit">-</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Fractional Overrun (ξ):</label>
+                        <input type="number" id="sd_xi" value="0.15" step="any" oninput="syncAllInstances('sd_xi'); markAsUser('sd_xi'); calculateStaticDesign()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        ξ ≥ 0.15 typically recommended for clash allowance
+                    </div>
+                </div>
+
+                <!-- Constraint Type Selection -->
+                <div class="section">
+                    <h2>Step 2: Constraint Type</h2>
+                    <div class="note">
+                        Select the constraint type based on your application.
+                    </div>
+
+                    <div class="input-row">
+                        <label>Constraint Type:</label>
+                        <select id="sd_constraint" onchange="updateConstraintUI(); calculateStaticDesign()">
+                            <option value="free">Free (No physical constraint)</option>
+                            <option value="over-rod">Over-a-rod</option>
+                            <option value="in-hole">In-a-hole</option>
+                        </select>
+                    </div>
+
+                    <!-- Over-a-rod inputs -->
+                    <div id="over-rod-inputs" style="display: none;">
+                        <div class="subsection">
+                            <h3>Over-a-rod Parameters</h3>
+                            <div class="input-row">
+                                <label>Rod Diameter (d<sub>rod</sub>):</label>
+                                <input type="number" id="sd_d_rod" step="any" oninput="syncAllInstances('sd_d_rod'); markAsUser('sd_d_rod'); calculateStaticDesign()">
+                                <span class="unit">in</span>
+                            </div>
+                            <div class="input-row">
+                                <label>Allowance:</label>
+                                <input type="number" id="sd_allowance_rod" value="0.05" step="any" oninput="syncAllInstances('sd_allowance_rod'); markAsUser('sd_allowance_rod'); calculateStaticDesign()">
+                                <span class="unit">in</span>
+                            </div>
+                            <div class="equation-block">
+                                <div class="equation-latex">$$D = d_{rod} + d + \text{allowance}$$</div>
+                                <div class="equation-inputs">
+                                    <div class="var-input">
+                                        <label>D</label>
+                                        <input type="number" id="sd_D_rod_result" class="computed" step="any" oninput="syncAllInstances('sd_D_rod_result'); markAsUser('sd_D_rod_result'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>=</span>
+                                    <div class="var-input">
+                                        <label>d<sub>rod</sub></label>
+                                        <input type="number" id="sd_d_rod_eq" step="any" oninput="syncAllInstances('sd_d_rod_eq'); markAsUser('sd_d_rod_eq'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>+</span>
+                                    <div class="var-input">
+                                        <label>d</label>
+                                        <input type="number" id="sd_d_rod_eq2" step="any" oninput="syncAllInstances('sd_d_rod_eq2'); markAsUser('sd_d_rod_eq2'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>+</span>
+                                    <div class="var-input">
+                                        <label>allow</label>
+                                        <input type="number" id="sd_allowance_rod_eq" step="any" oninput="syncAllInstances('sd_allowance_rod_eq'); markAsUser('sd_allowance_rod_eq'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- In-a-hole inputs -->
+                    <div id="in-hole-inputs" style="display: none;">
+                        <div class="subsection">
+                            <h3>In-a-hole Parameters</h3>
+                            <div class="input-row">
+                                <label>Hole Diameter (d<sub>hole</sub>):</label>
+                                <input type="number" id="sd_d_hole" step="any" oninput="syncAllInstances('sd_d_hole'); markAsUser('sd_d_hole'); calculateStaticDesign()">
+                                <span class="unit">in</span>
+                            </div>
+                            <div class="input-row">
+                                <label>Allowance:</label>
+                                <input type="number" id="sd_allowance_hole" value="0.05" step="any" oninput="syncAllInstances('sd_allowance_hole'); markAsUser('sd_allowance_hole'); calculateStaticDesign()">
+                                <span class="unit">in</span>
+                            </div>
+                            <div class="equation-block">
+                                <div class="equation-latex">$$D = d_{hole} - d - \text{allowance}$$</div>
+                                <div class="equation-inputs">
+                                    <div class="var-input">
+                                        <label>D</label>
+                                        <input type="number" id="sd_D_hole_result" class="computed" step="any" oninput="syncAllInstances('sd_D_hole_result'); markAsUser('sd_D_hole_result'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>=</span>
+                                    <div class="var-input">
+                                        <label>d<sub>hole</sub></label>
+                                        <input type="number" id="sd_d_hole_eq" step="any" oninput="syncAllInstances('sd_d_hole_eq'); markAsUser('sd_d_hole_eq'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>-</span>
+                                    <div class="var-input">
+                                        <label>d</label>
+                                        <input type="number" id="sd_d_hole_eq2" step="any" oninput="syncAllInstances('sd_d_hole_eq2'); markAsUser('sd_d_hole_eq2'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                    <span>-</span>
+                                    <div class="var-input">
+                                        <label>allow</label>
+                                        <input type="number" id="sd_allowance_hole_eq" step="any" oninput="syncAllInstances('sd_allowance_hole_eq'); markAsUser('sd_allowance_hole_eq'); calculateStaticDesign()">
+                                        <span class="unit-inline">[in]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Free constraint inputs -->
+                    <div id="free-inputs">
+                        <div class="subsection">
+                            <h3>Free Constraint - Yield Strength Selection</h3>
+                            <div class="input-row">
+                                <label>Spring Condition:</label>
+                                <select id="sd_condition" onchange="calculateStaticDesign()">
+                                    <option value="as-wound">As-wound</option>
+                                    <option value="set-removed">Set removed</option>
+                                </select>
+                            </div>
+                            <div class="note">
+                                <strong>As-wound:</strong> S<sub>sy</sub> = A/d<sup>m</sup> (use tensile strength constants)<br>
+                                <strong>Set removed:</strong> S<sub>sy</sub> = 0.65A/d<sup>m</sup> (increased yield due to set removal)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Properties -->
+                <div class="section">
+                    <h2>Step 3: Material Properties</h2>
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Look up A and m from <a href="#" onclick="goToPage(5)">Table 10-4</a> based on material and wire diameter.
+                    </div>
+
+                    <div class="input-row">
+                        <label>Material Constant (A):</label>
+                        <input type="number" id="sd_A" class="lookup" step="any" oninput="syncAllInstances('sd_A'); markAsUser('sd_A'); calculateStaticDesign()">
+                        <span class="unit">kpsi·in<sup>m</sup></span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Material Exponent (m):</label>
+                        <input type="number" id="sd_m" class="lookup" step="any" oninput="syncAllInstances('sd_m'); markAsUser('sd_m'); calculateStaticDesign()">
+                        <span class="unit">-</span>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Shear Modulus (G):</label>
+                        <input type="number" id="sd_G" class="lookup" value="11.5" step="any" oninput="syncAllInstances('sd_G'); markAsUser('sd_G'); calculateStaticDesign()">
+                        <span class="unit">Mpsi</span>
+                    </div>
+                    <div class="note">
+                        Look up from <a href="#" onclick="goToPage(5)">Table 10-5</a>. Typical for music wire: G ≈ 11.5 Mpsi
+                    </div>
+
+                    <div class="input-row">
+                        <label>Wire Density (γ):</label>
+                        <input type="number" id="sd_gamma" class="lookup" value="0.284" step="any" oninput="syncAllInstances('sd_gamma'); markAsUser('sd_gamma'); calculateStaticDesign()">
+                        <span class="unit">lbf/in³</span>
+                    </div>
+                    <div class="note">
+                        Steel: 0.284 lbf/in³
+                    </div>
+
+                    <h3>Calculated Yield Strength</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex" id="ssy-equation">$$S_{sy} = \frac{A}{d^m}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>S<sub>sy</sub></label>
+                                <input type="number" id="sd_Ssy" class="computed" step="any" oninput="syncAllInstances('sd_Ssy'); markAsUser('sd_Ssy'); calculateStaticDesign()">
+                                <span class="unit-inline">[kpsi]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>A</label>
+                                <input type="number" id="sd_A_eq" step="any" oninput="syncAllInstances('sd_A_eq'); markAsUser('sd_A_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[kpsi·in<sup>m</sup>]</span>
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="sd_d_ssy" step="any" oninput="syncAllInstances('sd_d_ssy'); markAsUser('sd_d_ssy'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span><sup></sup></span>
+                            <div class="var-input">
+                                <label>m</label>
+                                <input type="number" id="sd_m_eq" step="any" oninput="syncAllInstances('sd_m_eq'); markAsUser('sd_m_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spring Index Calculation -->
+                <div class="section" id="free-calculation-section">
+                    <h2>Step 4: Spring Index Calculation (C)</h2>
+
+                    <div id="as-wound-calc">
+                        <div class="note">
+                            For <strong>As-wound</strong> springs, calculate C using the quadratic formula.
+                        </div>
+
+                        <h3>Intermediate Values</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\alpha = \frac{S_{sy}}{n_s}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>α</label>
+                                    <input type="number" id="sd_alpha" class="computed" step="any" oninput="syncAllInstances('sd_alpha'); markAsUser('sd_alpha'); calculateStaticDesign()">
+                                    <span class="unit-inline">[kpsi]</span>
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>S<sub>sy</sub></label>
+                                    <input type="number" id="sd_Ssy_alpha" step="any" oninput="syncAllInstances('sd_Ssy_alpha'); markAsUser('sd_Ssy_alpha'); calculateStaticDesign()">
+                                    <span class="unit-inline">[kpsi]</span>
+                                </div>
+                                <span>/</span>
+                                <div class="var-input">
+                                    <label>n<sub>s</sub></label>
+                                    <input type="number" id="sd_ns_eq" step="any" oninput="syncAllInstances('sd_ns_eq'); markAsUser('sd_ns_eq'); calculateStaticDesign()">
+                                    <span class="unit-inline">[-]</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$\beta = \frac{8(1+\xi)F_{max}}{\pi d^2}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>β</label>
+                                    <input type="number" id="sd_beta" class="computed" step="any" oninput="syncAllInstances('sd_beta'); markAsUser('sd_beta'); calculateStaticDesign()">
+                                    <span class="unit-inline">[kpsi]</span>
+                                </div>
+                                <span>=</span>
+                                <span>8(1+</span>
+                                <div class="var-input">
+                                    <label>ξ</label>
+                                    <input type="number" id="sd_xi_beta" step="any" oninput="syncAllInstances('sd_xi_beta'); markAsUser('sd_xi_beta'); calculateStaticDesign()">
+                                    <span class="unit-inline">[-]</span>
+                                </div>
+                                <span>)</span>
+                                <div class="var-input">
+                                    <label>F<sub>max</sub></label>
+                                    <input type="number" id="sd_Fmax_beta" step="any" oninput="syncAllInstances('sd_Fmax_beta'); markAsUser('sd_Fmax_beta'); calculateStaticDesign()">
+                                    <span class="unit-inline">[lbf]</span>
+                                </div>
+                                <span>/ πd²</span>
+                                <div class="var-input">
+                                    <label>d</label>
+                                    <input type="number" id="sd_d_beta" step="any" oninput="syncAllInstances('sd_d_beta'); markAsUser('sd_d_beta'); calculateStaticDesign()">
+                                    <span class="unit-inline">[in]</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3>Spring Index (Quadratic Solution)</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$C = \frac{2\alpha - \beta}{4\beta} + \sqrt{\left(\frac{2\alpha - \beta}{4\beta}\right)^2 - \frac{3\alpha}{4\beta}}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>C</label>
+                                    <input type="number" id="sd_C" class="computed" step="any" oninput="syncAllInstances('sd_C'); markAsUser('sd_C'); calculateStaticDesign()">
+                                    <span class="unit-inline">[-]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="set-removed-calc" style="display: none;">
+                        <div class="note">
+                            For <strong>Set removed</strong> springs, calculate D directly.
+                        </div>
+
+                        <div class="equation-block">
+                            <div class="equation-latex">$$D = \frac{S_{sy}\pi d^3}{8n_s(1+\xi)F_{max}}$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>D</label>
+                                    <input type="number" id="sd_D_set" class="computed" step="any" readonly>
+                                    <span class="unit-inline">[in]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Mean Diameter</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$D = C \times d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="sd_D" class="computed" step="any" oninput="syncAllInstances('sd_D'); markAsUser('sd_D'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="sd_C_eq" step="any" oninput="syncAllInstances('sd_C_eq'); markAsUser('sd_C_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="sd_d_eq" step="any" oninput="syncAllInstances('sd_d_eq'); markAsUser('sd_d_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="C_range_check" class="note">
+                        Spring index C will be calculated...
+                    </div>
+                </div>
+
+                <!-- Design Verification -->
+                <div class="section">
+                    <h2>Step 5: Design Verification</h2>
+
+                    <h3>Stress Correction Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$K_B = \frac{4C + 2}{4C - 3}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>K<sub>B</sub></label>
+                                <input type="number" id="sd_KB" class="computed" step="any" oninput="syncAllInstances('sd_KB'); markAsUser('sd_KB'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>= (4×</span>
+                            <div class="var-input">
+                                <label>C</label>
+                                <input type="number" id="sd_C_KB" step="any" oninput="syncAllInstances('sd_C_KB'); markAsUser('sd_C_KB'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>+2)/(4C-3)</span>
+                        </div>
+                    </div>
+
+                    <h3>Shear Stress at Solid</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$\tau_s = \frac{8K_B(1+\xi)F_{max}D}{\pi d^3}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>τ<sub>s</sub></label>
+                                <input type="number" id="sd_tau_s" class="computed" step="any" oninput="syncAllInstances('sd_tau_s'); markAsUser('sd_tau_s'); calculateStaticDesign()">
+                                <span class="unit-inline">[kpsi]</span>
+                            </div>
+                            <span>= 8×</span>
+                            <div class="var-input">
+                                <label>K<sub>B</sub></label>
+                                <input type="number" id="sd_KB_eq" step="any" oninput="syncAllInstances('sd_KB_eq'); markAsUser('sd_KB_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>(1+ξ)F<sub>max</sub>D/(πd³)</span>
+                        </div>
+                    </div>
+
+                    <h3>Actual Safety Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_s = \frac{S_{sy}}{\tau_s}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n<sub>s</sub></label>
+                                <input type="number" id="sd_ns_actual" class="computed" step="any" oninput="syncAllInstances('sd_ns_actual'); markAsUser('sd_ns_actual'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>S<sub>sy</sub></label>
+                                <input type="number" id="sd_Ssy_eq2" step="any" oninput="syncAllInstances('sd_Ssy_eq2'); markAsUser('sd_Ssy_eq2'); calculateStaticDesign()">
+                                <span class="unit-inline">[kpsi]</span>
+                            </div>
+                            <span>/</span>
+                            <div class="var-input">
+                                <label>τ<sub>s</sub></label>
+                                <input type="number" id="sd_tau_s_eq" step="any" oninput="syncAllInstances('sd_tau_s_eq'); markAsUser('sd_tau_s_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[kpsi]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ns_check_result" class="note">
+                        Safety factor check will appear here...
+                    </div>
+
+                    <h3>Diameters</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$OD = D + d \quad \quad ID = D - d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>OD</label>
+                                <input type="number" id="sd_OD" class="computed" step="any" oninput="syncAllInstances('sd_OD'); markAsUser('sd_OD'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="sd_D_eq2" step="any" oninput="syncAllInstances('sd_D_eq2'); markAsUser('sd_D_eq2'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>+ d</span>
+                            <span style="margin-left:20px;">|</span>
+                            <div class="var-input">
+                                <label>ID</label>
+                                <input type="number" id="sd_ID" class="computed" step="any" oninput="syncAllInstances('sd_ID'); markAsUser('sd_ID'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>= D - d</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coil Calculations -->
+                <div class="section">
+                    <h2>Step 6: Coil Calculations</h2>
+
+                    <h3>Number of Active Coils</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$N_a = \frac{Gd^4y_{max}}{8D^3F_{max}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>a</sub></label>
+                                <input type="number" id="sd_Na" class="computed" step="any" oninput="syncAllInstances('sd_Na'); markAsUser('sd_Na'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>G</label>
+                                <input type="number" id="sd_G_eq" step="any" oninput="syncAllInstances('sd_G_eq'); markAsUser('sd_G_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[Mpsi]</span>
+                            </div>
+                            <span>×d⁴×</span>
+                            <div class="var-input">
+                                <label>y<sub>max</sub></label>
+                                <input type="number" id="sd_ymax_eq" step="any" oninput="syncAllInstances('sd_ymax_eq'); markAsUser('sd_ymax_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>/ (8D³F<sub>max</sub>)</span>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label>End Type:</label>
+                        <select id="sd_end_type" onchange="updateEndTypeEquations(); calculateStaticDesign()">
+                            <option value="plain">Plain</option>
+                            <option value="plain_ground">Plain and Ground</option>
+                            <option value="squared">Squared or Closed</option>
+                            <option value="squared_ground">Squared and Ground</option>
+                        </select>
+                    </div>
+                    <div class="note">
+                        See <a href="#" onclick="goToPage(4)">Table 10-1</a> for end type formulas.
+                    </div>
+
+                    <h3>Total Coils and Lengths (from Table 10-1)</h3>
+                    <div id="end_type_note" class="note" style="margin-bottom: 10px;">
+                        <strong>Plain:</strong> N<sub>e</sub> = 0, L<sub>s</sub> = d(N<sub>t</sub>+1), L<sub>0</sub> = pN<sub>a</sub> + d
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex" id="eq_Nt">$$N_t = N_a + 0$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>N<sub>t</sub></label>
+                                <input type="number" id="sd_Nt" class="computed" step="any" oninput="syncAllInstances('sd_Nt'); markAsUser('sd_Nt'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>N<sub>a</sub></label>
+                                <input type="number" id="sd_Na_eq" step="any" oninput="syncAllInstances('sd_Na_eq'); markAsUser('sd_Na_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span>+</span>
+                            <div class="var-input">
+                                <label>N<sub>e</sub></label>
+                                <input type="number" id="sd_Ne" class="computed" step="any" oninput="syncAllInstances('sd_Ne'); markAsUser('sd_Ne'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex" id="eq_Ls">$$L_s = d(N_t + 1)$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>s</sub></label>
+                                <input type="number" id="sd_Ls" class="computed" step="any" oninput="syncAllInstances('sd_Ls'); markAsUser('sd_Ls'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>d</label>
+                                <input type="number" id="sd_d_Ls" step="any" oninput="syncAllInstances('sd_d_Ls'); markAsUser('sd_d_Ls'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span id="Ls_formula_text">× (</span>
+                            <div class="var-input">
+                                <label>N<sub>t</sub></label>
+                                <input type="number" id="sd_Nt_eq" step="any" oninput="syncAllInstances('sd_Nt_eq'); markAsUser('sd_Nt_eq'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span id="Ls_plus_text">+ 1)</span>
+                        </div>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex" id="eq_L0">$$L_0 = pN_a + d$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>0</sub></label>
+                                <input type="number" id="sd_L0" class="computed" step="any" oninput="syncAllInstances('sd_L0'); markAsUser('sd_L0'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>p (pitch)</label>
+                                <input type="number" id="sd_p" step="any" oninput="syncAllInstances('sd_p'); markAsUser('sd_p'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>×</span>
+                            <div class="var-input">
+                                <label>N<sub>a</sub></label>
+                                <input type="number" id="sd_Na_L0" step="any" oninput="syncAllInstances('sd_Na_L0'); markAsUser('sd_Na_L0'); calculateStaticDesign()">
+                                <span class="unit-inline">[-]</span>
+                            </div>
+                            <span id="L0_plus_text">+ d</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buckling and Figure of Merit -->
+                <div class="section">
+                    <h2>Step 7: Buckling Check & Figure of Merit</h2>
+
+                    <h3>Critical Buckling Length</h3>
+                    <div class="input-row">
+                        <label>End Condition Factor (α):</label>
+                        <select id="sd_alpha_end" onchange="calculateStaticDesign()">
+                            <option value="0.5">0.5 - Fixed-Fixed (both ends fixed)</option>
+                            <option value="0.707">0.707 - Fixed-Hinged</option>
+                            <option value="1.0">1.0 - Hinged-Hinged</option>
+                            <option value="2.0">2.0 - Fixed-Free (clamped-free)</option>
+                        </select>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$(L_0)_{cr} = \frac{2.63D}{\alpha}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>(L<sub>0</sub>)<sub>cr</sub></label>
+                                <input type="number" id="sd_L0_cr" class="computed" step="any" oninput="syncAllInstances('sd_L0_cr'); markAsUser('sd_L0_cr'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>= 2.63×</span>
+                            <div class="var-input">
+                                <label>D</label>
+                                <input type="number" id="sd_D_L0cr" step="any" oninput="syncAllInstances('sd_D_L0cr'); markAsUser('sd_D_L0cr'); calculateStaticDesign()">
+                                <span class="unit-inline">[in]</span>
+                            </div>
+                            <span>/ α</span>
+                        </div>
+                    </div>
+
+                    <div id="buckling_check" class="note">
+                        Buckling check will appear here...
+                    </div>
+
+                    <h3>Figure of Merit</h3>
+                    <div class="input-row">
+                        <label>Relative Cost Factor:</label>
+                        <input type="number" id="sd_rel_cost" value="1.0" step="any" oninput="calculateStaticDesign()">
+                        <span class="unit">-</span>
+                    </div>
+                    <div class="note">
+                        Relative cost factor for material (1.0 for music wire reference)
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$fom = -(\text{rel. cost})\frac{\gamma\pi^2 d^2 N_t D}{4}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>fom</label>
+                                <input type="number" id="sd_fom" class="computed" step="any" oninput="syncAllInstances('sd_fom'); markAsUser('sd_fom'); calculateStaticDesign()">
+                                <span class="unit-inline">[lbf]</span>
+                            </div>
+                            <span>= -cost×</span>
+                            <div class="var-input">
+                                <label>γ</label>
+                                <input type="number" id="sd_gamma_fom" step="any" oninput="syncAllInstances('sd_gamma_fom'); markAsUser('sd_gamma_fom'); calculateStaticDesign()">
+                                <span class="unit-inline">[lbf/in³]</span>
+                            </div>
+                            <span>×π²d²N<sub>t</sub>D/4</span>
+                        </div>
+                    </div>
+                    <div class="note">
+                        Lower (more negative) fom indicates a more cost-effective design.
+                    </div>
+                </div>
+
+                <!-- Design Summary -->
+                <div class="section">
+                    <h2>Design Summary</h2>
+                    <div class="success">
+                        <strong>Designed Spring Parameters:</strong>
+                        <table class="variables-table" style="margin-top: 15px;">
+                            <tr><td><strong>Wire Diameter (d)</strong></td><td><span id="sum_d">-</span> in</td></tr>
+                            <tr><td><strong>Mean Diameter (D)</strong></td><td><span id="sum_D">-</span> in</td></tr>
+                            <tr><td><strong>Spring Index (C)</strong></td><td><span id="sum_C">-</span></td></tr>
+                            <tr><td><strong>OD / ID</strong></td><td><span id="sum_OD">-</span> / <span id="sum_ID">-</span> in</td></tr>
+                            <tr><td><strong>Active Coils (N<sub>a</sub>)</strong></td><td><span id="sum_Na">-</span></td></tr>
+                            <tr><td><strong>Total Coils (N<sub>t</sub>)</strong></td><td><span id="sum_Nt">-</span></td></tr>
+                            <tr><td><strong>Free Length (L<sub>0</sub>)</strong></td><td><span id="sum_L0">-</span> in</td></tr>
+                            <tr><td><strong>Solid Length (L<sub>s</sub>)</strong></td><td><span id="sum_Ls">-</span> in</td></tr>
+                            <tr><td><strong>Safety Factor (n<sub>s</sub>)</strong></td><td><span id="sum_ns">-</span></td></tr>
+                            <tr><td><strong>Figure of Merit</strong></td><td><span id="sum_fom">-</span></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>Color Key:</strong> White = User Input | Yellow = Table/Graph Lookup | Green = Calculated
+                </div>
+            </div>
+
             <!-- PROCEDURE TAB -->
-            <div id="procedure" class="tab-content active">
+            <div id="procedure" class="tab-content">
                 <div class="button-group">
                     <button class="save-btn" onclick="saveSession()">💾 Save Session</button>
                     <button class="reset-btn" onclick="resetAll()">🔄 Reset All</button>
@@ -429,16 +1112,19 @@
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq" step="any" oninput="syncAllInstances('C_eq'); markAsUser('C_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>D</label>
                                 <input type="number" id="D_eq1" step="any" oninput="syncAllInstances('D_eq1'); markAsUser('D_eq1'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq1" step="any" oninput="syncAllInstances('d_eq1'); markAsUser('d_eq1'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -449,16 +1135,19 @@
                             <div class="var-input">
                                 <label>OD</label>
                                 <input type="number" id="OD_eq" step="any" oninput="syncAllInstances('OD_eq'); markAsUser('OD_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>D</label>
                                 <input type="number" id="D_eq2" step="any" oninput="syncAllInstances('D_eq2'); markAsUser('D_eq2'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -469,16 +1158,19 @@
                             <div class="var-input">
                                 <label>ID</label>
                                 <input type="number" id="ID_eq" step="any" oninput="syncAllInstances('ID_eq'); markAsUser('ID_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>D</label>
                                 <input type="number" id="D_eq3" step="any" oninput="syncAllInstances('D_eq3'); markAsUser('D_eq3'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>-</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq3" step="any" oninput="syncAllInstances('d_eq3'); markAsUser('d_eq3'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -516,6 +1208,7 @@
                             <div class="var-input">
                                 <label>N<sub>e</sub></label>
                                 <input type="number" id="Ne_eq" step="any" oninput="syncAllInstances('Ne_eq'); markAsUser('Ne_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -527,16 +1220,19 @@
                             <div class="var-input">
                                 <label>N<sub>t</sub></label>
                                 <input type="number" id="Nt_eq" step="any" oninput="syncAllInstances('Nt_eq'); markAsUser('Nt_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>N<sub>a</sub></label>
                                 <input type="number" id="Na_eq2" step="any" oninput="syncAllInstances('Na_eq2'); markAsUser('Na_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>N<sub>e</sub></label>
                                 <input type="number" id="Ne_eq2" step="any" oninput="syncAllInstances('Ne_eq2'); markAsUser('Ne_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -557,17 +1253,20 @@
                             <div class="var-input">
                                 <label>K<sub>s</sub></label>
                                 <input type="number" id="Ks_eq" step="any" oninput="syncAllInstances('Ks_eq'); markAsUser('Ks_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <span>(2 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq2" step="any" oninput="syncAllInstances('C_eq2'); markAsUser('C_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>+ 1) / (2 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq3" step="any" oninput="syncAllInstances('C_eq3'); markAsUser('C_eq3'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -580,22 +1279,26 @@
                             <div class="var-input">
                                 <label>K<sub>W</sub></label>
                                 <input type="number" id="KW_eq" step="any" oninput="syncAllInstances('KW_eq'); markAsUser('KW_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <span>(4 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq4" step="any" oninput="syncAllInstances('C_eq4'); markAsUser('C_eq4'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>- 1) / (4 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq5" step="any" oninput="syncAllInstances('C_eq5'); markAsUser('C_eq5'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>- 4) + 0.615 /</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq6" step="any" oninput="syncAllInstances('C_eq6'); markAsUser('C_eq6'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -607,17 +1310,20 @@
                             <div class="var-input">
                                 <label>K<sub>B</sub></label>
                                 <input type="number" id="KB_eq" step="any" oninput="syncAllInstances('KB_eq'); markAsUser('KB_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <span>(4 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq7" step="any" oninput="syncAllInstances('C_eq7'); markAsUser('C_eq7'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>+ 2) / (4 ×</span>
                             <div class="var-input">
                                 <label>C</label>
                                 <input type="number" id="C_eq8" step="any" oninput="syncAllInstances('C_eq8'); markAsUser('C_eq8'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>- 3)</span>
                         </div>
@@ -630,16 +1336,19 @@
                             <div class="var-input">
                                 <label>K<sub>C</sub></label>
                                 <input type="number" id="KC_eq" step="any" oninput="syncAllInstances('KC_eq'); markAsUser('KC_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>K<sub>B</sub></label>
                                 <input type="number" id="KB_eq2" step="any" oninput="syncAllInstances('KB_eq2'); markAsUser('KB_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>/</span>
                             <div class="var-input">
                                 <label>K<sub>s</sub></label>
                                 <input type="number" id="Ks_eq2" step="any" oninput="syncAllInstances('Ks_eq2'); markAsUser('Ks_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -1002,9 +1711,82 @@
                     </div>
                 </div>
 
+                <!-- Critical Frequency -->
+                <div class="section">
+                    <h2>Critical Frequency Analysis</h2>
+
+                    <div class="note">
+                        Springs in dynamic applications must avoid resonance. Operating frequency should be well below natural frequency.
+                    </div>
+
+                    <h3>Spring Weight</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$W = \frac{\pi^2 d^2 D N_t \gamma}{4}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>γ [lbf/in³]</label>
+                                <input type="number" id="gamma_freq" class="lookup" value="0.284" step="any" oninput="syncAllInstances('gamma_freq'); markAsUser('gamma_freq'); calculate()">
+                            </div>
+                            <div class="var-input">
+                                <label>W [lbf]</label>
+                                <input type="number" id="W_spring" class="computed" step="any" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="note">
+                        Steel wire density: 0.284 lbf/in³
+                    </div>
+
+                    <h3>Natural Frequency (1st mode)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$f_n = \frac{1}{2}\sqrt{\frac{kg}{W}}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>k [lbf/in]</label>
+                                <input type="number" id="k_freq" step="any" readonly>
+                            </div>
+                            <div class="var-input">
+                                <label>g = 386.4</label>
+                                <input type="number" value="386.4" readonly style="background: #f0f0f0;">
+                            </div>
+                            <div class="var-input">
+                                <label>f<sub>n</sub> [Hz]</label>
+                                <input type="number" id="fn" class="computed" step="any" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Operating Frequency:</label>
+                        <input type="number" id="f_operating" step="any" oninput="calculate()">
+                        <span class="unit">Hz</span>
+                    </div>
+
+                    <div id="freq_check" class="note">
+                        Enter operating frequency to check against natural frequency.
+                    </div>
+
+                    <div class="warning">
+                        <strong>Design Guidelines:</strong><br>
+                        • Operating frequency should be &lt; 80% of f<sub>n</sub> (0.8 × f<sub>n</sub>)<br>
+                        • For fatigue applications, use &lt; 5-7% of f<sub>n</sub> (15-20× lower)
+                    </div>
+                </div>
+
                 <!-- Fatigue Analysis -->
                 <div class="section">
-                    <h2>Fatigue Analysis (Goodman Criterion)</h2>
+                    <h2>Fatigue Analysis</h2>
+
+                    <div class="input-row">
+                        <label>Surface Treatment:</label>
+                        <select id="surface_treatment" onchange="updateFatigueStrengths(); calculate()">
+                            <option value="unpeened">Unpeened (Ssa=35, Ssm=55 kpsi)</option>
+                            <option value="peened">Peened (Ssa=57.5, Ssm=77.5 kpsi)</option>
+                        </select>
+                    </div>
+                    <div class="note">
+                        Peening increases fatigue strength by inducing compressive residual stresses.
+                    </div>
 
                     <div class="input-row">
                         <label><strong>Alternating Shear Strength (S<sub>sa</sub>):</strong></label>
@@ -1088,6 +1870,24 @@
                     <div id="nf_check" style="display:none;">
                         <!-- Dynamic fatigue check -->
                     </div>
+
+                    <h3>Gerber Criterion (Alternative)</h3>
+                    <div class="note">
+                        Gerber is often more accurate for ductile materials and static mean stress.
+                    </div>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$n_{f,Gerber} = \frac{1}{2}\left(\frac{S_{su}}{\tau_m}\right)^2 \frac{\tau_a}{S_{se}}\left[-1 + \sqrt{1 + \left(\frac{2\tau_m S_{se}}{S_{su}\tau_a}\right)^2}\right]$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>n<sub>f,Gerber</sub></label>
+                                <input type="number" id="nf_gerber" class="computed" step="any" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="nf_gerber_check" style="display:none;">
+                        <!-- Dynamic Gerber fatigue check -->
+                    </div>
                 </div>
 
                 <div class="note">
@@ -1149,6 +1949,43 @@
                         $$S_{se} = \frac{S_{sa}}{1 - \frac{S_{sm}}{S_{su}}}$$
                         $$n_f = \frac{S_{se}}{\tau_a + \frac{S_{se}}{S_{su}}\tau_m}$$
                     </div>
+
+                    <h3>Fatigue (Gerber Criterion)</h3>
+                    <div class="equation-latex">
+                        $$n_{f,Gerber} = \frac{1}{2}\left(\frac{S_{su}}{\tau_m}\right)^2 \cdot \frac{\tau_a}{S_{se}} \left[-1 + \sqrt{1 + \left(\frac{2\tau_m S_{se}}{S_{su}\tau_a}\right)^2}\right]$$
+                    </div>
+
+                    <h3>Static Design - Spring Index Calculation</h3>
+                    <div class="equation-latex">
+                        $$\alpha = \frac{S_{sy}}{n_s}$$
+                        $$\beta = \frac{8(1+\xi)F_{max}}{\pi d^2}$$
+                        $$C = \frac{2\alpha - \beta}{4\beta} + \sqrt{\left(\frac{2\alpha - \beta}{4\beta}\right)^2 - \frac{3\alpha}{4\beta}}$$
+                        $$D = C \cdot d$$
+                    </div>
+
+                    <h3>Static Design - Constraint-Based Mean Diameter</h3>
+                    <div class="equation-latex">
+                        $$\text{Over-a-rod: } D = d_{rod} + d + allowance$$
+                        $$\text{In-a-hole: } D = d_{hole} - d - allowance$$
+                    </div>
+
+                    <h3>Critical Buckling Length</h3>
+                    <div class="equation-latex">
+                        $$(L_0)_{cr} = \frac{2.63D}{\alpha_{end}}$$
+                    </div>
+                    <p style="font-size: 0.85em; color: #666;">where α<sub>end</sub> depends on end conditions (0.5 for fixed-fixed, 0.707 for fixed-hinged)</p>
+
+                    <h3>Figure of Merit</h3>
+                    <div class="equation-latex">
+                        $$fom = -(\text{rel. cost}) \cdot \frac{\gamma \pi^2 d^2 N_t D}{4}$$
+                    </div>
+
+                    <h3>Critical Frequency</h3>
+                    <div class="equation-latex">
+                        $$W = \frac{\pi^2 d^2 D N_t \gamma}{4}$$
+                        $$f_n = \frac{1}{2}\sqrt{\frac{k \cdot g}{W}}$$
+                    </div>
+                    <p style="font-size: 0.85em; color: #666;">where g = 386.4 in/s² (gravitational constant). Operating frequency should be ≤ 0.8f<sub>n</sub>.</p>
                 </div>
             </div>
 
@@ -1352,6 +2189,120 @@
                                 <td>-</td>
                                 <td>Computed</td>
                             </tr>
+                            <!-- Static Design Variables -->
+                            <tr class="section-header">
+                                <td colspan="4"><strong>Static Design Variables</strong></td>
+                            </tr>
+                            <tr>
+                                <td>y<sub>max</sub></td>
+                                <td>Maximum deflection (design)</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>s,target</sub></td>
+                                <td>Target safety factor</td>
+                                <td>-</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>ξ</td>
+                                <td>Fractional overrun</td>
+                                <td>-</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>A</td>
+                                <td>Material constant (Table 10-4)</td>
+                                <td>kpsi</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>m</td>
+                                <td>Material exponent (Table 10-4)</td>
+                                <td>-</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>γ</td>
+                                <td>Material density</td>
+                                <td>lbf/in³</td>
+                                <td>Lookup</td>
+                            </tr>
+                            <tr>
+                                <td>d<sub>rod</sub></td>
+                                <td>Rod diameter (over-a-rod constraint)</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>d<sub>hole</sub></td>
+                                <td>Hole diameter (in-a-hole constraint)</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>allowance</td>
+                                <td>Clearance allowance</td>
+                                <td>in</td>
+                                <td>Input</td>
+                            </tr>
+                            <tr>
+                                <td>α</td>
+                                <td>Design alpha (Ssy/ns)</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>β</td>
+                                <td>Design beta</td>
+                                <td>kpsi</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>(L<sub>0</sub>)<sub>cr</sub></td>
+                                <td>Critical free length (buckling)</td>
+                                <td>in</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>fom</td>
+                                <td>Figure of merit</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
+                            <!-- Critical Frequency Variables -->
+                            <tr class="section-header">
+                                <td colspan="4"><strong>Critical Frequency Variables</strong></td>
+                            </tr>
+                            <tr>
+                                <td>W</td>
+                                <td>Spring weight</td>
+                                <td>lbf</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>f<sub>n</sub></td>
+                                <td>Natural frequency (1st mode)</td>
+                                <td>Hz</td>
+                                <td>Computed</td>
+                            </tr>
+                            <tr>
+                                <td>f<sub>op</sub></td>
+                                <td>Operating frequency</td>
+                                <td>Hz</td>
+                                <td>Input</td>
+                            </tr>
+                            <!-- Gerber Fatigue Variables -->
+                            <tr class="section-header">
+                                <td colspan="4"><strong>Gerber Fatigue Variables</strong></td>
+                            </tr>
+                            <tr>
+                                <td>n<sub>f,Gerber</sub></td>
+                                <td>Gerber fatigue safety factor</td>
+                                <td>-</td>
+                                <td>Computed</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1361,46 +2312,81 @@
 
     <script>
         // Variable instance mapping for synchronization
+        // All instances of a variable are linked and sync together
         const varInstanceMap = {
-            'd': ['d', 'd_eq1', 'd_eq2', 'd_eq3', 'd_eq4'],
-            'D': ['D', 'D_eq1', 'D_eq2', 'D_eq3', 'D_eq4', 'D_eq5'],
-            'C': ['C_eq', 'C_eq2', 'C_eq3', 'C_eq4', 'C_eq5', 'C_eq6', 'C_eq7', 'C_eq8'],
-            'OD': ['OD_eq'],
-            'ID': ['ID_eq'],
-            'Na': ['Na', 'Na_eq', 'Na_eq2'],
-            'Ne': ['Ne_eq', 'Ne_eq2'],
-            'Nt': ['Nt_eq', 'Nt_eq2'],
+            // Wire diameter - linked across both tabs
+            'd': ['d', 'd_eq1', 'd_eq2', 'd_eq3', 'd_eq4', 'sd_d', 'sd_d_eq', 'sd_d_rod_eq2', 'sd_d_hole_eq2', 'sd_d_beta', 'sd_d_ssy', 'sd_d_Ls'],
+            // Mean diameter - linked across both tabs
+            'D': ['D', 'D_eq1', 'D_eq2', 'D_eq3', 'D_eq4', 'D_eq5', 'sd_D', 'sd_D_rod_result', 'sd_D_hole_result', 'sd_D_set', 'sd_D_eq2', 'sd_D_L0cr'],
+            // Spring index - linked across both tabs
+            'C': ['C_eq', 'C_eq2', 'C_eq3', 'C_eq4', 'C_eq5', 'C_eq6', 'C_eq7', 'C_eq8', 'sd_C', 'sd_C_eq', 'sd_C_KB'],
+            // Diameters - linked across both tabs
+            'OD': ['OD_eq', 'sd_OD'],
+            'ID': ['ID_eq', 'sd_ID'],
+            // Coil counts - linked across both tabs
+            'Na': ['Na', 'Na_eq', 'Na_eq2', 'sd_Na', 'sd_Na_eq', 'sd_Na_L0'],
+            'Ne': ['Ne_eq', 'Ne_eq2', 'sd_Ne'],
+            'Nt': ['Nt_eq', 'Nt_eq2', 'sd_Nt', 'sd_Nt_eq'],
+            // Stress factors
             'Ks': ['Ks_eq', 'Ks_eq2'],
             'KW': ['KW_eq'],
-            'KB': ['KB_eq', 'KB_eq2', 'KB_eq3', 'KB_eq4'],
+            'KB': ['KB_eq', 'KB_eq2', 'KB_eq3', 'KB_eq4', 'sd_KB', 'sd_KB_eq'],
             'KC': ['KC_eq'],
-            'Fmax': ['Fmax', 'Fmax_eq', 'Fmax_eq2'],
+            // Forces - linked across both tabs
+            'Fmax': ['Fmax', 'Fmax_eq', 'Fmax_eq2', 'sd_Fmax', 'sd_Fmax_eq', 'sd_Fmax_beta'],
             'Fmin': ['Fmin'],
+            // Stresses
             'tau_max': ['tau_max_eq', 'tau_max_eq2', 'tau_max_eq3'],
             'tau_min': ['tau_min_eq', 'tau_min_eq2'],
             'tau_a': ['tau_a_eq', 'tau_a_eq2'],
             'tau_m': ['tau_m_eq', 'tau_m_eq2'],
+            'tau_s': ['tau_s_eq', 'tau_s_eq2', 'sd_tau_s', 'sd_tau_s_eq'],
+            // Material properties - linked across both tabs
             'Sut': ['Sut', 'Sut_eq'],
             'Ssu': ['Ssu_eq', 'Ssu_eq2', 'Ssu_eq3'],
-            'Ssy': ['Ssy', 'Ssy_eq'],
-            'G': ['G', 'G_eq'],
-            'k': ['k_eq', 'k_eq2'],
+            'Ssy': ['Ssy', 'Ssy_eq', 'sd_Ssy', 'sd_Ssy_eq', 'sd_Ssy_eq2', 'sd_Ssy_alpha'],
+            'G': ['G', 'G_eq', 'sd_G', 'sd_G_eq'],
+            // Spring rate and deflection
+            'k': ['k_eq', 'k_eq2', 'k_freq'],
             'y': ['y_eq', 'y_eq2'],
-            'L0': ['L0', 'L0_eq'],
-            'Ls': ['Ls_eq'],
+            'ymax': ['sd_ymax', 'sd_ymax_eq'],
+            // Lengths - linked across both tabs
+            'L0': ['L0', 'L0_eq', 'sd_L0'],
+            'Ls': ['Ls_eq', 'sd_Ls'],
             'L_loaded': ['L_loaded_eq'],
-            'p': ['p'],
-            'xi': ['xi', 'xi_eq'],
+            'p': ['p', 'sd_p'],
+            // Overrun - linked across both tabs
+            'xi': ['xi', 'xi_eq', 'sd_xi', 'sd_xi_eq', 'sd_xi_beta'],
+            // Safety factors
             'Fs': ['Fs_eq', 'Fs_eq2'],
-            'tau_s': ['tau_s_eq', 'tau_s_eq2'],
-            'ns': ['ns_eq'],
+            'ns': ['ns_eq', 'sd_ns_target', 'sd_ns_eq', 'sd_ns_actual'],
+            // Fatigue
             'Ssa': ['Ssa', 'Ssa_eq'],
             'Ssm': ['Ssm', 'Ssm_eq'],
             'Sse': ['Sse_eq', 'Sse_eq2', 'Sse_eq3'],
             'nf': ['nf_eq'],
+            'nf_gerber': ['nf_gerber'],
+            // Derived values
             'd_cubed': ['d_cubed_eq', 'd_cubed_eq2'],
             'd_4th': ['d_4th_eq'],
-            'D_cubed': ['D_cubed_eq']
+            'D_cubed': ['D_cubed_eq'],
+            // Material constants - Static Design
+            'A_material': ['sd_A', 'sd_A_eq'],
+            'm_material': ['sd_m', 'sd_m_eq'],
+            // Static Design specific
+            'alpha_design': ['sd_alpha'],
+            'beta_design': ['sd_beta'],
+            'd_rod': ['sd_d_rod', 'sd_d_rod_eq'],
+            'd_hole': ['sd_d_hole', 'sd_d_hole_eq'],
+            'allowance_rod': ['sd_allowance_rod', 'sd_allowance_rod_eq'],
+            'allowance_hole': ['sd_allowance_hole', 'sd_allowance_hole_eq'],
+            'L0_cr': ['sd_L0_cr'],
+            'fom': ['sd_fom'],
+            // Critical frequency variables
+            'gamma': ['gamma_freq', 'sd_gamma', 'sd_gamma_fom'],
+            'fn': ['fn'],
+            'W_spring': ['W_spring'],
+            'f_operating': ['f_operating']
         };
 
         // Track user-modified values
@@ -1611,6 +2597,62 @@
                 nf_check.style.display = 'none';
             }
 
+            // Gerber criterion
+            if (Ssu > 0 && tau_m > 0 && tau_a > 0 && Sse > 0) {
+                const term1 = 0.5 * Math.pow(Ssu / tau_m, 2);
+                const term2 = tau_a / Sse;
+                const innerSqrt = Math.sqrt(1 + Math.pow((2 * tau_m * Sse) / (Ssu * tau_a), 2));
+                const nf_gerber = term1 * term2 * (-1 + innerSqrt);
+                const nf_gerber_el = document.getElementById('nf_gerber');
+                if (nf_gerber_el) nf_gerber_el.value = nf_gerber.toFixed(4);
+
+                const nf_gerber_check = document.getElementById('nf_gerber_check');
+                if (nf_gerber_check) {
+                    nf_gerber_check.style.display = 'block';
+                    if (nf_gerber >= 1.0) {
+                        nf_gerber_check.className = 'success';
+                        nf_gerber_check.innerHTML = `✅ <strong>PASS (Gerber):</strong> n<sub>f,Gerber</sub> = ${nf_gerber.toFixed(2)} ≥ 1.0`;
+                    } else {
+                        nf_gerber_check.className = 'warning';
+                        nf_gerber_check.innerHTML = `⚠️ <strong>WARNING (Gerber):</strong> n<sub>f,Gerber</sub> = ${nf_gerber.toFixed(2)} < 1.0`;
+                    }
+                }
+            }
+
+            // Critical frequency calculations
+            const gamma = parseFloat(document.getElementById('gamma_freq')?.value) || 0.284;
+            if (d > 0 && D > 0 && Nt > 0 && k > 0) {
+                // Spring weight: W = π²d²DNtγ/4
+                const W_spring = (Math.PI * Math.PI * d * d * D * Nt * gamma) / 4;
+                const W_spring_el = document.getElementById('W_spring');
+                if (W_spring_el) W_spring_el.value = W_spring.toFixed(6);
+
+                // Natural frequency: fn = (1/2)√(kg/W)
+                const g = 386.4; // in/s²
+                const fn_val = 0.5 * Math.sqrt((k * g) / W_spring);
+                const fn_el = document.getElementById('fn');
+                if (fn_el) fn_el.value = fn_val.toFixed(2);
+
+                // Also sync k to the frequency section
+                const k_freq = document.getElementById('k_freq');
+                if (k_freq) k_freq.value = k.toFixed(4);
+
+                // Check operating frequency
+                const f_op = parseFloat(document.getElementById('f_operating')?.value) || 0;
+                const freq_check = document.getElementById('freq_check');
+                if (freq_check && f_op > 0) {
+                    const fn_limit = 0.8 * fn_val;
+                    freq_check.style.display = 'block';
+                    if (f_op <= fn_limit) {
+                        freq_check.className = 'success';
+                        freq_check.innerHTML = `✅ <strong>PASS:</strong> f<sub>op</sub> = ${f_op.toFixed(1)} Hz ≤ 0.8×f<sub>n</sub> = ${fn_limit.toFixed(1)} Hz`;
+                    } else {
+                        freq_check.className = 'warning';
+                        freq_check.innerHTML = `⚠️ <strong>WARNING:</strong> f<sub>op</sub> = ${f_op.toFixed(1)} Hz > 0.8×f<sub>n</sub> = ${fn_limit.toFixed(1)} Hz (resonance risk!)`;
+                    }
+                }
+            }
+
             // Auto-save
             saveSession();
         }
@@ -1741,10 +2783,349 @@
             }
         }
 
+        // ========== STATIC DESIGN FUNCTIONS ==========
+
+        // Update constraint UI visibility
+        function updateConstraintUI() {
+            const constraint = document.getElementById('sd_constraint').value;
+            document.getElementById('over-rod-inputs').style.display = constraint === 'over-rod' ? 'block' : 'none';
+            document.getElementById('in-hole-inputs').style.display = constraint === 'in-hole' ? 'block' : 'none';
+            document.getElementById('free-inputs').style.display = constraint === 'free' ? 'block' : 'none';
+            document.getElementById('free-calculation-section').style.display = constraint === 'free' ? 'block' : 'none';
+
+            // Show/hide condition-specific calculation sections
+            if (constraint === 'free') {
+                const condition = document.getElementById('sd_condition').value;
+                document.getElementById('as-wound-calc').style.display = condition === 'as-wound' ? 'block' : 'none';
+                document.getElementById('set-removed-calc').style.display = condition === 'set-removed' ? 'block' : 'none';
+            }
+        }
+
+        // Update equations based on end type (Table 10-1)
+        function updateEndTypeEquations() {
+            const endType = document.getElementById('sd_end_type').value;
+            const endTypeNote = document.getElementById('end_type_note');
+            const eqNt = document.getElementById('eq_Nt');
+            const eqLs = document.getElementById('eq_Ls');
+            const eqL0 = document.getElementById('eq_L0');
+            const LsFormulaText = document.getElementById('Ls_formula_text');
+            const LsPlusText = document.getElementById('Ls_plus_text');
+            const L0PlusText = document.getElementById('L0_plus_text');
+
+            // Table 10-1 formulas based on end type
+            switch (endType) {
+                case 'plain':
+                    endTypeNote.innerHTML = '<strong>Plain:</strong> N<sub>e</sub> = 0, L<sub>s</sub> = d(N<sub>t</sub>+1), L<sub>0</sub> = pN<sub>a</sub> + d';
+                    eqNt.innerHTML = '$$N_t = N_a + 0$$';
+                    eqLs.innerHTML = '$$L_s = d(N_t + 1)$$';
+                    eqL0.innerHTML = '$$L_0 = pN_a + d$$';
+                    LsFormulaText.textContent = '× (';
+                    LsPlusText.textContent = '+ 1)';
+                    L0PlusText.textContent = '+ d';
+                    break;
+                case 'plain_ground':
+                    endTypeNote.innerHTML = '<strong>Plain and Ground:</strong> N<sub>e</sub> = 1, L<sub>s</sub> = dN<sub>t</sub>, L<sub>0</sub> = pN<sub>a</sub> + d';
+                    eqNt.innerHTML = '$$N_t = N_a + 1$$';
+                    eqLs.innerHTML = '$$L_s = dN_t$$';
+                    eqL0.innerHTML = '$$L_0 = pN_a + d$$';
+                    LsFormulaText.textContent = '×';
+                    LsPlusText.textContent = '';
+                    L0PlusText.textContent = '+ d';
+                    break;
+                case 'squared':
+                    endTypeNote.innerHTML = '<strong>Squared or Closed:</strong> N<sub>e</sub> = 2, L<sub>s</sub> = d(N<sub>t</sub>+1), L<sub>0</sub> = pN<sub>a</sub> + 3d';
+                    eqNt.innerHTML = '$$N_t = N_a + 2$$';
+                    eqLs.innerHTML = '$$L_s = d(N_t + 1)$$';
+                    eqL0.innerHTML = '$$L_0 = pN_a + 3d$$';
+                    LsFormulaText.textContent = '× (';
+                    LsPlusText.textContent = '+ 1)';
+                    L0PlusText.textContent = '+ 3d';
+                    break;
+                case 'squared_ground':
+                    endTypeNote.innerHTML = '<strong>Squared and Ground:</strong> N<sub>e</sub> = 2, L<sub>s</sub> = dN<sub>t</sub>, L<sub>0</sub> = pN<sub>a</sub> + 2d';
+                    eqNt.innerHTML = '$$N_t = N_a + 2$$';
+                    eqLs.innerHTML = '$$L_s = dN_t$$';
+                    eqL0.innerHTML = '$$L_0 = pN_a + 2d$$';
+                    LsFormulaText.textContent = '×';
+                    LsPlusText.textContent = '';
+                    L0PlusText.textContent = '+ 2d';
+                    break;
+            }
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([eqNt, eqLs, eqL0]).catch((err) => console.log('MathJax error:', err));
+            }
+        }
+
+        // Calculate static design
+        function calculateStaticDesign() {
+            // Get inputs
+            const d = parseFloat(document.getElementById('sd_d').value) || 0;
+            const Fmax = parseFloat(document.getElementById('sd_Fmax').value) || 0;
+            const ymax = parseFloat(document.getElementById('sd_ymax').value) || 0;
+            const ns_target = parseFloat(document.getElementById('sd_ns_target').value) || 1.2;
+            const xi = parseFloat(document.getElementById('sd_xi').value) || 0.15;
+            const A = parseFloat(document.getElementById('sd_A').value) || 0;
+            const m = parseFloat(document.getElementById('sd_m').value) || 0;
+            const G = parseFloat(document.getElementById('sd_G').value) || 11.5;
+            const gamma = parseFloat(document.getElementById('sd_gamma').value) || 0.284;
+            const constraint = document.getElementById('sd_constraint').value;
+            const condition = document.getElementById('sd_condition').value;
+
+            let D = 0;
+            let C = 0;
+
+            // Calculate yield strength
+            let Ssy = 0;
+            if (A > 0 && m > 0 && d > 0) {
+                const d_pow_m = Math.pow(d, m);
+                if (condition === 'set-removed') {
+                    Ssy = 0.65 * A / d_pow_m;
+                } else {
+                    Ssy = A / d_pow_m;
+                }
+                setValueSD('sd_Ssy', Ssy);
+                setValueSD('sd_A_eq', A);
+                setValueSD('sd_d_ssy', d);
+                setValueSD('sd_m_eq', m);
+                // Sync to Procedure tab
+                setValueSD('Ssy', Ssy);
+            }
+
+            // Calculate D based on constraint type
+            if (constraint === 'over-rod') {
+                const d_rod = parseFloat(document.getElementById('sd_d_rod').value) || 0;
+                const allowance = parseFloat(document.getElementById('sd_allowance_rod').value) || 0.05;
+                D = d_rod + d + allowance;
+                setValueSD('sd_D_rod_result', D);
+                setValueSD('sd_d_rod_eq', d_rod);
+                setValueSD('sd_d_rod_eq2', d);
+                setValueSD('sd_allowance_rod_eq', allowance);
+                C = d > 0 ? D / d : 0;
+            } else if (constraint === 'in-hole') {
+                const d_hole = parseFloat(document.getElementById('sd_d_hole').value) || 0;
+                const allowance = parseFloat(document.getElementById('sd_allowance_hole').value) || 0.05;
+                D = d_hole - d - allowance;
+                setValueSD('sd_D_hole_result', D);
+                setValueSD('sd_d_hole_eq', d_hole);
+                setValueSD('sd_d_hole_eq2', d);
+                setValueSD('sd_allowance_hole_eq', allowance);
+                C = d > 0 ? D / d : 0;
+            } else if (constraint === 'free' && Ssy > 0 && d > 0 && Fmax > 0) {
+                if (condition === 'as-wound') {
+                    // Calculate alpha and beta
+                    const alpha = Ssy / ns_target;
+                    const beta = (8 * (1 + xi) * Fmax) / (Math.PI * d * d) / 1000; // Convert to kpsi
+
+                    setValueSD('sd_alpha', alpha);
+                    setValueSD('sd_beta', beta);
+                    setValueSD('sd_Ssy_alpha', Ssy);
+                    setValueSD('sd_ns_eq', ns_target);
+                    // Fill beta RHS
+                    setValueSD('sd_xi_beta', xi);
+                    setValueSD('sd_Fmax_beta', Fmax);
+                    setValueSD('sd_d_beta', d);
+
+                    // Quadratic formula for C
+                    const term1 = (2 * alpha - beta) / (4 * beta);
+                    const term2_sq = term1 * term1 - (3 * alpha) / (4 * beta);
+                    if (term2_sq >= 0) {
+                        C = term1 + Math.sqrt(term2_sq);
+                        setValueSD('sd_C', C);
+                    }
+                    D = C * d;
+                } else {
+                    // Set removed - direct D calculation
+                    D = (Ssy * Math.PI * d * d * d) / (8 * ns_target * (1 + xi) * Fmax) * 1000;
+                    setValueSD('sd_D_set', D);
+                    C = d > 0 ? D / d : 0;
+                }
+            }
+
+            // Set D and C
+            if (D > 0) {
+                setValueSD('sd_D', D);
+                setValueSD('sd_C', C);
+                setValueSD('sd_C_eq', C);
+                setValueSD('sd_d_eq', d);
+                // Sync to Procedure tab
+                setValueSD('D', D);
+                setValueSD('d', d);
+            }
+
+            // C range check
+            const C_check = document.getElementById('C_range_check');
+            if (C >= 4 && C <= 12) {
+                C_check.className = 'success';
+                C_check.innerHTML = '✅ Spring index C = ' + C.toFixed(2) + ' is within recommended range (4-12)';
+            } else if (C > 0) {
+                C_check.className = 'warning';
+                C_check.innerHTML = '⚠️ Spring index C = ' + C.toFixed(2) + ' is outside recommended range (4-12)';
+            }
+
+            // Design verification
+            if (C > 0 && d > 0 && D > 0 && Fmax > 0) {
+                // KB factor
+                const KB = (4 * C + 2) / (4 * C - 3);
+                setValueSD('sd_KB', KB);
+                setValueSD('sd_C_KB', C);
+                setValueSD('sd_KB_eq', KB);
+
+                // Shear stress at solid
+                const tau_s = KB * 8 * (1 + xi) * Fmax * D / (Math.PI * d * d * d) / 1000;
+                setValueSD('sd_tau_s', tau_s);
+                setValueSD('sd_tau_s_eq', tau_s);
+
+                // Actual safety factor
+                const ns_actual = Ssy / tau_s;
+                setValueSD('sd_ns_actual', ns_actual);
+                setValueSD('sd_Ssy_eq2', Ssy);
+
+                // ns check
+                const ns_check = document.getElementById('ns_check_result');
+                if (ns_actual >= ns_target) {
+                    ns_check.className = 'success';
+                    ns_check.innerHTML = '✅ n<sub>s</sub> = ' + ns_actual.toFixed(2) + ' ≥ ' + ns_target.toFixed(2) + ' (target) - PASS';
+                } else {
+                    ns_check.className = 'warning';
+                    ns_check.innerHTML = '⚠️ n<sub>s</sub> = ' + ns_actual.toFixed(2) + ' < ' + ns_target.toFixed(2) + ' (target) - FAIL';
+                }
+
+                // Diameters
+                const OD = D + d;
+                const ID = D - d;
+                setValueSD('sd_OD', OD);
+                setValueSD('sd_ID', ID);
+                setValueSD('sd_D_eq2', D);
+
+                // Active coils
+                if (G > 0 && ymax > 0) {
+                    const Na = (G * 1e6 * Math.pow(d, 4) * ymax) / (8 * Math.pow(D, 3) * Fmax);
+                    setValueSD('sd_Na', Na);
+                    setValueSD('sd_Na_eq', Na);
+                    setValueSD('sd_G_eq', G);
+                    setValueSD('sd_ymax_eq', ymax);
+                    // Sync to Procedure tab
+                    setValueSD('Na', Na);
+                    setValueSD('G', G);
+
+                    // End coils based on end type (Table 10-1)
+                    const endType = document.getElementById('sd_end_type').value;
+                    let Ne = 0;
+                    if (endType === 'plain') Ne = 0;
+                    else if (endType === 'plain_ground') Ne = 1;
+                    else Ne = 2;  // squared or squared_ground
+
+                    setValueSD('sd_Ne', Ne);
+                    const Nt = Na + Ne;
+                    setValueSD('sd_Nt', Nt);
+                    setValueSD('sd_Nt_eq', Nt);
+
+                    // Solid length based on end type (Table 10-1)
+                    let Ls;
+                    if (endType === 'plain' || endType === 'squared') {
+                        Ls = d * (Nt + 1);  // Ls = d(Nt + 1)
+                    } else {
+                        Ls = d * Nt;  // Ls = dNt for plain_ground and squared_ground
+                    }
+                    setValueSD('sd_Ls', Ls);
+                    setValueSD('sd_d_Ls', d);
+
+                    // Calculate pitch: p = (L0 - Ls) / Na or use ymax/Na
+                    // From design: ymax = F/k, and for spring rate, deflection per coil
+                    const p = ymax > 0 && Na > 0 ? (Ls + ymax * (1 + xi) - Ls) / Na + d : d;
+                    setValueSD('sd_p', (Ls / Na) > d ? Ls / Na : (ymax / Na + d));
+
+                    // Free length based on end type (Table 10-1)
+                    // L0 = pNa + {d, d, 3d, 2d} for {plain, plain_ground, squared, squared_ground}
+                    let L0;
+                    const pitch = parseFloat(document.getElementById('sd_p').value) || (Ls / Na);
+                    if (endType === 'plain' || endType === 'plain_ground') {
+                        L0 = pitch * Na + d;
+                    } else if (endType === 'squared') {
+                        L0 = pitch * Na + 3 * d;
+                    } else {  // squared_ground
+                        L0 = pitch * Na + 2 * d;
+                    }
+                    setValueSD('sd_L0', L0);
+                    setValueSD('sd_Na_L0', Na);
+                    // Sync to Procedure tab
+                    setValueSD('L0', L0);
+                    setValueSD('xi', xi);
+                    setValueSD('Fmax', Fmax);
+
+                    // Critical buckling length
+                    const alpha_end = parseFloat(document.getElementById('sd_alpha_end').value) || 0.5;
+                    const L0_cr = 2.63 * D / alpha_end;
+                    setValueSD('sd_L0_cr', L0_cr);
+                    setValueSD('sd_D_L0cr', D);
+
+                    // Buckling check
+                    const buckling_check = document.getElementById('buckling_check');
+                    if (L0 < L0_cr) {
+                        buckling_check.className = 'success';
+                        buckling_check.innerHTML = '✅ L<sub>0</sub> = ' + L0.toFixed(2) + ' < (L<sub>0</sub>)<sub>cr</sub> = ' + L0_cr.toFixed(2) + ' - No buckling risk';
+                    } else {
+                        buckling_check.className = 'warning';
+                        buckling_check.innerHTML = '⚠️ L<sub>0</sub> = ' + L0.toFixed(2) + ' ≥ (L<sub>0</sub>)<sub>cr</sub> = ' + L0_cr.toFixed(2) + ' - Buckling risk!';
+                    }
+
+                    // Figure of merit
+                    const rel_cost = parseFloat(document.getElementById('sd_rel_cost').value) || 1.0;
+                    const fom = -rel_cost * gamma * Math.PI * Math.PI * d * d * Nt * D / 4;
+                    setValueSD('sd_fom', fom);
+                    setValueSD('sd_gamma_fom', gamma);
+
+                    // Update summary
+                    document.getElementById('sum_d').textContent = d.toFixed(4);
+                    document.getElementById('sum_D').textContent = D.toFixed(4);
+                    document.getElementById('sum_C').textContent = C.toFixed(2);
+                    document.getElementById('sum_OD').textContent = OD.toFixed(4);
+                    document.getElementById('sum_ID').textContent = ID.toFixed(4);
+                    document.getElementById('sum_Na').textContent = Na.toFixed(2);
+                    document.getElementById('sum_Nt').textContent = Nt.toFixed(2);
+                    document.getElementById('sum_L0').textContent = L0.toFixed(4);
+                    document.getElementById('sum_Ls').textContent = Ls.toFixed(4);
+                    document.getElementById('sum_ns').textContent = ns_actual.toFixed(2);
+                    document.getElementById('sum_fom').textContent = fom.toFixed(6);
+                }
+            }
+
+            // Trigger Procedure tab calculations
+            calculate();
+            saveSession();
+        }
+
+        // Helper to set static design values without triggering sync loops
+        function setValueSD(id, value) {
+            const el = document.getElementById(id);
+            if (el && !isNaN(value) && isFinite(value)) {
+                el.value = value.toFixed(4);
+            }
+        }
+
+        // Update fatigue strengths based on surface treatment
+        function updateFatigueStrengths() {
+            const treatment = document.getElementById('surface_treatment').value;
+            const Ssa_input = document.getElementById('Ssa');
+            const Ssm_input = document.getElementById('Ssm');
+
+            if (treatment === 'peened') {
+                Ssa_input.value = '57.5';
+                Ssm_input.value = '77.5';
+            } else {
+                Ssa_input.value = '35';
+                Ssm_input.value = '55';
+            }
+        }
+
         // Load session on page load
         window.addEventListener('load', () => {
             initCrosshairs();
             loadSession();
+            updateConstraintUI();
+            updateEndTypeEquations();
             // Trigger MathJax rendering
             if (window.MathJax) {
                 MathJax.typesetPromise().catch((err) => console.log('MathJax error:', err));

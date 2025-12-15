@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluid Power Design Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            gap: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+        }
+        .pdf-column {
+            flex: 1;
+            background: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            display: flex;
+        }
+        .pdf-container embed {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .click-overlay.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+        .crosshairs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .crosshairs-overlay.visible {
+            display: block;
+        }
+        .crosshair-line {
+            stroke: #00ff00;
+            stroke-width: 1;
+            opacity: 0.8;
+        }
+        .crosshair-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 15;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .crosshair-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .crosshair-btn.active {
+            background: #27ae60;
+        }
+        .calculator-column {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+            padding: 25px 30px;
+            font-size: 1.8em;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            background: #34495e;
+            border-bottom: 2px solid #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-right: 1px solid #2c3e50;
+        }
+        .tab:hover {
+            background: #3d566e;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h2 {
+            color: #3498db;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+            padding-left: 12px;
+            border-left: 5px solid #3498db;
+        }
+        h3 {
+            color: #555;
+            margin: 15px 0 10px;
+            font-size: 1.05em;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .subsection {
+            background: #ffffff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .input-row label {
+            min-width: 300px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95em;
+        }
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95em;
+            background: white;
+            transition: border-color 0.3s;
+        }
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .input-row input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .input-row input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .input-row .unit {
+            font-weight: 600;
+            color: #666;
+            min-width: 60px;
+            font-size: 0.9em;
+        }
+        .hint {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            margin-left: 8px;
+        }
+        .note {
+            background: #e3f2fd;
+            padding: 12px;
+            border-left: 4px solid #2196f3;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 12px;
+            border-left: 4px solid #ffc107;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            padding: 12px;
+            border-left: 4px solid #28a745;
+            margin: 12px 0;
+            font-size: 0.9em;
+            border-radius: 4px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            flex: 1;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            flex: 1;
+        }
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+        .equation-block {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .equation-latex {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .equation-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 8px;
+        }
+        .var-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .var-input label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .var-input input, .var-input select {
+            width: 120px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+            background: white;
+        }
+        .var-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .var-input input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .var-input input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .equation-inputs > span {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #495057;
+            margin: 0 5px;
+        }
+        .variables-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .variables-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .variables-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .variables-table tr:hover {
+            background: #f8f9fa;
+        }
+        .variables-table input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+        }
+        .variables-table input.computed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        .variables-table input.lookup {
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+        .var-category {
+            background: #e3f2fd !important;
+            font-weight: 600;
+            color: #1976d2;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+        .check-result {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .check-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .check-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-column">
+            <div class="pdf-container">
+                <embed src="../../documents/fluids/mech_fluids.pdf" type="application/pdf" id="pdf">
+                <div class="click-overlay" id="click-overlay"></div>
+                <svg id="pdf-crosshairs" class="crosshairs-overlay">
+                    <line id="crosshair-vertical" class="crosshair-line" x1="0" y1="0" x2="0" y2="100%" />
+                    <line id="crosshair-horizontal" class="crosshair-line" x1="0" y1="0" x2="100%" y2="0" />
+                </svg>
+            </div>
+            <button class="crosshair-btn" id="crosshair-toggle" onclick="toggleCrosshairsFeature()">
+                + Enable Crosshairs
+            </button>
+        </div>
+
+        <div class="calculator-column">
+            <h1>Fluid Power Design Calculator</h1>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('procedure')">Procedure</button>
+                <button class="tab" onclick="switchTab('equations')">General Equations</button>
+                <button class="tab" onclick="switchTab('variables')">Variables</button>
+            </div>
+
+            <!-- PROCEDURE TAB -->
+            <div id="procedure" class="tab-content active">
+                <div class="button-group">
+                    <button class="save-btn" onclick="saveSessionManual()">Save Session</button>
+                    <button class="reset-btn" onclick="resetAll()">Reset All</button>
+                </div>
+
+                <!-- Step 1: Given Information -->
+                <div class="section">
+                    <h2>Step 1: Given Information</h2>
+                    <div class="note">
+                        Record the basic information provided in the problem.
+                    </div>
+                    <div class="input-row">
+                        <label>Relief/Operating Pressure (P) [psi]:</label>
+                        <input type="number" id="P_relief" step="any" oninput="syncAllInstances('P_relief'); markAsUser('P_relief'); calculate()">
+                        <span class="hint">Default: 1000 psi if not given</span>
+                    </div>
+                    <div class="input-row">
+                        <label>Stroke Length (L) [in]:</label>
+                        <input type="number" id="L_stroke" step="any" oninput="syncAllInstances('L_stroke'); markAsUser('L_stroke'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Extension Speed (V<sub>ext</sub>) [ft/min]:</label>
+                        <input type="number" id="V_ext" step="any" oninput="syncAllInstances('V_ext'); markAsUser('V_ext'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Maximum Load (F<sub>max</sub>) [lbf]:</label>
+                        <input type="number" id="F_max" step="any" oninput="syncAllInstances('F_max'); markAsUser('F_max'); calculate()">
+                        <span class="hint">Given or calculated from statics</span>
+                    </div>
+                </div>
+
+                <!-- Step 2: Piston Bore Selection -->
+                <div class="section">
+                    <h2>Step 2: Select Piston Bore</h2>
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(2); return false;">Table b-1 (Page 2)</a> to find a bore with stroke force exceeding F<sub>max</sub> at your operating pressure.
+                    </div>
+                    <div class="input-row">
+                        <label>Cylinder Bore Diameter (d<sub>bore</sub>) [in]:</label>
+                        <input type="number" id="d_bore" class="lookup" step="any" oninput="syncAllInstances('d_bore'); markAsUser('d_bore'); calculate()">
+                        <span class="hint">From Table b-1</span>
+                    </div>
+                    <div class="note">
+                        <strong>Standard Bore Sizes:</strong> 5/8", 1", 1-3/8", 1-1/2", 1-3/4", 2", 2-1/2", 3", 3-1/4", 3-1/2", 4", 5", 5-1/2", 6", 7", 8", 10", 12", 14"
+                    </div>
+                </div>
+
+                <!-- Step 3: Basic Length Calculation -->
+                <div class="section">
+                    <h2>Step 3: Calculate Basic (Effective) Length</h2>
+                    <div class="note">
+                        Select mounting style from <a href="#" onclick="goToPage(3); return false;">Page 3</a> to determine the stroke factor.
+                    </div>
+                    <div class="input-row">
+                        <label>Mounting Style:</label>
+                        <select id="mounting_style" onchange="updateStrokeFactor()">
+                            <option value="">-- Select Mounting Style --</option>
+                            <option value="0.50">Case I: Fixed and Rigidly Guided (0.50)</option>
+                            <option value="0.70">Case II: Pivoted and Rigidly Guided (0.70)</option>
+                            <option value="2.00">Case III: Supported but Not Rigidly Guided (2.00)</option>
+                            <option value="1.00">Case IV: Trunnion on Head - Pivoted & Guided (1.00)</option>
+                            <option value="1.50">Case V: Intermediate Trunnion - Pivoted & Guided (1.50)</option>
+                            <option value="2.00">Case VI: Trunnion/Clevis on Cap - Pivoted & Guided (2.00)</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <label>Stroke Factor (k):</label>
+                        <input type="number" id="k_stroke" class="lookup" step="any" oninput="syncAllInstances('k_stroke'); markAsUser('k_stroke'); calculate()">
+                        <span class="hint">Auto-filled from dropdown or enter manually</span>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_{basic} = L_{stroke} \times k$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>L<sub>basic</sub> [in]</label>
+                                <input type="number" id="L_basic" class="computed" step="any" oninput="syncAllInstances('L_basic'); markAsUser('L_basic'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>L<sub>stroke</sub></label>
+                                <input type="number" id="L_stroke_eq" step="any" oninput="syncAllInstances('L_stroke_eq'); markAsUser('L_stroke_eq'); calculate()">
+                            </div>
+                            <span>&times;</span>
+                            <div class="var-input">
+                                <label>k</label>
+                                <input type="number" id="k_stroke_eq" step="any" oninput="syncAllInstances('k_stroke_eq'); markAsUser('k_stroke_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Rod Diameter Selection -->
+                <div class="section">
+                    <h2>Step 4: Select Rod Diameter</h2>
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(3); return false;">Graph b-1 (Page 3)</a> to find rod diameter based on Thrust (F<sub>max</sub>) and Basic Length (L<sub>basic</sub>). Round UP to nearest standard size.
+                    </div>
+                    <div class="input-row">
+                        <label>Rod Diameter (d<sub>rod</sub>) [in]:</label>
+                        <input type="number" id="d_rod" class="lookup" step="any" oninput="syncAllInstances('d_rod'); markAsUser('d_rod'); calculate()">
+                        <span class="hint">From Graph b-1</span>
+                    </div>
+                    <div class="note">
+                        <strong>Standard Rod Sizes:</strong> 5/8", 1", 1-3/8", 1-3/4", 2", 2-1/2", 3", 3-1/2", 4", 4-1/2", 5", 5-1/2"
+                    </div>
+                </div>
+
+                <!-- Step 5: Verify Bore/Rod Combination -->
+                <div class="section">
+                    <h2>Step 5: Verify Bore/Rod Combination</h2>
+                    <div class="note">
+                        Check <a href="#" onclick="goToPage(4); return false;">Table b-5 (Pages 4-5)</a> to verify that your bore/rod combination is available.
+                    </div>
+                    <div class="warning">
+                        <strong>Note:</strong> If the rod is not available for your bore, choose a <em>larger bore</em> and use the same rod diameter.
+                    </div>
+                    <div class="input-row">
+                        <label>Combination Available:</label>
+                        <select id="combo_verified" onchange="calculate()">
+                            <option value="">-- Select --</option>
+                            <option value="yes">Yes - Available</option>
+                            <option value="no">No - Need to adjust</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 6: Acceleration Check -->
+                <div class="section">
+                    <h2>Step 6: Check Acceleration/Deceleration Condition</h2>
+                    <div class="note">
+                        If the problem specifies an acceleration condition (e.g., "accelerate to V ft/min in S inches"), calculate the acceleration factor g.
+                    </div>
+                    <div class="input-row">
+                        <label>Velocity to Accelerate to (V) [ft/min]:</label>
+                        <input type="number" id="V_accel" step="any" oninput="syncAllInstances('V_accel'); markAsUser('V_accel'); calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label>Acceleration Distance (S) [in]:</label>
+                        <input type="number" id="S_accel" step="any" oninput="syncAllInstances('S_accel'); markAsUser('S_accel'); calculate()">
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$g = \frac{V^2}{S} \times 0.0000517$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>g</label>
+                                <input type="number" id="g_factor" class="computed" step="any" oninput="syncAllInstances('g_factor'); markAsUser('g_factor'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <span>(</span>
+                            <div class="var-input">
+                                <label>V</label>
+                                <input type="number" id="V_accel_eq" step="any" oninput="syncAllInstances('V_accel_eq'); markAsUser('V_accel_eq'); calculate()">
+                            </div>
+                            <span>)<sup>2</sup> /</span>
+                            <div class="var-input">
+                                <label>S</label>
+                                <input type="number" id="S_accel_eq" step="any" oninput="syncAllInstances('S_accel_eq'); markAsUser('S_accel_eq'); calculate()">
+                            </div>
+                            <span>&times; 0.0000517</span>
+                        </div>
+                    </div>
+
+                    <div class="note">
+                        Alternatively, look up g from the <a href="#" onclick="goToPage(6); return false;">graph on Page 6</a> and enter directly.
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Total Force Check</h3>
+                        <div class="equation-block">
+                            <div class="equation-latex">$$F_{total} = F_{max} \times (1 + g)$$</div>
+                            <div class="equation-inputs">
+                                <div class="var-input">
+                                    <label>F<sub>total</sub> [lbf]</label>
+                                    <input type="number" id="F_total" class="computed" step="any" oninput="syncAllInstances('F_total'); markAsUser('F_total'); calculate()">
+                                </div>
+                                <span>=</span>
+                                <div class="var-input">
+                                    <label>F<sub>max</sub></label>
+                                    <input type="number" id="F_max_eq" step="any" oninput="syncAllInstances('F_max_eq'); markAsUser('F_max_eq'); calculate()">
+                                </div>
+                                <span>&times; (1 +</span>
+                                <div class="var-input">
+                                    <label>g</label>
+                                    <input type="number" id="g_factor_eq" step="any" oninput="syncAllInstances('g_factor_eq'); markAsUser('g_factor_eq'); calculate()">
+                                </div>
+                                <span>)</span>
+                            </div>
+                        </div>
+                        <div id="force_check_result" class="check-result" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Flow Rate Calculation -->
+                <div class="section">
+                    <h2>Step 7: Find Flow Rate [GPM]</h2>
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(4); return false;">Table b-5 (Pages 4-5)</a> to find Q<sub>table</sub> (GPM at 10 ft/min piston speed). Use 0" rod diameter column for extension problems.
+                    </div>
+                    <div class="input-row">
+                        <label>Q<sub>table</sub> (Flow at 10 ft/min) [GPM]:</label>
+                        <input type="number" id="Q_table" class="lookup" step="any" oninput="syncAllInstances('Q_table'); markAsUser('Q_table'); calculate()">
+                        <span class="hint">From Table b-5</span>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$Q_{true} = \frac{V_{ext}}{10} \times Q_{table}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>Q<sub>true</sub> [GPM]</label>
+                                <input type="number" id="Q_true" class="computed" step="any" oninput="syncAllInstances('Q_true'); markAsUser('Q_true'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>V<sub>ext</sub></label>
+                                <input type="number" id="V_ext_eq" step="any" oninput="syncAllInstances('V_ext_eq'); markAsUser('V_ext_eq'); calculate()">
+                            </div>
+                            <span>/ 10 &times;</span>
+                            <div class="var-input">
+                                <label>Q<sub>table</sub></label>
+                                <input type="number" id="Q_table_eq" step="any" oninput="syncAllInstances('Q_table_eq'); markAsUser('Q_table_eq'); calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 8: Pipe Diameter Selection -->
+                <div class="section">
+                    <h2>Step 8: Choose Pipe Diameter</h2>
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(4); return false;">Table b-5 (Pages 4-5)</a> to find fluid velocity at 10 ft/min piston speed for various pipe diameters.
+                    </div>
+                    <div class="input-row">
+                        <label>Fluid Velocity at 10 ft/min (v<sub>table</sub>) [ft/s]:</label>
+                        <input type="number" id="v_fluid_table" class="lookup" step="any" oninput="syncAllInstances('v_fluid_table'); markAsUser('v_fluid_table'); calculate()">
+                        <span class="hint">From Table b-5</span>
+                    </div>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$v_{actual} = v_{table} \times \frac{V_{ext}}{10} < 15 \text{ ft/s}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>v<sub>actual</sub> [ft/s]</label>
+                                <input type="number" id="v_actual" class="computed" step="any" oninput="syncAllInstances('v_actual'); markAsUser('v_actual'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>v<sub>table</sub></label>
+                                <input type="number" id="v_fluid_table_eq" step="any" oninput="syncAllInstances('v_fluid_table_eq'); markAsUser('v_fluid_table_eq'); calculate()">
+                            </div>
+                            <span>&times;</span>
+                            <div class="var-input">
+                                <label>V<sub>ext</sub></label>
+                                <input type="number" id="V_ext_eq2" step="any" oninput="syncAllInstances('V_ext_eq2'); markAsUser('V_ext_eq2'); calculate()">
+                            </div>
+                            <span>/ 10</span>
+                        </div>
+                    </div>
+
+                    <div id="velocity_check_result" class="check-result" style="display: none;"></div>
+
+                    <div class="input-row">
+                        <label>Selected Pipe Diameter [in]:</label>
+                        <input type="number" id="d_pipe" class="lookup" step="any" oninput="syncAllInstances('d_pipe'); markAsUser('d_pipe'); calculate()">
+                        <span class="hint">Smallest pipe with v<sub>actual</sub> < 15 ft/s</span>
+                    </div>
+                </div>
+
+                <!-- Step 9: Motor Selection -->
+                <div class="section">
+                    <h2>Step 9: Choose Motor</h2>
+
+                    <div class="equation-block">
+                        <div class="equation-latex">$$HP_{min} = \frac{Q_{true} \times P}{1714 \times 0.85}$$</div>
+                        <div class="equation-inputs">
+                            <div class="var-input">
+                                <label>HP<sub>min</sub></label>
+                                <input type="number" id="HP_min" class="computed" step="any" oninput="syncAllInstances('HP_min'); markAsUser('HP_min'); calculate()">
+                            </div>
+                            <span>=</span>
+                            <div class="var-input">
+                                <label>Q<sub>true</sub></label>
+                                <input type="number" id="Q_true_eq" step="any" oninput="syncAllInstances('Q_true_eq'); markAsUser('Q_true_eq'); calculate()">
+                            </div>
+                            <span>&times;</span>
+                            <div class="var-input">
+                                <label>P</label>
+                                <input type="number" id="P_relief_eq" step="any" oninput="syncAllInstances('P_relief_eq'); markAsUser('P_relief_eq'); calculate()">
+                            </div>
+                            <span>/ (1714 &times; 0.85)</span>
+                        </div>
+                    </div>
+
+                    <div class="warning">
+                        <strong>MANUAL LOOKUP REQUIRED</strong> - Use <a href="#" onclick="goToPage(8); return false;">Motor Tables (Page 8)</a> to select a standard motor with HP greater than HP<sub>min</sub>.
+                    </div>
+
+                    <div class="input-row">
+                        <label>Motor Type:</label>
+                        <select id="motor_type" onchange="calculate()">
+                            <option value="3phase">3-Phase Motor</option>
+                            <option value="1phase">Single-Phase Motor</option>
+                        </select>
+                    </div>
+
+                    <div class="input-row">
+                        <label>Selected Motor HP [hp]:</label>
+                        <input type="number" id="HP_motor" class="lookup" step="any" oninput="syncAllInstances('HP_motor'); markAsUser('HP_motor'); calculate()">
+                        <span class="hint">From motor table (round up)</span>
+                    </div>
+
+                    <div class="note">
+                        <strong>Standard Motor HP:</strong> 1/6, 1/4, 1/3, 1/2, 3/4, 1, 1-1/2, 2, 3, 5, 7-1/2, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="section">
+                    <h2>Design Summary</h2>
+                    <div class="success">
+                        <strong>Your specified system:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Cylinder Bore: <span id="summary_bore">-</span> in</li>
+                            <li>Rod Diameter: <span id="summary_rod">-</span> in</li>
+                            <li>Stroke Length: <span id="summary_stroke">-</span> in</li>
+                            <li>Operating Pressure: <span id="summary_pressure">-</span> psi</li>
+                            <li>Flow Rate: <span id="summary_flow">-</span> GPM</li>
+                            <li>Pipe Diameter: <span id="summary_pipe">-</span> in</li>
+                            <li>Motor: <span id="summary_motor">-</span> HP</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>Color Key:</strong> White = User Input, Yellow = Table/Graph Lookup, Green = Calculated
+                </div>
+            </div>
+
+            <!-- EQUATIONS TAB -->
+            <div id="equations" class="tab-content">
+                <h2>General Equations Reference</h2>
+
+                <div class="section">
+                    <h3>Basic Length</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$L_{basic} = L_{stroke} \times k$$</div>
+                    </div>
+                    <div class="note">
+                        k = Stroke Factor based on mounting style (0.50 to 2.00)
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Acceleration Factor</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$g = \frac{V^2}{S} \times 0.0000517$$</div>
+                    </div>
+                    <div class="note">
+                        V = velocity to accelerate to [ft/min]<br>
+                        S = distance over which acceleration occurs [in]
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Total Force (with acceleration)</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$F_{total} = F_{max} \times (1 + g)$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Flow Rate</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$Q_{true} = \frac{V_{ext}}{10} \times Q_{table}$$</div>
+                    </div>
+                    <div class="note">
+                        Q<sub>table</sub> = Flow rate from Table b-5 at 10 ft/min piston speed [GPM]
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Fluid Velocity Check</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$v_{actual} = v_{table} \times \frac{V_{ext}}{10} < 15 \text{ ft/s}$$</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Minimum Horsepower</h3>
+                    <div class="equation-block">
+                        <div class="equation-latex">$$HP_{min} = \frac{Q \times P}{1714 \times 0.85}$$</div>
+                    </div>
+                    <div class="note">
+                        Q = Flow rate [GPM]<br>
+                        P = Operating pressure [psi]<br>
+                        0.85 = Assumed pump efficiency
+                    </div>
+                </div>
+            </div>
+
+            <!-- VARIABLES TAB -->
+            <div id="variables" class="tab-content">
+                <h2>All Variables</h2>
+                <div class="note">
+                    Edit values here to sync across all tabs.
+                </div>
+
+                <table class="variables-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Description</th>
+                            <th>Value</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="var-category"><td colspan="4">Given Information</td></tr>
+                        <tr>
+                            <td>P</td>
+                            <td>Relief/Operating Pressure</td>
+                            <td><input type="number" id="var_P_relief" step="any" oninput="syncAllInstances('var_P_relief'); markAsUser('var_P_relief'); calculate()"></td>
+                            <td>psi</td>
+                        </tr>
+                        <tr>
+                            <td>L<sub>stroke</sub></td>
+                            <td>Stroke Length</td>
+                            <td><input type="number" id="var_L_stroke" step="any" oninput="syncAllInstances('var_L_stroke'); markAsUser('var_L_stroke'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>V<sub>ext</sub></td>
+                            <td>Extension Speed</td>
+                            <td><input type="number" id="var_V_ext" step="any" oninput="syncAllInstances('var_V_ext'); markAsUser('var_V_ext'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>max</sub></td>
+                            <td>Maximum Load</td>
+                            <td><input type="number" id="var_F_max" step="any" oninput="syncAllInstances('var_F_max'); markAsUser('var_F_max'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+
+                        <tr class="var-category"><td colspan="4">Manual Lookups (Tables/Graphs)</td></tr>
+                        <tr>
+                            <td>d<sub>bore</sub></td>
+                            <td>Cylinder Bore Diameter</td>
+                            <td><input type="number" id="var_d_bore" class="lookup" step="any" oninput="syncAllInstances('var_d_bore'); markAsUser('var_d_bore'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>k</td>
+                            <td>Stroke Factor</td>
+                            <td><input type="number" id="var_k_stroke" class="lookup" step="any" oninput="syncAllInstances('var_k_stroke'); markAsUser('var_k_stroke'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>d<sub>rod</sub></td>
+                            <td>Rod Diameter</td>
+                            <td><input type="number" id="var_d_rod" class="lookup" step="any" oninput="syncAllInstances('var_d_rod'); markAsUser('var_d_rod'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>Q<sub>table</sub></td>
+                            <td>Flow Rate at 10 ft/min</td>
+                            <td><input type="number" id="var_Q_table" class="lookup" step="any" oninput="syncAllInstances('var_Q_table'); markAsUser('var_Q_table'); calculate()"></td>
+                            <td>GPM</td>
+                        </tr>
+                        <tr>
+                            <td>v<sub>table</sub></td>
+                            <td>Fluid Velocity at 10 ft/min</td>
+                            <td><input type="number" id="var_v_fluid_table" class="lookup" step="any" oninput="syncAllInstances('var_v_fluid_table'); markAsUser('var_v_fluid_table'); calculate()"></td>
+                            <td>ft/s</td>
+                        </tr>
+                        <tr>
+                            <td>d<sub>pipe</sub></td>
+                            <td>Selected Pipe Diameter</td>
+                            <td><input type="number" id="var_d_pipe" class="lookup" step="any" oninput="syncAllInstances('var_d_pipe'); markAsUser('var_d_pipe'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>HP<sub>motor</sub></td>
+                            <td>Selected Motor HP</td>
+                            <td><input type="number" id="var_HP_motor" class="lookup" step="any" oninput="syncAllInstances('var_HP_motor'); markAsUser('var_HP_motor'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+
+                        <tr class="var-category"><td colspan="4">Acceleration Parameters</td></tr>
+                        <tr>
+                            <td>V</td>
+                            <td>Velocity to Accelerate to</td>
+                            <td><input type="number" id="var_V_accel" step="any" oninput="syncAllInstances('var_V_accel'); markAsUser('var_V_accel'); calculate()"></td>
+                            <td>ft/min</td>
+                        </tr>
+                        <tr>
+                            <td>S</td>
+                            <td>Acceleration Distance</td>
+                            <td><input type="number" id="var_S_accel" step="any" oninput="syncAllInstances('var_S_accel'); markAsUser('var_S_accel'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+
+                        <tr class="var-category"><td colspan="4">Calculated Values</td></tr>
+                        <tr>
+                            <td>L<sub>basic</sub></td>
+                            <td>Basic (Effective) Length</td>
+                            <td><input type="number" id="var_L_basic" class="computed" step="any" oninput="syncAllInstances('var_L_basic'); markAsUser('var_L_basic'); calculate()"></td>
+                            <td>in</td>
+                        </tr>
+                        <tr>
+                            <td>g</td>
+                            <td>Acceleration Factor</td>
+                            <td><input type="number" id="var_g_factor" class="computed" step="any" oninput="syncAllInstances('var_g_factor'); markAsUser('var_g_factor'); calculate()"></td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>F<sub>total</sub></td>
+                            <td>Total Force</td>
+                            <td><input type="number" id="var_F_total" class="computed" step="any" oninput="syncAllInstances('var_F_total'); markAsUser('var_F_total'); calculate()"></td>
+                            <td>lbf</td>
+                        </tr>
+                        <tr>
+                            <td>Q<sub>true</sub></td>
+                            <td>True Flow Rate</td>
+                            <td><input type="number" id="var_Q_true" class="computed" step="any" oninput="syncAllInstances('var_Q_true'); markAsUser('var_Q_true'); calculate()"></td>
+                            <td>GPM</td>
+                        </tr>
+                        <tr>
+                            <td>v<sub>actual</sub></td>
+                            <td>Actual Fluid Velocity</td>
+                            <td><input type="number" id="var_v_actual" class="computed" step="any" oninput="syncAllInstances('var_v_actual'); markAsUser('var_v_actual'); calculate()"></td>
+                            <td>ft/s</td>
+                        </tr>
+                        <tr>
+                            <td>HP<sub>min</sub></td>
+                            <td>Minimum Horsepower</td>
+                            <td><input type="number" id="var_HP_min" class="computed" step="any" oninput="syncAllInstances('var_HP_min'); markAsUser('var_HP_min'); calculate()"></td>
+                            <td>hp</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userValues = new Set();
+
+        // Variable instance mapping for syncing
+        const varInstanceMap = {
+            'P_relief': ['P_relief', 'P_relief_eq', 'var_P_relief'],
+            'L_stroke': ['L_stroke', 'L_stroke_eq', 'var_L_stroke'],
+            'V_ext': ['V_ext', 'V_ext_eq', 'V_ext_eq2', 'var_V_ext'],
+            'F_max': ['F_max', 'F_max_eq', 'var_F_max'],
+            'd_bore': ['d_bore', 'var_d_bore'],
+            'k_stroke': ['k_stroke', 'k_stroke_eq', 'var_k_stroke'],
+            'd_rod': ['d_rod', 'var_d_rod'],
+            'L_basic': ['L_basic', 'var_L_basic'],
+            'V_accel': ['V_accel', 'V_accel_eq', 'var_V_accel'],
+            'S_accel': ['S_accel', 'S_accel_eq', 'var_S_accel'],
+            'g_factor': ['g_factor', 'g_factor_eq', 'var_g_factor'],
+            'F_total': ['F_total', 'var_F_total'],
+            'Q_table': ['Q_table', 'Q_table_eq', 'var_Q_table'],
+            'Q_true': ['Q_true', 'Q_true_eq', 'var_Q_true'],
+            'v_fluid_table': ['v_fluid_table', 'v_fluid_table_eq', 'var_v_fluid_table'],
+            'v_actual': ['v_actual', 'var_v_actual'],
+            'd_pipe': ['d_pipe', 'var_d_pipe'],
+            'HP_min': ['HP_min', 'var_HP_min'],
+            'HP_motor': ['HP_motor', 'var_HP_motor']
+        };
+
+        function getBaseVariable(id) {
+            // Remove 'var_' prefix if present
+            if (id.startsWith('var_')) {
+                return id.substring(4);
+            }
+            // Remove '_eq' or '_eq2' suffix if present
+            const eqMatch = id.match(/^(.+?)_eq\d*$/);
+            if (eqMatch) {
+                return eqMatch[1];
+            }
+            return id;
+        }
+
+        function markAsUser(id) {
+            const baseVar = getBaseVariable(id);
+            userValues.add(baseVar);
+        }
+
+        function syncAllInstances(changedId) {
+            const baseVar = getBaseVariable(changedId);
+            const instances = varInstanceMap[baseVar];
+
+            if (!instances) return;
+
+            const changedInput = document.getElementById(changedId);
+            if (!changedInput) return;
+
+            const value = changedInput.value;
+
+            instances.forEach(instanceId => {
+                if (instanceId !== changedId) {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value;
+                    }
+                }
+            });
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const val = parseFloat(el.value);
+            return isNaN(val) ? null : val;
+        }
+
+        function setValue(id, value, decimals = 4) {
+            const baseVar = getBaseVariable(id);
+            if (userValues.has(baseVar)) return;
+
+            if (value !== null && !isNaN(value) && isFinite(value)) {
+                const instances = varInstanceMap[baseVar] || [id];
+                instances.forEach(instanceId => {
+                    const el = document.getElementById(instanceId);
+                    if (el) {
+                        el.value = value.toFixed(decimals);
+                        if (!el.classList.contains('lookup')) {
+                            el.classList.add('computed');
+                        }
+                    }
+                });
+            }
+        }
+
+        function goToPage(page) {
+            const embed = document.getElementById("pdf");
+            const currSrc = embed.src.split('#')[0];
+            embed.src = '';
+            setTimeout(() => {
+                embed.src = `${currSrc}#page=${page}`;
+            }, 50);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById(tabName)]).catch((err) => console.log(err));
+            }
+        }
+
+        let crosshairsEnabled = false;
+
+        function toggleCrosshairsFeature() {
+            crosshairsEnabled = !crosshairsEnabled;
+            const btn = document.getElementById('crosshair-toggle');
+            const overlay = document.getElementById('click-overlay');
+
+            if (crosshairsEnabled) {
+                btn.textContent = 'X Disable Crosshairs';
+                btn.classList.add('active');
+                overlay.classList.add('active');
+            } else {
+                btn.textContent = '+ Enable Crosshairs';
+                btn.classList.remove('active');
+                overlay.classList.remove('active');
+                document.getElementById('pdf-crosshairs').classList.remove('visible');
+            }
+        }
+
+        function initCrosshairs() {
+            const clickOverlay = document.getElementById('click-overlay');
+            const svg = document.getElementById('pdf-crosshairs');
+            const vLine = document.getElementById('crosshair-vertical');
+            const hLine = document.getElementById('crosshair-horizontal');
+
+            clickOverlay.addEventListener('click', (e) => {
+                if (!crosshairsEnabled) return;
+
+                const rect = clickOverlay.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                vLine.setAttribute('x1', x);
+                vLine.setAttribute('x2', x);
+                hLine.setAttribute('y1', y);
+                hLine.setAttribute('y2', y);
+
+                svg.classList.add('visible');
+            });
+        }
+
+        function updateStrokeFactor() {
+            const mounting = document.getElementById('mounting_style').value;
+            const kInput = document.getElementById('k_stroke');
+
+            if (mounting) {
+                kInput.value = parseFloat(mounting).toFixed(2);
+                syncAllInstances('k_stroke');
+                // Don't mark as user since it came from dropdown
+            }
+
+            calculate();
+        }
+
+        function calculate() {
+            // Get values
+            const P_relief = getValue('P_relief');
+            const L_stroke = getValue('L_stroke');
+            const V_ext = getValue('V_ext');
+            const F_max = getValue('F_max');
+            const d_bore = getValue('d_bore');
+            const k_stroke = getValue('k_stroke');
+            const d_rod = getValue('d_rod');
+            const V_accel = getValue('V_accel');
+            const S_accel = getValue('S_accel');
+            const Q_table = getValue('Q_table');
+            const v_fluid_table = getValue('v_fluid_table');
+            const d_pipe = getValue('d_pipe');
+            const HP_motor = getValue('HP_motor');
+
+            // Step 3: Basic Length
+            if (L_stroke && k_stroke) {
+                setValue('L_basic', L_stroke * k_stroke, 2);
+            }
+
+            // Step 6: Acceleration Factor
+            if (V_accel && S_accel && S_accel !== 0) {
+                const g = (V_accel * V_accel / S_accel) * 0.0000517;
+                setValue('g_factor', g, 6);
+            }
+
+            // Step 6: Total Force
+            const g_factor = getValue('g_factor');
+            if (F_max && g_factor !== null) {
+                const F_total = F_max * (1 + g_factor);
+                setValue('F_total', F_total, 2);
+
+                // Force check display
+                const forceCheckEl = document.getElementById('force_check_result');
+                if (forceCheckEl) {
+                    forceCheckEl.style.display = 'block';
+                    forceCheckEl.textContent = `Total Force: ${F_total.toFixed(2)} lbf. Verify this doesn't exceed bore rating from Table b-1.`;
+                    forceCheckEl.className = 'check-result';
+                }
+            }
+
+            // Step 7: True Flow Rate
+            if (V_ext && Q_table) {
+                setValue('Q_true', (V_ext / 10) * Q_table, 4);
+            }
+
+            // Step 8: Actual Fluid Velocity
+            if (v_fluid_table && V_ext) {
+                const v_actual = v_fluid_table * (V_ext / 10);
+                setValue('v_actual', v_actual, 4);
+
+                // Velocity check display
+                const velCheckEl = document.getElementById('velocity_check_result');
+                if (velCheckEl) {
+                    velCheckEl.style.display = 'block';
+                    if (v_actual < 15) {
+                        velCheckEl.textContent = `v_actual = ${v_actual.toFixed(2)} ft/s < 15 ft/s - PASS`;
+                        velCheckEl.className = 'check-result check-pass';
+                    } else {
+                        velCheckEl.textContent = `v_actual = ${v_actual.toFixed(2)} ft/s >= 15 ft/s - FAIL (choose larger pipe)`;
+                        velCheckEl.className = 'check-result check-fail';
+                    }
+                }
+            }
+
+            // Step 9: Minimum HP
+            const Q_true = getValue('Q_true');
+            if (Q_true && P_relief) {
+                setValue('HP_min', (Q_true * P_relief) / (1714 * 0.85), 4);
+            }
+
+            // Update summary
+            updateSummary();
+
+            // Save session
+            saveSession();
+        }
+
+        function updateSummary() {
+            document.getElementById('summary_bore').textContent = getValue('d_bore') || '-';
+            document.getElementById('summary_rod').textContent = getValue('d_rod') || '-';
+            document.getElementById('summary_stroke').textContent = getValue('L_stroke') || '-';
+            document.getElementById('summary_pressure').textContent = getValue('P_relief') || '-';
+            document.getElementById('summary_flow').textContent = getValue('Q_true')?.toFixed(2) || '-';
+            document.getElementById('summary_pipe').textContent = getValue('d_pipe') || '-';
+            document.getElementById('summary_motor').textContent = getValue('HP_motor') || '-';
+        }
+
+        function saveSession() {
+            const session = {};
+            document.querySelectorAll('input[type="number"], select').forEach(input => {
+                if (input.value) {
+                    session[input.id] = input.value;
+                }
+            });
+            session.userValues = Array.from(userValues);
+            localStorage.setItem('mech_fluids_session', JSON.stringify(session));
+        }
+
+        function loadSession() {
+            const sessionData = localStorage.getItem('mech_fluids_session');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+
+                // Restore user values set
+                userValues.clear();
+                if (session.userValues) {
+                    session.userValues.forEach(v => userValues.add(v));
+                }
+
+                // Restore input values
+                Object.keys(session).forEach(id => {
+                    if (id === 'userValues') return;
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = session[id];
+                    }
+                });
+
+                calculate();
+            }
+        }
+
+        function saveSessionManual() {
+            saveSession();
+            alert('Session saved successfully!');
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all values?')) {
+                userValues.clear();
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('computed');
+                });
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+
+                // Hide check results
+                document.getElementById('force_check_result').style.display = 'none';
+                document.getElementById('velocity_check_result').style.display = 'none';
+
+                localStorage.removeItem('mech_fluids_session');
+                updateSummary();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCrosshairs();
+            loadSession();
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -185,6 +185,12 @@
             outline: none;
             border-color: #3498db;
         }
+        .unit-inline {
+            font-size: 0.75em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
         .input-row {
             display: flex;
             align-items: center;
@@ -440,17 +446,20 @@
                                 <div class="var-input">
                                     <label>n<sub>D</sub></label>
                                     <input type="number" id="nD_eq" step="any" oninput="syncAllInstances('nD_eq'); markAsUser('nD_eq'); calculate()">
+                                    <span class="unit-inline">[rpm]</span>
                                 </div>
                                 <span>=</span>
                                 <span>63025 ×</span>
                                 <div class="var-input">
                                     <label>H</label>
                                     <input type="number" id="H_eq" step="any" oninput="syncAllInstances('H_eq'); markAsUser('H_eq'); calculate()">
+                                    <span class="unit-inline">[hp]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>T</label>
                                     <input type="number" id="T_eq" step="any" oninput="syncAllInstances('T_eq'); markAsUser('T_eq'); calculate()">
+                                    <span class="unit-inline">[lbf·in]</span>
                                 </div>
                             </div>
                         </div>
@@ -484,17 +493,20 @@
                             <div class="var-input">
                                 <label>F<sub>R</sub></label>
                                 <input type="number" id="FR_eq" step="any" oninput="syncAllInstances('FR_eq'); markAsUser('FR_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <span>√(</span>
                             <div class="var-input">
                                 <label>F<sub>x</sub></label>
                                 <input type="number" id="Fx_eq" step="any" oninput="syncAllInstances('Fx_eq'); markAsUser('Fx_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>² +</span>
                             <div class="var-input">
                                 <label>F<sub>y</sub></label>
                                 <input type="number" id="Fy_eq" step="any" oninput="syncAllInstances('Fy_eq'); markAsUser('Fy_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>²)</span>
                         </div>
@@ -538,16 +550,19 @@
                             <div class="var-input">
                                 <label>R<sub>i</sub></label>
                                 <input type="number" id="Ri_eq" step="any" oninput="syncAllInstances('Ri_eq'); markAsUser('Ri_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>R<sub>tot</sub></label>
                                 <input type="number" id="Rtot_eq" step="any" oninput="syncAllInstances('Rtot_eq'); markAsUser('Rtot_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>^(1/</span>
                             <div class="var-input">
                                 <label>n</label>
                                 <input type="number" id="n_bearings_eq" step="any" oninput="syncAllInstances('n_bearings_eq'); markAsUser('n_bearings_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -615,19 +630,22 @@
                         <div class="equation-latex">$$L_D = 60 \times \mathcal{L}_D \times n_D \times 1000$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>L<sub>D</sub> (rev)</label>
+                                <label>L<sub>D</sub></label>
                                 <input type="text" id="LD_rev_eq" style="width:140px" oninput="syncAllInstances('LD_rev_eq'); markAsUser('LD_rev_eq'); calculate()">
+                                <span class="unit-inline">[rev]</span>
                             </div>
                             <span>=</span>
                             <span>60 ×</span>
                             <div class="var-input">
-                                <label>𝓛<sub>D</sub> (kh)</label>
+                                <label>𝓛<sub>D</sub></label>
                                 <input type="number" id="LD_hours_eq" step="any" oninput="syncAllInstances('LD_hours_eq'); markAsUser('LD_hours_eq'); calculate()">
+                                <span class="unit-inline">[kh]</span>
                             </div>
                             <span>× 1000 ×</span>
                             <div class="var-input">
                                 <label>n<sub>D</sub></label>
                                 <input type="number" id="nD_eq2" step="any" oninput="syncAllInstances('nD_eq2'); markAsUser('nD_eq2'); calculate()">
+                                <span class="unit-inline">[rpm]</span>
                             </div>
                         </div>
                     </div>
@@ -637,16 +655,19 @@
                             <div class="var-input">
                                 <label>x<sub>D</sub></label>
                                 <input type="number" id="xD_eq" step="any" oninput="syncAllInstances('xD_eq'); markAsUser('xD_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
-                                <label>L<sub>D</sub> (rev)</label>
+                                <label>L<sub>D</sub></label>
                                 <input type="text" id="LD_rev_eq2" style="width:140px" oninput="syncAllInstances('LD_rev_eq2'); markAsUser('LD_rev_eq2'); calculate()">
+                                <span class="unit-inline">[rev]</span>
                             </div>
                             <span>/ (</span>
                             <div class="var-input">
                                 <label>L<sub>10</sub></label>
                                 <input type="number" id="L10_eq" step="any" oninput="syncAllInstances('L10_eq'); markAsUser('L10_eq'); calculate()">
+                                <span class="unit-inline">[10⁶ rev]</span>
                             </div>
                             <span>× 10⁶)</span>
                         </div>
@@ -683,75 +704,66 @@
                 <div class="section radial-only">
                     <h2>Step 7: Calculate Required Load Rating C<sub>10</sub></h2>
                     <div class="equation-block">
-                        <div class="equation-latex">$$F_D = a_f F_R$$</div>
+                        <div class="equation-latex">$$C_{10} = a_f F_R \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>F<sub>D</sub></label>
-                                <input type="number" id="FD_radial_eq" step="any" oninput="syncAllInstances('FD_radial_eq'); markAsUser('FD_radial_eq'); calculate()">
+                                <label>C<sub>10</sub></label>
+                                <input type="number" id="C10_calc_eq" step="any" oninput="syncAllInstances('C10_calc_eq'); markAsUser('C10_calc_eq'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>a<sub>f</sub></label>
                                 <input type="number" id="af_eq" step="any" oninput="syncAllInstances('af_eq'); markAsUser('af_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>F<sub>R</sub></label>
                                 <input type="number" id="FR_eq2" step="any" oninput="syncAllInstances('FR_eq2'); markAsUser('FR_eq2'); calculate()">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="equation-block">
-                        <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>C<sub>10</sub></label>
-                                <input type="number" id="C10_calc_eq" step="any" oninput="syncAllInstances('C10_calc_eq'); markAsUser('C10_calc_eq'); calculate()">
-                            </div>
-                            <span>=</span>
-                            <div class="var-input">
-                                <label>a<sub>f</sub></label>
-                                <input type="number" id="af_eq3" step="any" oninput="syncAllInstances('af_eq3'); markAsUser('af_eq3'); calculate()">
-                            </div>
-                            <span>×</span>
-                            <div class="var-input">
-                                <label>F<sub>D</sub></label>
-                                <input type="number" id="FD_radial_eq2" step="any" oninput="syncAllInstances('FD_radial_eq2'); markAsUser('FD_radial_eq2'); calculate()">
+                                <span class="unit-inline">[lbf]</span>
                             </div>
                             <span>× [</span>
                             <div class="var-input">
                                 <label>x<sub>D</sub></label>
                                 <input type="number" id="xD_eq2" step="any" oninput="syncAllInstances('xD_eq2'); markAsUser('xD_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>/ (</span>
                             <div class="var-input">
                                 <label>x<sub>0</sub></label>
                                 <input type="number" id="x0_eq" step="any" oninput="syncAllInstances('x0_eq'); markAsUser('x0_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>+ (</span>
                             <div class="var-input">
                                 <label>θ</label>
                                 <input type="number" id="theta_eq" step="any" oninput="syncAllInstances('theta_eq'); markAsUser('theta_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>-</span>
                             <div class="var-input">
                                 <label>x<sub>0</sub></label>
                                 <input type="number" id="x0_eq2" step="any" oninput="syncAllInstances('x0_eq2'); markAsUser('x0_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>) × ln(1/</span>
                             <div class="var-input">
                                 <label>R<sub>i</sub></label>
                                 <input type="number" id="Ri_eq2" step="any" oninput="syncAllInstances('Ri_eq2'); markAsUser('Ri_eq2'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)^(1/</span>
                             <div class="var-input">
                                 <label>b</label>
                                 <input type="number" id="b_eq" step="any" oninput="syncAllInstances('b_eq'); markAsUser('b_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>))]^(1/</span>
                             <div class="var-input">
                                 <label>a</label>
                                 <input type="number" id="a_eq" step="any" oninput="syncAllInstances('a_eq'); markAsUser('a_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -810,11 +822,11 @@
                         </div>
                     </div>
                     <div class="equation-block">
-                        <div class="equation-latex">$$F_D = a_f F_e$$</div>
+                        <div class="equation-latex">$$C_{10} = a_f F_e \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
                         <div class="equation-inputs">
                             <div class="var-input">
-                                <label>F<sub>D</sub></label>
-                                <input type="number" id="FD_combined_eq" step="any" oninput="syncAllInstances('FD_combined_eq'); markAsUser('FD_combined_eq'); calculate()">
+                                <label>C<sub>10</sub></label>
+                                <input type="number" id="C10_comb_eq" step="any" oninput="syncAllInstances('C10_comb_eq'); markAsUser('C10_comb_eq'); calculate()">
                             </div>
                             <span>=</span>
                             <div class="var-input">
@@ -825,25 +837,6 @@
                             <div class="var-input">
                                 <label>F<sub>e</sub></label>
                                 <input type="number" id="Fe_eq2" step="any" oninput="syncAllInstances('Fe_eq2'); markAsUser('Fe_eq2'); calculate()">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="equation-block">
-                        <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
-                        <div class="equation-inputs">
-                            <div class="var-input">
-                                <label>C<sub>10</sub></label>
-                                <input type="number" id="C10_comb_eq" step="any" oninput="syncAllInstances('C10_comb_eq'); markAsUser('C10_comb_eq'); calculate()">
-                            </div>
-                            <span>=</span>
-                            <div class="var-input">
-                                <label>a<sub>f</sub></label>
-                                <input type="number" id="af_eq4" step="any" oninput="syncAllInstances('af_eq4'); markAsUser('af_eq4'); calculate()">
-                            </div>
-                            <span>×</span>
-                            <div class="var-input">
-                                <label>F<sub>D</sub></label>
-                                <input type="number" id="FD_combined_eq2" step="any" oninput="syncAllInstances('FD_combined_eq2'); markAsUser('FD_combined_eq2'); calculate()">
                             </div>
                             <span>× [</span>
                             <div class="var-input">
@@ -1018,17 +1011,14 @@
                     <div class="equation-latex">$$x_D = \frac{L_D}{L_{10}}$$</div>
                     <div class="note">Where L<sub>10</sub> is in 10⁶ revolutions</div>
 
-                    <h3>Design Load (Radial Only)</h3>
-                    <div class="equation-latex">$$F_D = a_f F_R$$</div>
-
                     <h3>Catalog Rating (Radial Only)</h3>
-                    <div class="equation-latex">$$C_{10} = a_f F_D \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
+                    <div class="equation-latex">$$C_{10} = a_f F_R \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
 
                     <h3>Equivalent Radial Load (Combined)</h3>
                     <div class="equation-latex">$$F_e = X_i V F_r + Y_i F_a$$</div>
 
-                    <h3>Design Load (Combined)</h3>
-                    <div class="equation-latex">$$F_D = a_f F_e$$</div>
+                    <h3>Catalog Rating (Combined)</h3>
+                    <div class="equation-latex">$$C_{10} = a_f F_e \left[\frac{x_D}{x_0 + (\theta - x_0)[\ln(1/R_i)]^{1/b}}\right]^{1/a}$$</div>
                 </div>
             </div>
 
@@ -1101,10 +1091,8 @@
             'theta': ['theta', 'theta_eq', 'theta_eq2'],
             'b': ['b', 'b_eq', 'b_eq2'],
             'a': ['a_eq', 'a_eq2'],
-            'af': ['af', 'af_eq', 'af_eq2', 'af_eq3', 'af_eq4'],
-            'FD_radial': ['FD_radial', 'FD_radial_eq', 'FD_radial_eq2'],
+            'af': ['af', 'af_eq', 'af_eq2'],
             'Fe': ['Fe', 'Fe_eq', 'Fe_eq2'],
-            'FD_combined': ['FD_combined', 'FD_combined_eq', 'FD_combined_eq2'],
             'Xi': ['Xi', 'Xi_eq'],
             'Yi': ['Yi', 'Yi_eq'],
             'bore': ['bore'],
@@ -1321,29 +1309,21 @@
             }
 
             if (procedure === 'radial_only') {
-                // Radial only procedure
-                const FD = af * FR;
-
-                // Sync values to FD equation box
+                // Radial only procedure - C10 = af * FR * [...]
+                // Sync values to C10 equation box
                 syncValue('af_eq', af, 4);
                 syncValue('FR_eq2', FR, 2);
-                syncValue('FD_radial_eq', FD, 2);
-                syncAllInstances('FD_radial_eq');
-
-                // Sync values to C10 equation box
                 syncValue('xD_eq2', xD, 4);
-                syncValue('af_eq3', af, 4);
-                syncValue('FD_radial_eq2', FD, 2);
 
-                // Calculate C10 using Weibull formula
+                // Calculate C10 using Weibull formula: C10 = af * FR * [xD / weibullDenom]^(1/a)
                 if (weibullDenom > 0 && a !== 0) {
-                    C10 = af * FD * Math.pow(xD / weibullDenom, 1 / a);
+                    C10 = af * FR * Math.pow(xD / weibullDenom, 1 / a);
                 }
 
                 // Sync C10 to equation box
                 syncValue('C10_calc_eq', C10, 2);
             } else {
-                // Combined loading procedure
+                // Combined loading procedure - C10 = af * Fe * [...]
                 const Fa = parseFloat(document.getElementById('Fa').value) || 0;
                 const Xi = parseFloat(document.getElementById('Xi').value) || 0.56;
                 const Yi = parseFloat(document.getElementById('Yi').value) || 1.63;
@@ -1356,25 +1336,18 @@
                 syncValue('Fa_eq', Fa, 2);
 
                 const Fe = Xi * V * FR + Yi * Fa;
-                const FD = af * Fe;
 
                 syncValue('Fe_eq', Fe, 2);
                 syncAllInstances('Fe_eq');
 
-                syncValue('FD_combined_eq', FD, 2);
-                syncAllInstances('FD_combined_eq');
-
-                // Sync af to FD equation box
-                syncValue('af_eq2', af, 4);
-
                 // Sync values to C10 combined equation boxes
+                syncValue('af_eq2', af, 4);
+                syncValue('Fe_eq2', Fe, 2);
                 syncValue('xD_eq3', xD, 4);
-                syncValue('af_eq4', af, 4);
-                syncValue('FD_combined_eq2', FD, 2);
 
-                // Calculate C10 using Weibull formula
+                // Calculate C10 using Weibull formula: C10 = af * Fe * [xD / weibullDenom]^(1/a)
                 if (weibullDenom > 0 && a !== 0) {
-                    C10 = af * FD * Math.pow(xD / weibullDenom, 1 / a);
+                    C10 = af * Fe * Math.pow(xD / weibullDenom, 1 / a);
                 }
 
                 // Sync C10 to equation box

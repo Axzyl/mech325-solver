@@ -333,6 +333,12 @@
             border-color: #3498db;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
+        .unit-inline {
+            font-size: 0.75em;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 2px;
+        }
         .equation-inputs > span {
             font-weight: bold;
             font-size: 1.2em;
@@ -446,16 +452,19 @@
                                 <div class="var-input">
                                     <label>l</label>
                                     <input type="number" id="l_eq_a" step="any" oninput="syncAllInstances('l_eq_a'); markAsUser('l_eq_a'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>t₁</label>
                                     <input type="number" id="t1_eq_a" step="any" oninput="syncAllInstances('t1_eq_a'); markAsUser('t1_eq_a'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>t₂</label>
                                     <input type="number" id="t2_a_eq" step="any" oninput="syncAllInstances('t2_a_eq'); markAsUser('t2_a_eq'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>
@@ -467,16 +476,19 @@
                                 <div class="var-input">
                                     <label>L</label>
                                     <input type="number" id="L_eq_a" step="any" oninput="syncAllInstances('L_eq_a'); markAsUser('L_eq_a'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>l</label>
                                     <input type="number" id="l_eq_a2" step="any" oninput="syncAllInstances('l_eq_a2'); markAsUser('l_eq_a2'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>H</label>
                                     <input type="number" id="H_eq_a" step="any" oninput="syncAllInstances('H_eq_a'); markAsUser('H_eq_a'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>
@@ -502,16 +514,19 @@
                                 <div class="var-input">
                                     <label>l</label>
                                     <input type="number" id="l_eq_b" step="any" oninput="syncAllInstances('l_eq_b'); markAsUser('l_eq_b'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>h</label>
                                     <input type="number" id="h_eq_b" step="any" oninput="syncAllInstances('h_eq_b'); markAsUser('h_eq_b'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>min(t₂, d)/2</label>
                                     <input type="number" id="half_term_eq" step="any" oninput="syncAllInstances('half_term_eq'); markAsUser('half_term_eq'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>
@@ -523,21 +538,25 @@
                                 <div class="var-input">
                                     <label>L</label>
                                     <input type="number" id="L_eq_b" step="any" oninput="syncAllInstances('L_eq_b'); markAsUser('L_eq_b'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>h</label>
                                     <input type="number" id="h_eq_b2" step="any" oninput="syncAllInstances('h_eq_b2'); markAsUser('h_eq_b2'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>1.5</label>
                                     <input type="number" id="onefive_eq" value="1.5" step="any" oninput="syncAllInstances('onefive_eq'); markAsUser('onefive_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>d</label>
                                     <input type="number" id="d_eq_b" step="any" oninput="syncAllInstances('d_eq_b'); markAsUser('d_eq_b'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>
@@ -567,21 +586,25 @@
                             <div class="var-input">
                                 <label>L<sub>T</sub></label>
                                 <input type="number" id="LT_eq" step="any" oninput="syncAllInstances('LT_eq'); markAsUser('LT_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>2</label>
                                 <input type="number" id="two_eq" value="2" step="any" oninput="syncAllInstances('two_eq'); markAsUser('two_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq_LT" step="any" oninput="syncAllInstances('d_eq_LT'); markAsUser('d_eq_LT'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>const</label>
                                 <input type="number" id="const_LT" step="any" oninput="syncAllInstances('const_LT'); markAsUser('const_LT'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -593,16 +616,19 @@
                             <div class="var-input">
                                 <label>l<sub>d</sub></label>
                                 <input type="number" id="ld_eq" step="any" oninput="syncAllInstances('ld_eq'); markAsUser('ld_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>L</label>
                                 <input type="number" id="L_eq_ld" step="any" oninput="syncAllInstances('L_eq_ld'); markAsUser('L_eq_ld'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>-</span>
                             <div class="var-input">
                                 <label>L<sub>T</sub></label>
                                 <input type="number" id="LT_eq_ld" step="any" oninput="syncAllInstances('LT_eq_ld'); markAsUser('LT_eq_ld'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -614,16 +640,19 @@
                             <div class="var-input">
                                 <label>l<sub>t</sub></label>
                                 <input type="number" id="lt_eq" step="any" oninput="syncAllInstances('lt_eq'); markAsUser('lt_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>l</label>
                                 <input type="number" id="l_eq_lt" step="any" oninput="syncAllInstances('l_eq_lt'); markAsUser('l_eq_lt'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>-</span>
                             <div class="var-input">
                                 <label>l<sub>d</sub></label>
                                 <input type="number" id="ld_eq_lt" step="any" oninput="syncAllInstances('ld_eq_lt'); markAsUser('ld_eq_lt'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                         </div>
                     </div>
@@ -635,22 +664,26 @@
                             <div class="var-input">
                                 <label>A<sub>d</sub></label>
                                 <input type="number" id="Ad_eq" step="any" oninput="syncAllInstances('Ad_eq'); markAsUser('Ad_eq'); calculate()">
+                                <span class="unit-inline">[in²]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>π</label>
                                 <input type="number" id="pi_eq" value="3.14159" step="any" oninput="syncAllInstances('pi_eq'); markAsUser('pi_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq" step="any" oninput="syncAllInstances('d_eq'); markAsUser('d_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>²</span>
                             <span>/</span>
                             <div class="var-input">
                                 <label>4</label>
                                 <input type="number" id="four_eq" value="4" step="any" oninput="syncAllInstances('four_eq'); markAsUser('four_eq'); calculate()">
+                                <span class="unit-inline">[-]</span>
                             </div>
                         </div>
                     </div>
@@ -677,42 +710,50 @@
                             <div class="var-input">
                                 <label>k<sub>b</sub></label>
                                 <input type="number" id="kb_eq" step="any" oninput="syncAllInstances('kb_eq'); markAsUser('kb_eq'); calculate()">
+                                <span class="unit-inline">[lbf/in]</span>
                             </div>
                             <span>=</span>
                             <div class="var-input">
                                 <label>A<sub>d</sub></label>
                                 <input type="number" id="Ad_eq2" step="any" oninput="syncAllInstances('Ad_eq2'); markAsUser('Ad_eq2'); calculate()">
+                                <span class="unit-inline">[in²]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>A<sub>t</sub></label>
                                 <input type="number" id="At_eq" step="any" oninput="syncAllInstances('At_eq'); markAsUser('At_eq'); calculate()">
+                                <span class="unit-inline">[in²]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>E<sub>b</sub></label>
                                 <input type="number" id="Eb_eq" step="any" oninput="syncAllInstances('Eb_eq'); markAsUser('Eb_eq'); calculate()">
+                                <span class="unit-inline">[psi]</span>
                             </div>
                             <span>/</span>
                             <span>(</span>
                             <div class="var-input">
                                 <label>A<sub>d</sub></label>
                                 <input type="number" id="Ad_eq3" step="any" oninput="syncAllInstances('Ad_eq3'); markAsUser('Ad_eq3'); calculate()">
+                                <span class="unit-inline">[in²]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>l<sub>t</sub></label>
                                 <input type="number" id="lt_eq2" step="any" oninput="syncAllInstances('lt_eq2'); markAsUser('lt_eq2'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>A<sub>t</sub></label>
                                 <input type="number" id="At_eq2" step="any" oninput="syncAllInstances('At_eq2'); markAsUser('At_eq2'); calculate()">
+                                <span class="unit-inline">[in²]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>l<sub>d</sub></label>
                                 <input type="number" id="ld_eq2" step="any" oninput="syncAllInstances('ld_eq2'); markAsUser('ld_eq2'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>)</span>
                         </div>
@@ -806,17 +847,20 @@
                             <div class="var-input">
                                 <label>k<sub>m</sub></label>
                                 <input type="number" id="km_eq" step="any" oninput="syncAllInstances('km_eq'); markAsUser('km_eq'); calculate()">
+                                <span class="unit-inline">[lbf/in]</span>
                             </div>
                             <span>=</span>
                             <span>0.5774π ×</span>
                             <div class="var-input">
                                 <label>E<sub>m</sub></label>
                                 <input type="number" id="Em_eq" step="any" oninput="syncAllInstances('Em_eq'); markAsUser('Em_eq'); calculate()">
+                                <span class="unit-inline">[psi]</span>
                             </div>
                             <span>×</span>
                             <div class="var-input">
                                 <label>d</label>
                                 <input type="number" id="d_eq_km" step="any" oninput="syncAllInstances('d_eq_km'); markAsUser('d_eq_km'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>/ ln[...]</span>
                         </div>
@@ -826,16 +870,21 @@
                             <div class="var-input">
                                 <label>t<sub>f</sub></label>
                                 <input type="number" id="tf_eq" step="any" oninput="syncAllInstances('tf_eq'); markAsUser('tf_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>+</span>
                             <div class="var-input">
                                 <label>D</label>
                                 <input type="number" id="D_fr_eq" step="any" oninput="syncAllInstances('D_fr_eq'); markAsUser('D_fr_eq'); calculate()">
+                                <span class="unit-inline">[in]</span>
                             </div>
                             <span>- d)(D + d) / (1.155t<sub>f</sub> + D + d)(D - d)</span>
                         </div>
                     </div>
-
+                    
+                    <div class="note">
+                        Note: total k<sub>t</sub> is not calculated automatically, you must calculate k for each part and then add them up (1/k<sub>m</sub>, like parallel resistors)
+                    </div>
                     <div class="input-row">
                         <label><strong>Member Stiffness (k<sub>m</sub>):</strong></label>
                         <input type="number" id="km" class="lookup" step="any" oninput="syncAllInstances('km'); markAsUser('km'); calculate()">
@@ -873,16 +922,19 @@
                                 <div class="var-input">
                                     <label>P</label>
                                     <input type="number" id="P_eq" step="any" oninput="syncAllInstances('P_eq'); markAsUser('P_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>P<sub>tot</sub></label>
                                     <input type="number" id="Ptot_eq" step="any" oninput="syncAllInstances('Ptot_eq'); markAsUser('Ptot_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>N</label>
                                     <input type="number" id="N_eq" step="any" oninput="syncAllInstances('N_eq'); markAsUser('N_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                             </div>
                         </div>
@@ -947,21 +999,25 @@
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_pct_eq" step="any" oninput="syncAllInstances('Fi_pct_eq'); markAsUser('Fi_pct_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>pct/100</label>
                                     <input type="number" id="pct_eq" step="any" oninput="syncAllInstances('pct_eq'); markAsUser('pct_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_pct_eq" step="any" oninput="syncAllInstances('At_pct_eq'); markAsUser('At_pct_eq'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>S<sub>p</sub></label>
                                     <input type="number" id="Sp_pct_eq" step="any" oninput="syncAllInstances('Sp_pct_eq'); markAsUser('Sp_pct_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>× 1000</span>
                             </div>
@@ -985,21 +1041,25 @@
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_shig_eq" step="any" oninput="syncAllInstances('Fi_shig_eq'); markAsUser('Fi_shig_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>factor</label>
                                     <input type="number" id="factor_eq" step="any" oninput="syncAllInstances('factor_eq'); markAsUser('factor_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_shig_eq" step="any" oninput="syncAllInstances('At_shig_eq'); markAsUser('At_shig_eq'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>S<sub>p</sub></label>
                                     <input type="number" id="Sp_shig_eq" step="any" oninput="syncAllInstances('Sp_shig_eq'); markAsUser('Sp_shig_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>× 1000</span>
                             </div>
@@ -1023,21 +1083,25 @@
                                 <div class="var-input">
                                     <label>T</label>
                                     <input type="number" id="T_eq" step="any" oninput="syncAllInstances('T_eq'); markAsUser('T_eq'); calculate()">
+                                    <span class="unit-inline">[lbf·in]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>K</label>
                                     <input type="number" id="K_eq" step="any" oninput="syncAllInstances('K_eq'); markAsUser('K_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_eq" step="any" oninput="syncAllInstances('Fi_eq'); markAsUser('Fi_eq'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>d</label>
                                     <input type="number" id="d_eq2" step="any" oninput="syncAllInstances('d_eq2'); markAsUser('d_eq2'); calculate()">
+                                    <span class="unit-inline">[in]</span>
                                 </div>
                             </div>
                         </div>
@@ -1058,22 +1122,26 @@
                                 <div class="var-input">
                                     <label>C</label>
                                     <input type="number" id="C_eq" step="any" oninput="syncAllInstances('C_eq'); markAsUser('C_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>k<sub>b</sub></label>
                                     <input type="number" id="kb_eq2" step="any" oninput="syncAllInstances('kb_eq2'); markAsUser('kb_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf/in]</span>
                                 </div>
                                 <span>/</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>k<sub>b</sub></label>
                                     <input type="number" id="kb_eq3" step="any" oninput="syncAllInstances('kb_eq3'); markAsUser('kb_eq3'); calculate()">
+                                    <span class="unit-inline">[lbf/in]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>k<sub>m</sub></label>
-                                    <input type="number" id="km_eq" step="any" oninput="syncAllInstances('km_eq'); markAsUser('km_eq'); calculate()">
+                                    <input type="number" id="km_eq2" step="any" oninput="syncAllInstances('km_eq2'); markAsUser('km_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf/in]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -1088,22 +1156,26 @@
                                 <div class="var-input">
                                     <label>n<sub>L</sub></label>
                                     <input type="number" id="nL_eq" step="any" oninput="syncAllInstances('nL_eq'); markAsUser('nL_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>S<sub>p</sub></label>
                                     <input type="number" id="Sp_eq" step="any" oninput="syncAllInstances('Sp_eq'); markAsUser('Sp_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_eq3" step="any" oninput="syncAllInstances('At_eq3'); markAsUser('At_eq3'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                                 <span>-</span>
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_eq2" step="any" oninput="syncAllInstances('Fi_eq2'); markAsUser('Fi_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>)</span>
                                 <span>/</span>
@@ -1111,11 +1183,13 @@
                                 <div class="var-input">
                                     <label>C</label>
                                     <input type="number" id="C_eq2" step="any" oninput="syncAllInstances('C_eq2'); markAsUser('C_eq2'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>P</label>
                                     <input type="number" id="P_eq2" step="any" oninput="syncAllInstances('P_eq2'); markAsUser('P_eq2'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -1131,28 +1205,33 @@
                                 <div class="var-input">
                                     <label>σ<sub>b</sub></label>
                                     <input type="number" id="sigma_b_eq" step="any" oninput="syncAllInstances('sigma_b_eq'); markAsUser('sigma_b_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>=</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>C</label>
                                     <input type="number" id="C_eq3" step="any" oninput="syncAllInstances('C_eq3'); markAsUser('C_eq3'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>P</label>
                                     <input type="number" id="P_eq3" step="any" oninput="syncAllInstances('P_eq3'); markAsUser('P_eq3'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_eq3" step="any" oninput="syncAllInstances('Fi_eq3'); markAsUser('Fi_eq3'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>)</span>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_eq4" step="any" oninput="syncAllInstances('At_eq4'); markAsUser('At_eq4'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                             </div>
                         </div>
@@ -1163,16 +1242,19 @@
                                 <div class="var-input">
                                     <label>n<sub>p</sub></label>
                                     <input type="number" id="np_eq" step="any" oninput="syncAllInstances('np_eq'); markAsUser('np_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>S<sub>p</sub></label>
                                     <input type="number" id="Sp_eq2" step="any" oninput="syncAllInstances('Sp_eq2'); markAsUser('Sp_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>σ<sub>b</sub></label>
                                     <input type="number" id="sigma_b_eq2" step="any" oninput="syncAllInstances('sigma_b_eq2'); markAsUser('sigma_b_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                             </div>
                         </div>
@@ -1188,28 +1270,33 @@
                                 <div class="var-input">
                                     <label>n<sub>0</sub></label>
                                     <input type="number" id="n0_eq" step="any" oninput="syncAllInstances('n0_eq'); markAsUser('n0_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_eq4" step="any" oninput="syncAllInstances('Fi_eq4'); markAsUser('Fi_eq4'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>P</label>
                                     <input type="number" id="P_eq4" step="any" oninput="syncAllInstances('P_eq4'); markAsUser('P_eq4'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>×</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>1</label>
                                     <input type="number" id="one_eq" value="1" step="any" oninput="syncAllInstances('one_eq'); markAsUser('one_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>-</span>
                                 <div class="var-input">
                                     <label>C</label>
                                     <input type="number" id="C_eq4" step="any" oninput="syncAllInstances('C_eq4'); markAsUser('C_eq4'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>)</span>
                                 <span>)</span>
@@ -1253,16 +1340,19 @@
                                 <div class="var-input">
                                     <label>σ<sub>i</sub></label>
                                     <input type="number" id="sigma_i_eq" step="any" oninput="syncAllInstances('sigma_i_eq'); markAsUser('sigma_i_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>F<sub>i</sub></label>
                                     <input type="number" id="Fi_eq5" step="any" oninput="syncAllInstances('Fi_eq5'); markAsUser('Fi_eq5'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_eq5" step="any" oninput="syncAllInstances('At_eq5'); markAsUser('At_eq5'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                             </div>
                         </div>
@@ -1274,27 +1364,32 @@
                                 <div class="var-input">
                                     <label>σ<sub>a</sub></label>
                                     <input type="number" id="sigma_a_eq" step="any" oninput="syncAllInstances('sigma_a_eq'); markAsUser('sigma_a_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>C</label>
                                     <input type="number" id="C_eq5" step="any" oninput="syncAllInstances('C_eq5'); markAsUser('C_eq5'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>P</label>
                                     <input type="number" id="P_eq5" step="any" oninput="syncAllInstances('P_eq5'); markAsUser('P_eq5'); calculate()">
+                                    <span class="unit-inline">[lbf]</span>
                                 </div>
                                 <span>/</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>2</label>
                                     <input type="number" id="two_eq2" value="2" step="any" oninput="syncAllInstances('two_eq2'); markAsUser('two_eq2'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>×</span>
                                 <div class="var-input">
                                     <label>A<sub>t</sub></label>
                                     <input type="number" id="At_eq6" step="any" oninput="syncAllInstances('At_eq6'); markAsUser('At_eq6'); calculate()">
+                                    <span class="unit-inline">[in²]</span>
                                 </div>
                                 <span>)</span>
                             </div>
@@ -1307,16 +1402,19 @@
                                 <div class="var-input">
                                     <label>σ<sub>m</sub></label>
                                     <input type="number" id="sigma_m_eq" step="any" oninput="syncAllInstances('sigma_m_eq'); markAsUser('sigma_m_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>σ<sub>a</sub></label>
                                     <input type="number" id="sigma_a_eq2" step="any" oninput="syncAllInstances('sigma_a_eq2'); markAsUser('sigma_a_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>σ<sub>i</sub></label>
                                     <input type="number" id="sigma_i_eq2" step="any" oninput="syncAllInstances('sigma_i_eq2'); markAsUser('sigma_i_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                             </div>
                         </div>
@@ -1328,22 +1426,26 @@
                                 <div class="var-input">
                                     <label>n<sub>f</sub></label>
                                     <input type="number" id="nf_eq" step="any" oninput="syncAllInstances('nf_eq'); markAsUser('nf_eq'); calculate()">
+                                    <span class="unit-inline">[-]</span>
                                 </div>
                                 <span>=</span>
                                 <div class="var-input">
                                     <label>S<sub>e</sub></label>
                                     <input type="number" id="Se_eq" step="any" oninput="syncAllInstances('Se_eq'); markAsUser('Se_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>×</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>S<sub>ut</sub></label>
                                     <input type="number" id="Sut_eq" step="any" oninput="syncAllInstances('Sut_eq'); markAsUser('Sut_eq'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>-</span>
                                 <div class="var-input">
                                     <label>σ<sub>i</sub></label>
                                     <input type="number" id="sigma_i_eq3" step="any" oninput="syncAllInstances('sigma_i_eq3'); markAsUser('sigma_i_eq3'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>)</span>
                                 <span>/</span>
@@ -1351,17 +1453,20 @@
                                 <div class="var-input">
                                     <label>σ<sub>a</sub></label>
                                     <input type="number" id="sigma_a_eq3" step="any" oninput="syncAllInstances('sigma_a_eq3'); markAsUser('sigma_a_eq3'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>×</span>
                                 <span>(</span>
                                 <div class="var-input">
                                     <label>S<sub>ut</sub></label>
                                     <input type="number" id="Sut_eq2" step="any" oninput="syncAllInstances('Sut_eq2'); markAsUser('Sut_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>+</span>
                                 <div class="var-input">
                                     <label>S<sub>e</sub></label>
                                     <input type="number" id="Se_eq2" step="any" oninput="syncAllInstances('Se_eq2'); markAsUser('Se_eq2'); calculate()">
+                                    <span class="unit-inline">[kpsi]</span>
                                 </div>
                                 <span>)</span>
                                 <span>)</span>
@@ -1527,6 +1632,34 @@
             userValues.add(baseVar);
         }
 
+        // Helper function to get value from any input instance
+        function getVal(baseVar) {
+            const instances = varInstanceMap[baseVar];
+            if (!instances) return null;
+            for (const id of instances) {
+                const elem = document.getElementById(id);
+                if (elem && elem.value !== '') {
+                    return parseFloat(elem.value);
+                }
+            }
+            return null;
+        }
+
+        // Helper function to check if a variable has a value (user-entered or computed)
+        function hasVal(baseVar) {
+            const val = getVal(baseVar);
+            return val !== null && !isNaN(val) && val !== 0;
+        }
+
+        // Helper to set value for bi-directional solving (forces set even if not user-entered)
+        function setValBidi(id, value, decimals = 4) {
+            const elem = document.getElementById(id);
+            if (elem && elem !== document.activeElement && !isNaN(value) && isFinite(value)) {
+                elem.value = value.toFixed(decimals);
+                syncAllInstances(id);
+            }
+        }
+
         const varInstanceMap = {
             'd': ['d', 'd_eq', 'd_eq2', 'd_eq_b', 'd_eq_LT', 'd_eq_km'],
             't1': ['t1', 't1_eq_a'],
@@ -1544,7 +1677,7 @@
             'Eb': ['Eb', 'Eb_eq'],
             'Em': ['Em', 'Em_eq'],
             'kb': ['kb_eq', 'kb_eq2', 'kb_eq3'],
-            'km': ['km', 'km_eq'],
+            'km': ['km', 'km_eq', 'km_eq2'],
             'D_fr': ['D_fr', 'D_fr_eq'],
             'tf': ['tf', 'tf_eq'],
             'Ptot': ['Ptot', 'Ptot_eq'],
@@ -1858,31 +1991,50 @@
             const km = parseFloat(document.getElementById('km').value) || km_calc;
 
             // Safety Factors
-            const Ptot = parseFloat(document.getElementById('Ptot').value) || 0;
-            const N = parseFloat(document.getElementById('N').value) || 1;
-            const P = N > 0 ? Ptot / N : 0;
+            // P = Ptot / N - Bi-directional solving
+            let Ptot = parseFloat(document.getElementById('Ptot').value) || 0;
+            let N = parseFloat(document.getElementById('N').value) || 1;
+            let P;
 
-            // Sync P to equation instances
-            setValue('P_eq', P, 2);
+            if (userValues.has('P')) {
+                P = getVal('P') || 0;
+                if (!userValues.has('Ptot') && N > 0) {
+                    // Ptot = P * N
+                    const Ptot_calc = P * N;
+                    setValBidi('Ptot_eq', Ptot_calc, 2);
+                    Ptot = Ptot_calc;
+                } else if (!userValues.has('N') && P > 0) {
+                    // N = Ptot / P
+                    const N_calc = Ptot / P;
+                    setValBidi('N_eq', N_calc, 0);
+                    N = N_calc;
+                }
+            } else {
+                P = N > 0 ? Ptot / N : 0;
+                setValue('P_eq', P, 2);
+            }
 
             const Sp = parseFloat(document.getElementById('Sp').value) || 0;
             const Sut = parseFloat(document.getElementById('Sut').value) || 0;
             const Se = parseFloat(document.getElementById('Se').value) || 0;
 
             // Preload
+            // Standard units: Sp (kpsi), At (in²), Fi (lbf)
+            // stressToForce converts kpsi*in² to lbf (multiply by 1000)
             const preloadType = document.getElementById('preload_type').value;
             let Fi = 0;
+            const stressToForce = units === 'inches' ? 1000 : 1; // kpsi*in² -> lbf
 
             if (preloadType === 'given') {
                 Fi = parseFloat(document.getElementById('Fi_given').value) || 0;
             } else if (preloadType === 'percentage') {
                 const pct = parseFloat(document.getElementById('preload_pct').value) || 0;
-                Fi = (pct / 100) * At * Sp * 1000; // Sp in kpsi
+                Fi = (pct / 100) * At * Sp * stressToForce; // lbf
                 setValue('Fi_pct_eq', Fi, 2);
             } else { // Shigley
                 const connType = document.getElementById('connection_type').value;
                 const factor = connType === 'permanent' ? 0.90 : 0.75;
-                Fi = factor * At * Sp * 1000;
+                Fi = factor * At * Sp * stressToForce; // lbf
                 setValue('Fi_shig_eq', Fi, 2);
                 if (!userValues.has('factor') && document.getElementById('factor_eq')) {
                     document.getElementById('factor_eq').value = factor;
@@ -1892,12 +2044,31 @@
             // Sync Fi to equation instances
             syncAllInstances('Fi');
 
-            // Torque
-            const K = parseFloat(document.getElementById('K').value) || 0;
-            const T = K * Fi * d;
+            // Torque: T = K * Fi * d - Bi-directional solving
+            let K = parseFloat(document.getElementById('K').value) || 0;
+            let T;
 
-            // Sync T to equation instances
-            setValue('T_eq', T, 2);
+            if (userValues.has('T')) {
+                T = getVal('T') || 0;
+                if (!userValues.has('K') && Fi > 0 && d > 0) {
+                    // K = T / (Fi * d)
+                    const K_calc = T / (Fi * d);
+                    setValBidi('K_eq', K_calc, 3);
+                    K = K_calc;
+                } else if (!userValues.has('Fi') && K > 0 && d > 0) {
+                    // Fi = T / (K * d)
+                    const Fi_calc = T / (K * d);
+                    setValBidi('Fi_given', Fi_calc, 2);
+                    Fi = Fi_calc;
+                } else if (!userValues.has('d') && K > 0 && Fi > 0) {
+                    // d = T / (K * Fi)
+                    const d_calc = T / (K * Fi);
+                    setValBidi('d', d_calc, 4);
+                }
+            } else {
+                T = K * Fi * d;
+                setValue('T_eq', T, 2);
+            }
 
             const torqueWarning = document.getElementById('torque_warning');
             if (T > 1000) {
@@ -1908,16 +2079,67 @@
                 torqueWarning.classList.add('hidden');
             }
 
-            // Joint stiffness constant
-            const C = (kb + km) !== 0 ? kb / (kb + km) : 0;
+            // Joint stiffness constant: C = kb / (kb + km)
+            // Bi-directional solving
+            let C;
+            if (userValues.has('C')) {
+                // User entered C, solve for missing variable
+                C = getVal('C') || 0;
+                if (!userValues.has('kb') && km > 0) {
+                    // Solve for kb: kb = C*km / (1 - C)
+                    if (C < 1) {
+                        const kb_calc = (C * km) / (1 - C);
+                        setValBidi('kb_eq', kb_calc, 2);
+                    }
+                } else if (!userValues.has('km') && kb > 0) {
+                    // Solve for km: km = kb*(1-C) / C
+                    if (C > 0) {
+                        const km_calc = (kb * (1 - C)) / C;
+                        setValBidi('km_eq', km_calc, 2);
+                    }
+                }
+            } else {
+                // Forward calculation
+                C = (kb + km) !== 0 ? kb / (kb + km) : 0;
+                setValue('C_eq', C);
+            }
 
-            // Sync C to equation instances
-            setValue('C_eq', C);
+            // Load factor nL: nL = (Sp*At - Fi) / (C*P)
+            // Standard units: Sp (kpsi), At (in²), Fi (lbf), P (lbf)
+            // stressToForce converts Sp*At from kpsi*in² to lbf
+            // Bi-directional solving for: nL, Sp, At, Fi, C, P
+            let nL;
+            const Sp_force = Sp * stressToForce * At; // lbf
 
-            // Load factor nL
-            const nL = (C * P) !== 0 ? (Sp * 1000 * At - Fi) / (C * P) : 0;
-
-            setValue('nL_eq', nL);
+            if (userValues.has('nL')) {
+                nL = getVal('nL') || 0;
+                // Solve for missing variable (all in lbf units)
+                if (!userValues.has('Sp') && C > 0 && P > 0 && At > 0) {
+                    // Sp*stressToForce*At = nL*C*P + Fi => Sp = (nL*C*P + Fi) / (At*stressToForce)
+                    const Sp_calc = (nL * C * P + Fi) / (At * stressToForce);
+                    setValBidi('Sp_eq', Sp_calc, 2);
+                } else if (!userValues.has('At') && C > 0 && P > 0 && Sp > 0) {
+                    // At = (nL*C*P + Fi) / (Sp*stressToForce)
+                    const At_calc = (nL * C * P + Fi) / (Sp * stressToForce);
+                    setValBidi('At_eq3', At_calc, 6);
+                } else if (!userValues.has('Fi') && C > 0 && P > 0) {
+                    // Fi = Sp*At*stressToForce - nL*C*P
+                    const Fi_calc = Sp_force - nL * C * P;
+                    setValBidi('Fi_eq2', Fi_calc, 2);
+                } else if (!userValues.has('C') && P > 0 && nL > 0) {
+                    // C = (Sp*At*stressToForce - Fi) / (nL*P)
+                    const C_calc = (Sp_force - Fi) / (nL * P);
+                    setValBidi('C_eq2', C_calc, 4);
+                } else if (!userValues.has('P') && C > 0 && nL > 0) {
+                    // P = (Sp*At*stressToForce - Fi) / (nL*C)
+                    const P_calc = (Sp_force - Fi) / (nL * C);
+                    setValBidi('P_eq2', P_calc, 2);
+                }
+            } else {
+                // Forward calculation: all in lbf
+                nL = (C * P) !== 0 ? (Sp_force - Fi) / (C * P) : 0;
+                setValue('nL_eq', nL);
+            }
 
             const nL_check = document.getElementById('nL_check');
             nL_check.classList.remove('hidden');
@@ -1930,11 +2152,55 @@
             }
 
             // Bolt stress and yield factor
-            const sigma_b = At !== 0 ? (C * P + Fi) / At / 1000 : 0; // Convert to kpsi
-            const np = sigma_b !== 0 ? Sp / sigma_b : 0;
+            // Standard units: C*P + Fi in lbf, At in in², sigma_b in kpsi
+            // forceToStress converts lbf/in² (psi) to kpsi (divide by 1000)
+            // sigma_b = (C*P + Fi) / At / forceToStress
+            const forceToStress = units === 'inches' ? 1000 : 1; // psi -> kpsi
+            // Bi-directional solving
+            let sigma_b;
+            if (userValues.has('sigma_b')) {
+                sigma_b = getVal('sigma_b') || 0;
+                // Solve for missing variable
+                if (!userValues.has('C') && P > 0 && At > 0) {
+                    // C*P = sigma_b*At*forceToStress - Fi => C = (sigma_b*At*forceToStress - Fi) / P
+                    const C_calc = (sigma_b * At * forceToStress - Fi) / P;
+                    setValBidi('C_eq3', C_calc, 4);
+                } else if (!userValues.has('P') && C > 0 && At > 0) {
+                    // P = (sigma_b*At*forceToStress - Fi) / C
+                    const P_calc = (sigma_b * At * forceToStress - Fi) / C;
+                    setValBidi('P_eq3', P_calc, 2);
+                } else if (!userValues.has('Fi')) {
+                    // Fi = sigma_b*At*forceToStress - C*P
+                    const Fi_calc = sigma_b * At * forceToStress - C * P;
+                    setValBidi('Fi_eq3', Fi_calc, 2);
+                } else if (!userValues.has('At') && sigma_b > 0) {
+                    // At = (C*P + Fi) / (sigma_b*forceToStress)
+                    const At_calc = (C * P + Fi) / (sigma_b * forceToStress);
+                    setValBidi('At_eq4', At_calc, 6);
+                }
+            } else {
+                sigma_b = At !== 0 ? (C * P + Fi) / At / forceToStress : 0;
+                setValue('sigma_b_eq', sigma_b);
+            }
 
-            setValue('sigma_b_eq', sigma_b);
-            setValue('np_eq', np);
+            // np = Sp / sigma_b
+            // Bi-directional solving
+            let np;
+            if (userValues.has('np')) {
+                np = getVal('np') || 0;
+                if (!userValues.has('Sp') && np > 0 && sigma_b > 0) {
+                    // Sp = np * sigma_b
+                    const Sp_calc = np * sigma_b;
+                    setValBidi('Sp_eq2', Sp_calc, 2);
+                } else if (!userValues.has('sigma_b') && np > 0 && Sp > 0) {
+                    // sigma_b = Sp / np
+                    const sigma_b_calc = Sp / np;
+                    setValBidi('sigma_b_eq2', sigma_b_calc, 4);
+                }
+            } else {
+                np = sigma_b !== 0 ? Sp / sigma_b : 0;
+                setValue('np_eq', np);
+            }
 
             const np_check = document.getElementById('np_check');
             np_check.classList.remove('hidden');
@@ -1946,10 +2212,28 @@
                 np_check.innerHTML = '✅ <strong>PASS:</strong> n<sub>p</sub> ≥ 1 - Safe against yielding';
             }
 
-            // Joint separation factor
-            const n0 = (P * (1 - C)) !== 0 ? Fi / (P * (1 - C)) : 0;
-
-            setValue('n0_eq', n0);
+            // Joint separation factor: n0 = Fi / (P * (1 - C))
+            // Bi-directional solving
+            let n0;
+            if (userValues.has('n0')) {
+                n0 = getVal('n0') || 0;
+                if (!userValues.has('Fi') && P > 0 && C < 1) {
+                    // Fi = n0 * P * (1 - C)
+                    const Fi_calc = n0 * P * (1 - C);
+                    setValBidi('Fi_eq4', Fi_calc, 2);
+                } else if (!userValues.has('P') && n0 > 0 && C < 1) {
+                    // P = Fi / (n0 * (1 - C))
+                    const P_calc = Fi / (n0 * (1 - C));
+                    setValBidi('P_eq4', P_calc, 2);
+                } else if (!userValues.has('C') && P > 0 && n0 > 0) {
+                    // 1 - C = Fi / (n0 * P) => C = 1 - Fi / (n0 * P)
+                    const C_calc = 1 - Fi / (n0 * P);
+                    setValBidi('C_eq4', C_calc, 4);
+                }
+            } else {
+                n0 = (P * (1 - C)) !== 0 ? Fi / (P * (1 - C)) : 0;
+                setValue('n0_eq', n0);
+            }
 
             const n0_check = document.getElementById('n0_check');
             n0_check.classList.remove('hidden');
@@ -1962,21 +2246,23 @@
             }
 
             // Fatigue analysis
+            // Standard units: Fi, P in lbf; At in in²; stress results in kpsi
+            // forceToStress converts lbf/in² (psi) to kpsi (divide by 1000)
             const loadType = document.getElementById('load_type').value;
-            const sigma_i = At !== 0 ? Fi / At / 1000 : 0; // kpsi
+            const sigma_i = At !== 0 ? Fi / At / forceToStress : 0; // kpsi
 
             let sigma_a, sigma_m, nf;
 
             if (loadType === 'repeated') {
-                sigma_a = At !== 0 ? (C * P) / (2 * At) / 1000 : 0;
+                sigma_a = At !== 0 ? (C * P) / (2 * At) / forceToStress : 0; // kpsi
                 sigma_m = sigma_a + sigma_i;
                 nf = ((Sut + Se) * sigma_a) !== 0 ? (Se * (Sut - sigma_i)) / (sigma_a * (Sut + Se)) : 0;
             } else { // reversed
                 const Pmax = parseFloat(document.getElementById('Pmax').value) || 0;
                 const Pmin = parseFloat(document.getElementById('Pmin').value) || 0;
 
-                sigma_a = At !== 0 ? (C * (Pmax - Pmin)) / (2 * At) / 1000 : 0;
-                sigma_m = At !== 0 ? (C * (Pmax + Pmin)) / (2 * At) / 1000 + sigma_i : sigma_i;
+                sigma_a = At !== 0 ? (C * (Pmax - Pmin)) / (2 * At) / forceToStress : 0; // kpsi
+                sigma_m = At !== 0 ? (C * (Pmax + Pmin)) / (2 * At) / forceToStress + sigma_i : sigma_i;
 
                 const denominator = Sut * sigma_a + Se * (sigma_m - sigma_i);
                 nf = denominator !== 0 ? (Se * (Sut - sigma_i)) / denominator : 0;
